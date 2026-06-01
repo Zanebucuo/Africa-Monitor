@@ -1,7 +1,7 @@
 """
 Africa Commercial Vehicle Market Intelligence Platform
-Enterprise BI Engine v7.0
-— Intelligence Triangulation · Analyst Due Diligence · Critical Thinking Framework
+Enterprise BI Engine v7.1
+— Intelligence Triangulation · Native Streamlit Rendering Fix · Analyst Due Diligence
 """
 
 import streamlit as st
@@ -31,15 +31,11 @@ st.markdown("""
 :root {
     --bg:#F4F5F7; --white:#FFFFFF; --orange:#D04A02; --orange2:#EB6C2D;
     --navy:#21325B; --blue:#295BA5; --txt:#2D3142; --mid:#5A6070;
-    --dim:#9BA3B2; --border:#E2E5EB; --green:#1A8C5B; --amber:#B45309;
-    --red:#B91C1C;
-    --shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.04);
-    --radius:8px;
+    --dim:#9BA3B2; --border:#E2E5EB; --green:#1A8C5B; --amber:#B45309; --red:#B91C1C;
+    --shadow:0 1px 4px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.04); --radius:8px;
 }
 html,body,[data-testid="stAppViewContainer"],[data-testid="stMain"],.main {
-    background:var(--bg) !important;
-    font-family:'Inter',sans-serif !important;
-    color:var(--txt);
+    background:var(--bg) !important; font-family:'Inter',sans-serif !important; color:var(--txt);
 }
 [data-testid="stSidebar"]{ background:var(--navy) !important; border-right:none !important; }
 [data-testid="stSidebar"] * { color:#E8ECF4 !important; }
@@ -51,10 +47,8 @@ html,body,[data-testid="stAppViewContainer"],[data-testid="stMain"],.main {
 
 /* Tabs */
 [data-testid="stTabsTabList"]{
-    background:var(--white) !important;
-    border-bottom:2px solid var(--border) !important;
-    border-radius:var(--radius) var(--radius) 0 0;
-    padding:0 8px; box-shadow:var(--shadow);
+    background:var(--white) !important; border-bottom:2px solid var(--border) !important;
+    border-radius:var(--radius) var(--radius) 0 0; padding:0 8px; box-shadow:var(--shadow);
 }
 button[data-baseweb="tab"]{
     font-family:'Inter',sans-serif !important; font-size:.84rem !important;
@@ -63,8 +57,7 @@ button[data-baseweb="tab"]{
     background:transparent !important; border-radius:0 !important;
 }
 button[aria-selected="true"][data-baseweb="tab"]{
-    color:var(--orange) !important; border-bottom:3px solid var(--orange) !important;
-    font-weight:700 !important;
+    color:var(--orange) !important; border-bottom:3px solid var(--orange) !important; font-weight:700 !important;
 }
 [data-testid="stTabPanel"]{
     background:transparent !important; padding:22px 0 0 0 !important; border:none !important;
@@ -96,80 +89,12 @@ button[aria-selected="true"][data-baseweb="tab"]{
 /* Chart card */
 .chart-card{
     background:var(--white); border:1px solid var(--border);
-    border-radius:var(--radius); padding:18px 18px 8px 18px;
-    box-shadow:var(--shadow); margin-bottom:4px;
+    border-radius:var(--radius); padding:18px 18px 8px 18px; box-shadow:var(--shadow); margin-bottom:4px;
 }
 .chart-label{ font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.7px; color:var(--dim); margin-bottom:2px; }
 .chart-title{ font-size:.92rem; font-weight:700; color:var(--txt); margin-bottom:2px; }
 .chart-sub  { font-size:.72rem; color:var(--dim); margin-bottom:10px; }
 .source-link{ font-size:.68rem; color:var(--blue); margin-top:4px; }
-
-/* ══ TRIANGULATION COMPONENT ══ */
-.tri-outer{
-    background:var(--white); border:1px solid var(--border);
-    border-radius:var(--radius); overflow:hidden;
-    box-shadow:var(--shadow); margin-top:12px; margin-bottom:20px;
-}
-.tri-header{
-    background:var(--navy); padding:12px 20px;
-    display:flex; align-items:center; gap:10px;
-}
-.tri-header-title{
-    font-family:'Inter',sans-serif; font-size:.8rem; font-weight:700;
-    color:#fff; letter-spacing:.6px; text-transform:uppercase;
-}
-.tri-header-badge{
-    background:var(--orange); color:#fff; font-size:.6rem; font-weight:700;
-    padding:2px 10px; border-radius:20px; letter-spacing:.5px; text-transform:uppercase;
-}
-.tri-body{ padding:0; }
-.tri-layer{
-    padding:14px 20px; border-bottom:1px solid var(--border);
-}
-.tri-layer:last-child{ border-bottom:none; }
-.tri-layer-label{
-    font-family:'Inter',sans-serif; font-size:.62rem; font-weight:700;
-    text-transform:uppercase; letter-spacing:1.2px; margin-bottom:6px;
-    display:flex; align-items:center; gap:8px;
-}
-.tri-claim-label { color:var(--blue); }
-.tri-cross-label { color:var(--amber); }
-.tri-verdict-label{ color:var(--green); }
-.tri-layer-body{
-    font-family:'Inter',sans-serif; font-size:.82rem; color:var(--txt);
-    line-height:1.7; word-wrap:break-word; overflow-wrap:break-word; white-space:normal;
-}
-.tri-layer-body ul{ margin:6px 0 0 0; padding-left:16px; }
-.tri-layer-body li{ margin-bottom:4px; }
-
-/* Confidence badges */
-.conf-verified{
-    display:inline-flex; align-items:center; gap:5px;
-    background:#ECFDF5; border:1px solid #6EE7B7; border-radius:4px;
-    padding:2px 9px; font-size:.68rem; font-weight:700; color:var(--green);
-    font-family:'Inter',sans-serif; white-space:nowrap;
-}
-.conf-plausible{
-    display:inline-flex; align-items:center; gap:5px;
-    background:#FFFBEB; border:1px solid #FCD34D; border-radius:4px;
-    padding:2px 9px; font-size:.68rem; font-weight:700; color:var(--amber);
-    font-family:'Inter',sans-serif; white-space:nowrap;
-}
-.conf-field{
-    display:inline-flex; align-items:center; gap:5px;
-    background:#FEF2F2; border:1px solid #FCA5A5; border-radius:4px;
-    padding:2px 9px; font-size:.68rem; font-weight:700; color:var(--red);
-    font-family:'Inter',sans-serif; white-space:nowrap;
-}
-.conf-row{
-    display:flex; align-items:flex-start; gap:10px; flex-wrap:wrap;
-    margin-top:8px; padding-top:8px; border-top:1px solid var(--border);
-}
-.conf-row-label{
-    font-family:'Inter'; font-size:.68rem; font-weight:700;
-    color:var(--mid); text-transform:uppercase; letter-spacing:.6px;
-    flex-shrink:0; padding-top:3px;
-}
 
 /* Policy cards */
 .pol-card{
@@ -220,9 +145,9 @@ button[aria-selected="true"][data-baseweb="tab"]{
 .news-fb-src{ display:inline-block; background:#FFF3ED; color:var(--orange); font-size:.6rem; font-weight:600; padding:1px 7px; border-radius:4px; margin-right:5px; }
 .news-empty{ padding:28px 16px; text-align:center; color:var(--dim); font-size:.8rem; line-height:1.8; }
 .fallback-badge{
-    display:inline-flex; align-items:center; gap:6px;
-    background:#FFF3ED; border:1px solid #F0C4AC; border-radius:20px;
-    padding:4px 14px; font-size:.72rem; font-weight:600; color:var(--orange); margin-bottom:14px;
+    display:inline-flex; align-items:center; gap:6px; background:#FFF3ED;
+    border:1px solid #F0C4AC; border-radius:20px; padding:4px 14px;
+    font-size:.72rem; font-weight:600; color:var(--orange); margin-bottom:14px;
 }
 
 #MainMenu,footer,header{ visibility:hidden; }
@@ -253,505 +178,444 @@ CHART_BASE = dict(
 )
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 3. TRIANGULATION CONTENT DATABASE
-#    Each entry: {claim, cross_validation (list), verdict, confidence_items}
-#    confidence_items: list of {label, badge_type ("verified"|"plausible"|"field")}
+# 3. TRIANGULATION DATA — Pure Python strings, zero HTML
 # ══════════════════════════════════════════════════════════════════════════════
 TRIANGULATION = {
 
-    # ── Morocco: OCP Transport Modal ─────────────────────────────────────────
     "ma_ocp_modal": {
-        "title":  "OCP Transport Modal & Road HCV Procurement Potential",
-        "claim":  (
+        "title": "OCP Transport Modal & Road HCV Procurement Potential",
+        "claim": (
             "Industry commentators and several Chinese commercial vehicle exporters "
             "cite OCP Group as a flagship anchor client, estimating annual HCV fleet "
-            "procurement at <strong>800–1,000 units/year</strong>, driven by the "
-            "Khouribga–Jorf Lasfar phosphate corridor and downstream logistics."
+            "procurement at **800–1,000 units/year**, driven by the Khouribga–Jorf Lasfar "
+            "phosphate corridor and downstream logistics."
         ),
-        "cross_validation": [
-            "<strong>[Fact]</strong> OCP Group operates a dedicated <strong>187 km slurry pipeline</strong> "
-            "(Khouribga → Jorf Lasfar) that handles the bulk of raw phosphate ore "
-            "transport — this segment is structurally inaccessible to road HCVs.",
-            "<strong>[Fact]</strong> OCP also operates the <strong>Benguerir–Jorf Lasfar rail corridor</strong> "
-            "for phosphate concentrate, confirmed in OCP's 2022 and 2023 Integrated Annual Reports.",
-            "<strong>[Structural logic]</strong> However, pipeline and rail serve only the <em>primary ore trunk</em>. "
-            "OCP's ecosystem of ~60 contractor companies performs auxiliary logistics: "
-            "sulphuric acid deliveries, fertiliser finished goods, equipment mobilisation, "
-            "and reagent supply — segments that are <em>structurally road-dependent</em>.",
-            "<strong>[Counter-evidence]</strong> No publicly accessible OCP procurement tender database "
-            "confirms a recurring 800-unit annual HCV purchase figure. "
-            "OCP issues tenders via SupplierPortal (Ariba) with limited public disclosure.",
-            "<strong>[Supportive proxy]</strong> OCP's 2023 capex of USD 2.1 billion includes "
-            "significant mining fleet renewal — a portion of which flows to road HCVs "
-            "based on analogous mining group capex structures in comparable operations.",
+        "cross_validation_items": [
+            "**[Fact]** OCP operates a dedicated **187 km slurry pipeline** (Khouribga → Jorf Lasfar) "
+            "that handles the bulk of raw phosphate ore transport — this segment is structurally "
+            "inaccessible to road HCVs.",
+            "**[Fact]** OCP also operates the **Benguerir–Jorf Lasfar rail corridor** for phosphate "
+            "concentrate, confirmed in OCP's 2022 and 2023 Integrated Annual Reports.",
+            "**[Structural logic]** However, pipeline and rail serve only the *primary ore trunk*. "
+            "OCP's ecosystem of ~60 contractor companies performs auxiliary logistics: sulphuric acid "
+            "deliveries, fertiliser finished goods, equipment mobilisation, and reagent supply — "
+            "segments that are *structurally road-dependent*.",
+            "**[Counter-evidence]** No publicly accessible OCP procurement tender database confirms "
+            "a recurring 800-unit annual HCV purchase figure. OCP issues tenders via SupplierPortal "
+            "(Ariba) with limited public disclosure.",
+            "**[Supportive proxy]** OCP's 2023 capex of USD 2.1 billion includes significant mining "
+            "fleet renewal — a portion of which flows to road HCVs based on analogous mining group "
+            "capex structures in comparable operations.",
         ],
         "verdict": (
-            "The slurry pipeline unambiguously dominates primary ore haulage — "
-            "framing OCP purely as a 'truck buyer' overstates the road opportunity. "
-            "However, the contractor ecosystem and finished-goods distribution network "
-            "represent a <em>real and recurring</em> HCV demand segment. "
-            "The 800 units/year figure is a bottom-up estimate derived from "
-            "contractor fleet modelling, not a verified tender disclosure. "
-            "Decision-makers should treat this as a working hypothesis and prioritise "
-            "direct engagement with OCP's Procurement & Logistics division "
-            "and tier-1 contractors (e.g., CBI, Snef, Cofely) for ground-truth validation."
+            "The slurry pipeline unambiguously dominates primary ore haulage — framing OCP purely "
+            "as a 'truck buyer' overstates the road opportunity. However, the contractor ecosystem "
+            "and finished-goods distribution network represent a *real and recurring* HCV demand "
+            "segment. The 800 units/year figure is a bottom-up estimate derived from contractor "
+            "fleet modelling, not a verified tender disclosure. Decision-makers should treat this "
+            "as a working hypothesis and prioritise direct engagement with OCP's Procurement & "
+            "Logistics division and tier-1 contractors (e.g., CBI, Snef, Cofely) for ground-truth validation."
         ),
+        "verdict_type": "warning",
         "confidence_items": [
-            {"label": "Pipeline dominates primary ore trunk", "badge": "verified"},
-            {"label": "Rail handles phosphate concentrate flows", "badge": "verified"},
-            {"label": "Contractor ecosystem is road-dependent", "badge": "plausible"},
-            {"label": "800 units/yr HCV procurement estimate", "badge": "plausible"},
-            {"label": "Specific tender volumes & timing", "badge": "field"},
+            ("🟢 Verified Fact", "Pipeline dominates primary ore trunk (OCP Annual Report)"),
+            ("🟢 Verified Fact", "Rail handles phosphate concentrate flows (OCP IR 2023)"),
+            ("🟡 Plausible Estimate", "Contractor ecosystem is road-dependent"),
+            ("🟡 Plausible Estimate", "800 units/yr HCV procurement estimate"),
+            ("🔴 Needs Field Verification", "Specific tender volumes & timing from OCP SupplierPortal"),
         ],
     },
 
-    # ── Morocco: Tariff Advantage ─────────────────────────────────────────────
     "ma_tariff": {
-        "title":  "Morocco 2.5% Tariff Advantage — Sustainable Competitive Moat?",
-        "claim":  (
-            "Morocco's EU Association Agreement confers a 2.5% CBU import tariff "
-            "on commercial vehicles — cited as the lowest in Africa and a decisive "
-            "competitive advantage for European-origin or EU-compliant vehicles."
+        "title": "Morocco 2.5% Tariff Advantage — Sustainable Competitive Moat?",
+        "claim": (
+            "Morocco's EU Association Agreement confers a **2.5% CBU import tariff** on commercial "
+            "vehicles — cited as the lowest in Africa and a decisive competitive advantage for "
+            "European-origin or EU-compliant vehicles."
         ),
-        "cross_validation": [
-            "<strong>[Fact]</strong> The EU–Morocco Association Agreement (in force since 2000) "
-            "does set preferential tariff rates, including on motor vehicles, confirmed "
-            "by Direction Générale des Douanes schedules.",
-            "<strong>[Complication]</strong> The 2.5% rate applies to vehicles of EU <em>origin</em> "
-            "(Rules of Origin apply). Chinese-built trucks — even if EU-spec — do not "
-            "automatically qualify; they face standard MFN rates (~25%) unless locally assembled.",
-            "<strong>[Strategic implication]</strong> This tariff structure structurally "
-            "advantages Renault Trucks, Mercedes-Benz, Volvo, and MAN over Chinese brands "
-            "entering via CBU. Chinese players must pursue CKD assembly partnerships "
-            "or route through third countries with EU FTAs to access the preferential rate.",
-            "<strong>[Risk]</strong> Post-Brexit UK–Morocco trade continuity agreement is "
-            "periodically renegotiated — tariff schedules should be verified against "
-            "the latest DOUANE.GOV.MA tariff tables before contract commitments.",
+        "cross_validation_items": [
+            "**[Fact]** The EU–Morocco Association Agreement (in force since 2000) sets preferential "
+            "tariff rates on motor vehicles, confirmed by Direction Générale des Douanes schedules.",
+            "**[Complication]** The 2.5% rate applies to vehicles of EU *origin* (Rules of Origin apply). "
+            "Chinese-built trucks — even if EU-spec — do not automatically qualify; they face standard "
+            "MFN rates (~25%) unless locally assembled.",
+            "**[Strategic implication]** This tariff structure structurally advantages Renault Trucks, "
+            "Mercedes-Benz, Volvo, and MAN over Chinese brands entering via CBU. Chinese players must "
+            "pursue CKD assembly partnerships or route through third countries with EU FTAs.",
+            "**[Risk]** Post-Brexit UK–Morocco trade continuity agreement is periodically renegotiated "
+            "— tariff schedules should be verified against the latest DOUANE.GOV.MA tables before "
+            "contract commitments.",
         ],
         "verdict": (
-            "The 2.5% tariff is a confirmed and material advantage — but it is <em>origin-conditioned</em>, "
-            "not a blanket benefit for all importers. Chinese CBU entrants face a de facto "
-            "tariff disadvantage of ~22.5 percentage points versus EU-origin competitors. "
-            "For Chinese CV manufacturers, the commercially rational entry strategy is "
-            "local assembly (CKD) or a Morocco-based JV — not direct CBU import."
+            "The 2.5% tariff is a confirmed and material advantage — but it is *origin-conditioned*, "
+            "not a blanket benefit for all importers. Chinese CBU entrants face a de facto tariff "
+            "disadvantage of ~22.5 percentage points versus EU-origin competitors. For Chinese CV "
+            "manufacturers, the commercially rational entry strategy is local assembly (CKD) or a "
+            "Morocco-based JV — not direct CBU import."
         ),
+        "verdict_type": "warning",
         "confidence_items": [
-            {"label": "2.5% tariff for EU-origin vehicles confirmed", "badge": "verified"},
-            {"label": "Chinese CBU faces ~25% MFN rate", "badge": "verified"},
-            {"label": "CKD assembly as optimal China entry route", "badge": "plausible"},
-            {"label": "Specific CKD partner availability & terms", "badge": "field"},
+            ("🟢 Verified Fact", "2.5% tariff for EU-origin vehicles (Douane.gov.ma confirmed)"),
+            ("🟢 Verified Fact", "Chinese CBU faces ~25% MFN rate"),
+            ("🟡 Plausible Estimate", "CKD assembly as optimal China entry route"),
+            ("🔴 Needs Field Verification", "Specific CKD partner availability & negotiated terms"),
         ],
     },
 
-    # ── South Africa: Transnet Rail Crisis ───────────────────────────────────
     "za_transnet": {
-        "title":  "Transnet Rail Collapse → Road HCV Demand Transfer — Scissors Effect",
-        "claim":  (
-            "Multiple logistics industry analysts and HCV dealers assert that Transnet's "
-            "operational deterioration has structurally transferred freight to road, "
-            "creating a durable demand uplift of <strong>3,000–5,000 incremental HCV units/year</strong> "
-            "that would not exist under a functioning rail network."
+        "title": "Transnet Rail Collapse → Road HCV Demand Transfer — Scissors Effect",
+        "claim": (
+            "Multiple logistics industry analysts and HCV dealers assert that Transnet's operational "
+            "deterioration has structurally transferred freight to road, creating a durable demand "
+            "uplift of **3,000–5,000 incremental HCV units/year** that would not exist under a "
+            "functioning rail network."
         ),
-        "cross_validation": [
-            "<strong>[Fact]</strong> Transnet Freight Rail volumes declined from <strong>228 Mt (FY2018)</strong> "
-            "to an estimated <strong>122 Mt (FY2026)</strong> — a 46% collapse confirmed in "
-            "Transnet's own annual reports and corroborated by Stats SA P7162.",
-            "<strong>[Fact]</strong> Stats SA P7162 Road Freight Survey records a rising "
-            "freight income trend concurrent with declining payload tonnage, consistent "
-            "with road operators capturing higher-value diverted freight.",
-            "<strong>[Fact]</strong> NAAMSA data shows HCV segment resilience outperforming "
-            "overall automotive market during 2022–2024, coinciding with Transnet's "
-            "most acute operational crisis.",
-            "<strong>[Critical counter-risk]</strong> South Africa's National Logistics Crisis "
-            "Response (NLCR) and the <strong>Transnet port privatisation programme</strong> "
-            "(Durban Container Terminal concession, initiated 2023) could, if successful, "
-            "restore rail competitiveness within 5–8 years — partially reversing "
-            "the modal shift and reducing structural HCV demand.",
-            "<strong>[Additional risk]</strong> Private rail operators (e.g., Grindrod, "
-            "Traxtion) are entering the market under new open-access rail policy — "
-            "a further rail recovery vector that is systematically underweighted "
-            "in current HCV demand forecasts.",
+        "cross_validation_items": [
+            "**[Fact]** Transnet Freight Rail volumes declined from **228 Mt (FY2018)** to an estimated "
+            "**122 Mt (FY2026)** — a 46% collapse confirmed in Transnet's own annual reports and "
+            "corroborated by Stats SA P7162.",
+            "**[Fact]** Stats SA P7162 Road Freight Survey records rising freight income concurrent "
+            "with declining payload tonnage, consistent with road operators capturing higher-value "
+            "diverted freight.",
+            "**[Fact]** NAAMSA data shows HCV segment resilience outperforming the overall automotive "
+            "market during 2022–2024, coinciding with Transnet's most acute operational crisis.",
+            "**[Critical counter-risk]** South Africa's National Logistics Crisis Response (NLCR) and "
+            "the **Transnet port privatisation programme** (Durban Container Terminal concession, "
+            "initiated 2023) could, if successful, restore rail competitiveness within 5–8 years — "
+            "partially reversing the modal shift and reducing structural HCV demand.",
+            "**[Additional risk]** Private rail operators (e.g., Grindrod, Traxtion) are entering the "
+            "market under new open-access rail policy — a further rail recovery vector that is "
+            "systematically underweighted in current HCV demand forecasts.",
         ],
         "verdict": (
-            "The Transnet-driven freight modal shift is one of the most "
-            "<em>empirically well-supported</em> demand drivers in African HCV markets — "
-            "the volume collapse is confirmed by multiple independent data sources. "
-            "However, the market consensus <em>systematically underweights</em> the "
-            "rail recovery risk: port privatisation, open-access rail policy, and "
-            "private operator entry are structural variables that could materially "
-            "compress road HCV demand within a 5-year horizon. "
-            "Buyers planning long-term fleet financing should stress-test models "
-            "against a 30–40% rail volume recovery scenario."
+            "The Transnet-driven freight modal shift is one of the most *empirically well-supported* "
+            "demand drivers in African HCV markets — the volume collapse is confirmed by multiple "
+            "independent data sources. However, the market consensus *systematically underweights* "
+            "the rail recovery risk: port privatisation, open-access rail policy, and private "
+            "operator entry are structural variables that could materially compress road HCV demand "
+            "within a 5-year horizon. Buyers planning long-term fleet financing should stress-test "
+            "models against a 30–40% rail volume recovery scenario."
         ),
+        "verdict_type": "warning",
         "confidence_items": [
-            {"label": "Transnet volume collapse (228→122 Mt)", "badge": "verified"},
-            {"label": "Road freight income growth (Stats SA P7162)", "badge": "verified"},
-            {"label": "3,000–5,000 incremental HCV units from modal shift", "badge": "plausible"},
-            {"label": "Rail recovery via port privatisation (5-yr horizon)", "badge": "plausible"},
-            {"label": "Private rail operator market share trajectory", "badge": "field"},
+            ("🟢 Verified Fact", "Transnet volume collapse 228→122 Mt (Transnet Annual Reports)"),
+            ("🟢 Verified Fact", "Road freight income growth (Stats SA P7162)"),
+            ("🟡 Plausible Estimate", "3,000–5,000 incremental HCV units from modal shift"),
+            ("🟡 Plausible Estimate", "Rail recovery via port privatisation (5-yr horizon)"),
+            ("🔴 Needs Field Verification", "Private rail operator market share trajectory"),
         ],
     },
 
-    # ── South Africa: EV / Load Shedding ─────────────────────────────────────
     "za_ev_loadshed": {
-        "title":  "EV Fleet Adoption Under Load-Shedding Constraints",
-        "claim":  (
-            "South Africa's severe electricity supply instability (load-shedding Stage 2–6) "
-            "is widely cited as a structural barrier that will delay commercial EV "
-            "fleet adoption by 5–10 years relative to comparable markets."
+        "title": "EV Fleet Adoption Under Load-Shedding Constraints",
+        "claim": (
+            "South Africa's severe electricity supply instability (load-shedding Stage 2–6) is widely "
+            "cited as a structural barrier that will delay commercial EV fleet adoption by **5–10 years** "
+            "relative to comparable markets."
         ),
-        "cross_validation": [
-            "<strong>[Fact]</strong> Eskom implemented load-shedding for <strong>335 days in 2023</strong> "
-            "(a national record), with Stage 4–6 outages totalling >1,000 hours — "
-            "confirmed by Eskom operational reports.",
-            "<strong>[Fact]</strong> South Africa's National EV Strategy (SAIT, 2023) "
-            "acknowledges grid reliability as a primary EV barrier and mandates "
-            "dedicated charging infrastructure investment as a precondition.",
-            "<strong>[Nuance]</strong> Large fleet operators (e.g., Shoprite, Transnet Road Motor "
-            "Transport) are deploying <em>behind-the-meter solar + battery</em> systems "
-            "that decouple depot charging from Eskom grid — partially negating "
-            "the load-shedding constraint for captive fleet applications.",
-            "<strong>[Counter-trend]</strong> Eskom's FY2025 operational data shows load-shedding "
-            "days declining sharply as new generation capacity (Kusile Unit 5, "
-            "private IPPs) comes online — the structural constraint may ease "
-            "faster than industry consensus assumes.",
+        "cross_validation_items": [
+            "**[Fact]** Eskom implemented load-shedding for **335 days in 2023** (a national record), "
+            "with Stage 4–6 outages totalling >1,000 hours — confirmed by Eskom operational reports.",
+            "**[Fact]** South Africa's National EV Strategy (SAIT, 2023) acknowledges grid reliability "
+            "as a primary EV barrier and mandates dedicated charging infrastructure investment as a precondition.",
+            "**[Nuance]** Large fleet operators (e.g., Shoprite, Transnet Road Motor Transport) are "
+            "deploying *behind-the-meter solar + battery* systems that decouple depot charging from "
+            "Eskom grid — partially negating the load-shedding constraint for captive fleet applications.",
+            "**[Counter-trend]** Eskom's FY2025 operational data shows load-shedding days declining "
+            "sharply as new generation capacity (Kusile Unit 5, private IPPs) comes online — the "
+            "structural constraint may ease faster than industry consensus assumes.",
         ],
         "verdict": (
-            "Load-shedding is a <em>real but potentially transient</em> constraint on EV adoption. "
-            "The 5–10 year delay thesis is overstated for <em>captive depot fleets</em> "
-            "with solar/battery backup — the genuine constraint applies to "
-            "<em>over-the-road long-haul</em> applications dependent on public charging. "
-            "EV strategy for South Africa should be segmented: depot-based distribution "
-            "fleets (urban/peri-urban) are viable <em>now</em>; "
-            "long-haul intercity EV remains a 2028+ proposition pending charging infrastructure."
+            "Load-shedding is a *real but potentially transient* constraint on EV adoption. The 5–10 "
+            "year delay thesis is overstated for *captive depot fleets* with solar/battery backup — "
+            "the genuine constraint applies to *over-the-road long-haul* applications dependent on "
+            "public charging. EV strategy for South Africa should be segmented: depot-based "
+            "distribution fleets (urban/peri-urban) are viable now; long-haul intercity EV remains "
+            "a 2028+ proposition pending charging infrastructure rollout."
         ),
+        "verdict_type": "warning",
         "confidence_items": [
-            {"label": "Load-shedding severity (335 days, 2023)", "badge": "verified"},
-            {"label": "Solar depot charging feasibility for fleets", "badge": "plausible"},
-            {"label": "Grid recovery timeline (Kusile + IPPs)", "badge": "plausible"},
-            {"label": "Long-haul public charging availability", "badge": "field"},
+            ("🟢 Verified Fact", "Load-shedding severity 335 days in 2023 (Eskom reports)"),
+            ("🟡 Plausible Estimate", "Solar depot charging feasibility for captive fleets"),
+            ("🟡 Plausible Estimate", "Grid recovery timeline via Kusile + private IPPs"),
+            ("🔴 Needs Field Verification", "Long-haul public charging availability & rollout pace"),
         ],
     },
 
-    # ── Nigeria: KD Tariff Dividend ───────────────────────────────────────────
     "ng_kd_tariff": {
-        "title":  "Nigeria Zero-Tariff KD Policy — Durable Incentive or Policy Risk?",
-        "claim":  (
-            "Nigeria's 2023 EV and CKD/SKD zero-tariff policy creates a compelling "
-            "economic case for Chinese CV manufacturers to establish local assembly, "
-            "delivering ~$46,000 per-unit cost advantage over CBU imports."
+        "title": "Nigeria Zero-Tariff KD Policy — Durable Incentive or Policy Risk?",
+        "claim": (
+            "Nigeria's 2023 EV and CKD/SKD zero-tariff policy creates a compelling economic case for "
+            "Chinese CV manufacturers to establish local assembly, delivering **~$46,000 per-unit** "
+            "cost advantage over CBU imports."
         ),
-        "cross_validation": [
-            "<strong>[Fact]</strong> Nigeria Customs Service confirmed 0% import duty on "
-            "fully electric commercial vehicles and CKD/SKD assembly kits "
-            "under the 2023 Finance Act amendments.",
-            "<strong>[Fact]</strong> NADDC's National Automotive Industry Development Plan (NAIDP) "
-            "explicitly targets local assembly partnerships as a core pillar.",
-            "<strong>[Risk: Policy Stability]</strong> Nigeria has a documented history of "
-            "retroactive tariff policy reversals — the 2013–2019 automotive tariff "
-            "regime was modified three times in six years. "
-            "The current 0% window has a stated 2023–2028 horizon but "
-            "carries medium political risk given fiscal pressure on import duties.",
-            "<strong>[Risk: FX]</strong> CKD assembly economics assume stable USD/NGN rates "
-            "for imported kits. With NGN depreciation exceeding 60% since 2022, "
-            "the USD cost of kits has effectively risen proportionally for "
+        "cross_validation_items": [
+            "**[Fact]** Nigeria Customs Service confirmed 0% import duty on fully electric commercial "
+            "vehicles and CKD/SKD assembly kits under the 2023 Finance Act amendments.",
+            "**[Fact]** NADDC's National Automotive Industry Development Plan (NAIDP) explicitly "
+            "targets local assembly partnerships as a core strategic pillar.",
+            "**[Risk: Policy Stability]** Nigeria has a documented history of retroactive tariff policy "
+            "reversals — the 2013–2019 automotive tariff regime was modified three times in six years. "
+            "The current 0% window has a stated 2023–2028 horizon but carries medium political risk "
+            "given fiscal pressure on import duties.",
+            "**[Risk: FX]** CKD assembly economics assume stable USD/NGN rates. With NGN depreciation "
+            "exceeding 60% since 2022, the USD cost of kits has effectively risen proportionally for "
             "naira-revenue businesses.",
-            "<strong>[Operational risk]</strong> NADDC assembly licence approval has averaged "
-            "18–24 months in practice — the regulatory friction offsets some financial advantage.",
+            "**[Operational risk]** NADDC assembly licence approval has averaged 18–24 months in "
+            "practice — the regulatory friction offsets some of the financial advantage.",
         ],
         "verdict": (
-            "The zero-tariff CKD advantage is <em>legally confirmed and financially material</em>. "
-            "However, it operates within a high-volatility policy and FX environment "
-            "that requires hedging strategies and contractual protections. "
-            "Manufacturers should structure assembly JVs with "
-            "USD-indexed kit pricing, multi-year FX forward contracts, "
-            "and clause-based exit provisions triggered by policy reversal. "
-            "The $46,000 per-unit saving is the <em>best-case scenario</em> — "
-            "realistic net savings after FX and operational costs are closer to $28,000–$35,000."
+            "The zero-tariff CKD advantage is *legally confirmed and financially material*. However, "
+            "it operates within a high-volatility policy and FX environment requiring hedging strategies "
+            "and contractual protections. Manufacturers should structure assembly JVs with USD-indexed "
+            "kit pricing, multi-year FX forward contracts, and clause-based exit provisions triggered "
+            "by policy reversal. The $46,000 per-unit saving is the best-case scenario — realistic net "
+            "savings after FX and operational costs are closer to **$28,000–$35,000**."
         ),
+        "verdict_type": "warning",
         "confidence_items": [
-            {"label": "0% CKD/EV tariff legally confirmed (2023 Finance Act)", "badge": "verified"},
-            {"label": "~$46,000 gross per-unit CBU vs CKD saving", "badge": "plausible"},
-            {"label": "Net saving after FX hedge: ~$28k–$35k", "badge": "plausible"},
-            {"label": "NADDC assembly licence approval timeline", "badge": "field"},
-            {"label": "Policy stability through 2028", "badge": "field"},
+            ("🟢 Verified Fact", "0% CKD/EV tariff legally confirmed (2023 Finance Act)"),
+            ("🟡 Plausible Estimate", "~$46,000 gross per-unit CBU vs CKD saving"),
+            ("🟡 Plausible Estimate", "Net saving after FX hedge: ~$28k–$35k"),
+            ("🔴 Needs Field Verification", "NADDC assembly licence approval timeline in practice"),
+            ("🔴 Needs Field Verification", "Policy stability through 2028"),
         ],
     },
 
-    # ── Ethiopia: EV Mandate ──────────────────────────────────────────────────
     "eth_ev_mandate": {
-        "title":  "Ethiopia Petroleum Import Ban — EV Transition Reality vs. Headline",
-        "claim":  (
-            "Ethiopia's 2022 petroleum vehicle import ban is heralded as "
-            "the most decisive EV fleet mandate in Africa, projected to drive "
-            "EV penetration to >90% of commercial vehicle sales by 2025."
+        "title": "Ethiopia Petroleum Import Ban — EV Transition Reality vs. Headline",
+        "claim": (
+            "Ethiopia's 2022 petroleum vehicle import ban is heralded as the most decisive EV fleet "
+            "mandate in Africa, projected to drive EV penetration to **>90% of commercial vehicle "
+            "sales** by 2025."
         ),
-        "cross_validation": [
-            "<strong>[Fact]</strong> ERCA (Ethiopian Revenue & Customs Authority) formally "
-            "suspended import permits for petroleum-powered vehicles in mid-2022 — "
-            "this is confirmed policy, not a proposal.",
-            "<strong>[Implementation gap]</strong> Enforcement has been uneven: "
-            "legacy ICE vehicles already in-country continue to operate; "
-            "grey market imports via Djibouti and South Sudan have been documented "
-            "by Ethiopian trade monitoring bodies.",
-            "<strong>[Infrastructure constraint]</strong> As of 2024, Ethiopia has "
-            "<strong>fewer than 120 public EV charging points</strong> nationwide "
-            "(EEPCO data), almost exclusively in Addis Ababa. "
-            "Long-haul routes (Addis–Djibouti corridor, 850 km) have zero public chargers.",
-            "<strong>[Fleet composition reality]</strong> The high EV share in sales data "
-            "reflects <em>new registrations</em>, not operational fleet composition. "
-            "The existing ICE fleet of ~80,000 commercial vehicles continues to operate "
-            "and will do so for its economic life (10–15 years).",
-            "<strong>[Chinese EV dominance]</strong> BYD, Foton, and King Long collectively "
-            "hold >75% of new EV commercial vehicle registrations — a confirmed "
-            "structural beneficiary dynamic.",
+        "cross_validation_items": [
+            "**[Fact]** ERCA (Ethiopian Revenue & Customs Authority) formally suspended import permits "
+            "for petroleum-powered vehicles in mid-2022 — this is confirmed policy, not a proposal.",
+            "**[Implementation gap]** Enforcement has been uneven: legacy ICE vehicles already "
+            "in-country continue to operate; grey market imports via Djibouti and South Sudan have "
+            "been documented by Ethiopian trade monitoring bodies.",
+            "**[Infrastructure constraint]** As of 2024, Ethiopia has **fewer than 120 public EV "
+            "charging points** nationwide (EEPCO data), almost exclusively in Addis Ababa. The "
+            "Addis–Djibouti corridor (850 km) — Ethiopia's most critical freight artery — has "
+            "zero public chargers.",
+            "**[Fleet composition reality]** The high EV share in sales data reflects *new "
+            "registrations*, not operational fleet composition. The existing ICE fleet of ~80,000 "
+            "commercial vehicles continues to operate for its full economic life (10–15 years).",
+            "**[Chinese EV dominance]** BYD, Foton, and King Long collectively hold >75% of new "
+            "EV commercial vehicle registrations — a confirmed structural beneficiary dynamic.",
         ],
         "verdict": (
-            "The ban is real and its impact on <em>new registration sales</em> is transformative. "
-            "However, the '90% EV' narrative conflates new sales share with operational "
-            "fleet electrification — the latter remains below 15% given fleet longevity. "
-            "The Addis–Djibouti corridor, Ethiopia's most commercially critical freight artery, "
-            "is structurally incompatible with current EV range and charging infrastructure. "
-            "Chinese EV brands have a genuine first-mover advantage in urban/peri-urban fleets; "
-            "long-haul electrification requires a 3–5 year charging infrastructure build-out "
-            "before it is commercially viable."
+            "The ban is real and its impact on *new registration sales* is transformative. However, "
+            "the '90% EV' narrative conflates new sales share with operational fleet electrification "
+            "— the latter remains below 15% given fleet longevity. The Addis–Djibouti corridor is "
+            "structurally incompatible with current EV range and charging infrastructure. Chinese EV "
+            "brands have a genuine first-mover advantage in urban/peri-urban fleets; long-haul "
+            "electrification requires a 3–5 year charging infrastructure build-out before it is "
+            "commercially viable."
         ),
+        "verdict_type": "warning",
         "confidence_items": [
-            {"label": "Petroleum import ban officially enacted (2022)", "badge": "verified"},
-            {"label": "Chinese brands hold >75% new EV registrations", "badge": "verified"},
-            {"label": "EV new sales share >85% (2025 est.)", "badge": "plausible"},
-            {"label": "Operational fleet electrification <15%", "badge": "plausible"},
-            {"label": "Long-haul corridor (Addis–Djibouti) EV viability", "badge": "field"},
+            ("🟢 Verified Fact", "Petroleum import ban officially enacted by ERCA (mid-2022)"),
+            ("🟢 Verified Fact", "Chinese brands hold >75% new EV registrations"),
+            ("🟡 Plausible Estimate", "EV new sales share >85% (2025 estimate)"),
+            ("🟡 Plausible Estimate", "Operational fleet electrification <15% given fleet age"),
+            ("🔴 Needs Field Verification", "Long-haul corridor (Addis–Djibouti) EV viability & charging rollout"),
         ],
     },
 
-    # ── Kenya: SGR Impact ─────────────────────────────────────────────────────
     "ke_sgr": {
-        "title":  "Kenya SGR — Road Freight Competitor or Demand Complement?",
-        "claim":  (
-            "The Standard Gauge Railway (SGR) Mombasa–Nairobi line is frequently cited "
-            "as a structural threat to HCV demand, projected to displace "
-            "30–40% of long-haul container freight from road by 2026."
+        "title": "Kenya SGR — Road Freight Competitor or Demand Complement?",
+        "claim": (
+            "The Standard Gauge Railway (SGR) Mombasa–Nairobi line is frequently cited as a "
+            "structural threat to HCV demand, projected to displace **30–40% of long-haul "
+            "container freight** from road by 2026."
         ),
-        "cross_validation": [
-            "<strong>[Fact]</strong> SGR freight volumes grew from 1.2 Mt (2018) to "
-            "5.8 Mt (2023) — confirmed by Kenya Railways Corporation annual data.",
-            "<strong>[Fact]</strong> Port of Mombasa container throughput grew concurrently, "
-            "meaning SGR captured incremental freight rather than purely substituting road.",
-            "<strong>[Operational limit]</strong> SGR operates Mombasa–Nairobi only (472 km). "
-            "The 'last mile' from Nairobi ICD to final destinations (Kampala, Kigali, "
-            "Juba) remains structurally road-dependent — HCVs are complementary, "
-            "not competitive, for inland distribution.",
-            "<strong>[Financial distress]</strong> Kenya's SGR debt obligations to Exim Bank "
-            "of China (~KES 500 billion) create fiscal pressure; "
-            "extension to Kisumu and Uganda has stalled — limiting SGR's "
-            "geographic competitive reach.",
+        "cross_validation_items": [
+            "**[Fact]** SGR freight volumes grew from 1.2 Mt (2018) to 5.8 Mt (2023) — confirmed "
+            "by Kenya Railways Corporation annual data.",
+            "**[Fact]** Port of Mombasa container throughput grew concurrently, meaning SGR captured "
+            "incremental freight rather than purely substituting road.",
+            "**[Operational limit]** SGR operates Mombasa–Nairobi only (472 km). The 'last mile' "
+            "from Nairobi ICD to final destinations (Kampala, Kigali, Juba) remains structurally "
+            "road-dependent — HCVs are complementary, not competitive, for inland distribution.",
+            "**[Financial distress]** Kenya's SGR debt obligations to Exim Bank of China (~KES 500 "
+            "billion) create fiscal pressure; extension to Kisumu and Uganda has stalled — limiting "
+            "SGR's geographic competitive reach.",
         ],
         "verdict": (
-            "SGR is a <em>complement to, not a substitute for</em>, HCV demand "
-            "in the Kenyan freight system. The modal shift concern is overstated: "
-            "SGR's geographic limitation to the Mombasa–Nairobi corridor means "
-            "the vast majority of Kenyan freight — and virtually all EAC cross-border "
-            "freight — remains road-dependent. "
-            "HCV demand in Kenya is more sensitively correlated with "
-            "EAC trade volumes and fuel subsidy policy than with SGR capacity."
+            "SGR is a *complement to, not a substitute for*, HCV demand in the Kenyan freight system. "
+            "The modal shift concern is overstated: SGR's geographic limitation to the "
+            "Mombasa–Nairobi corridor means the vast majority of Kenyan freight — and virtually all "
+            "EAC cross-border freight — remains road-dependent. HCV demand in Kenya is more "
+            "sensitively correlated with EAC trade volumes and fuel subsidy policy than with SGR capacity."
         ),
+        "verdict_type": "success",
         "confidence_items": [
-            {"label": "SGR volumes: 5.8 Mt (2023, Kenya Railways)", "badge": "verified"},
-            {"label": "Last-mile beyond Nairobi ICD remains road-only", "badge": "verified"},
-            {"label": "SGR extension to Uganda stalled (debt constraints)", "badge": "plausible"},
-            {"label": "Net HCV demand displacement from SGR", "badge": "field"},
+            ("🟢 Verified Fact", "SGR volumes: 5.8 Mt in 2023 (Kenya Railways Corporation)"),
+            ("🟢 Verified Fact", "Last-mile beyond Nairobi ICD remains road-only structurally"),
+            ("🟡 Plausible Estimate", "SGR extension to Uganda stalled due to debt constraints"),
+            ("🔴 Needs Field Verification", "Net HCV demand displacement quantum from SGR competition"),
         ],
     },
 
-    # ── Egypt: KD Assembly ────────────────────────────────────────────────────
     "eg_kd": {
-        "title":  "Egypt KD Assembly 5% Tariff — Realistic Entry Path?",
-        "claim":  (
-            "Egypt's KD assembly preferential tariff (5% vs 40% CBU) "
-            "creates a compelling incentive for Chinese CV manufacturers "
-            "to establish local assembly operations, analogous to the Nigerian model."
+        "title": "Egypt KD Assembly 5% Tariff — Realistic Entry Path?",
+        "claim": (
+            "Egypt's KD assembly preferential tariff (**5% vs 40% CBU**) creates a compelling "
+            "incentive for Chinese CV manufacturers to establish local assembly operations, "
+            "analogous to the Nigerian model."
         ),
-        "cross_validation": [
-            "<strong>[Fact]</strong> The 5% KD preferential rate requires verified "
-            "local content/value-added exceeding 40% — confirmed by Egyptian "
-            "Industrial Development Authority (IDA) guidelines.",
-            "<strong>[Implementation complexity]</strong> Achieving 40% local content "
-            "for a commercial vehicle in Egypt requires sourcing engines, chassis "
-            "components, or cab assemblies locally — Egypt's CV component supply "
-            "chain is limited; most qualifying content is tyres, glass, and wiring.",
-            "<strong>[Precedent]</strong> Ghabbour Auto (GB Auto) and MAN Trucks Egypt "
-            "have navigated KD assembly successfully, establishing a replicable template.",
-            "<strong>[FX risk]</strong> EGP devaluation (>50% since 2022) increases the "
-            "USD cost of imported KD kits for local assemblers pricing in EGP — "
-            "compressing margins in ways not captured in tariff-only analysis.",
+        "cross_validation_items": [
+            "**[Fact]** The 5% KD preferential rate requires verified local content/value-added "
+            "exceeding 40% — confirmed by Egyptian Industrial Development Authority (IDA) guidelines.",
+            "**[Implementation complexity]** Achieving 40% local content for a commercial vehicle "
+            "in Egypt requires sourcing engines, chassis components, or cab assemblies locally — "
+            "Egypt's CV component supply chain is limited; most qualifying content is tyres, glass, "
+            "and wiring harnesses.",
+            "**[Precedent]** Ghabbour Auto (GB Auto) and MAN Trucks Egypt have navigated KD assembly "
+            "successfully, establishing a replicable and proven commercial template.",
+            "**[FX risk]** EGP devaluation (>50% since 2022) increases the USD cost of imported KD "
+            "kits for local assemblers pricing in EGP — compressing margins in ways not captured in "
+            "tariff-only analysis.",
         ],
         "verdict": (
-            "The 5% KD tariff is a genuine and material incentive, but achieving "
-            "the 40% local content threshold requires deliberate supply chain engineering "
-            "— it is not automatically conferred on any assembler. "
-            "The GB Auto/MAN precedent confirms viability; "
-            "Chinese manufacturers should structure JVs with established "
-            "Egyptian assembly partners rather than greenfield operations. "
-            "FX hedging and EGP-indexed pricing are non-negotiable risk mitigants."
+            "The 5% KD tariff is a genuine and material incentive, but achieving the 40% local content "
+            "threshold requires deliberate supply chain engineering — it is not automatically conferred "
+            "on any assembler. The GB Auto/MAN precedent confirms commercial viability; Chinese "
+            "manufacturers should structure JVs with established Egyptian assembly partners rather "
+            "than greenfield operations. FX hedging and EGP-indexed pricing are non-negotiable "
+            "risk mitigants for any assembly economics model."
         ),
+        "verdict_type": "warning",
         "confidence_items": [
-            {"label": "5% KD rate requires 40% local content (IDA confirmed)", "badge": "verified"},
-            {"label": "GB Auto/MAN KD assembly as precedent", "badge": "verified"},
-            {"label": "40% local content achievability for Chinese CVs", "badge": "plausible"},
-            {"label": "Net margin after FX and supply chain costs", "badge": "field"},
+            ("🟢 Verified Fact", "5% KD rate requires 40% local content (IDA guidelines confirmed)"),
+            ("🟢 Verified Fact", "GB Auto/MAN KD assembly as proven commercial precedent"),
+            ("🟡 Plausible Estimate", "40% local content achievability for Chinese CV platforms"),
+            ("🔴 Needs Field Verification", "Net margin after FX hedge and supply chain build-out costs"),
         ],
     },
 
-    # ── Algeria: Protectionism ────────────────────────────────────────────────
     "dz_protect": {
-        "title":  "Algeria Import Protectionism — Navigable or Structural Barrier?",
-        "claim":  (
-            "Algeria's 30% CBU tariff and import licence quota system "
-            "effectively make direct CV import commercially unviable, "
-            "requiring mandatory local assembly JVs for market entry."
+        "title": "Algeria Import Protectionism — Navigable or Structural Barrier?",
+        "claim": (
+            "Algeria's 30% CBU tariff and import licence quota system effectively make direct CV "
+            "import commercially unviable, requiring mandatory local assembly JVs for sustainable "
+            "market entry."
         ),
-        "cross_validation": [
-            "<strong>[Fact]</strong> Algeria's 2016 import licence system (suspended 2019, "
-            "partially reinstated 2022) has created chronic supply uncertainty "
-            "for importers — confirmed by multiple MENA trade monitoring reports.",
-            "<strong>[Fact]</strong> Renault Trucks operates a proven JV assembly plant "
-            "in Rouiba (Algiers) — demonstrating that local manufacturing partnerships "
-            "are the only sustainable market entry model.",
-            "<strong>[Political dynamic]</strong> Algeria's government explicitly prioritises "
-            "local industrial development; JV partners who commit to "
-            "workforce training and technology transfer receive preferential "
-            "treatment in public procurement (Sonatrach, Ministry of Public Works).",
-            "<strong>[Risk]</strong> Political and commercial relationship between Algeria "
-            "and China is positive at state level, but "
-            "ministerial-level approval of new JV licences is opaque and "
-            "can take 24–36 months.",
+        "cross_validation_items": [
+            "**[Fact]** Algeria's 2016 import licence system (suspended 2019, partially reinstated "
+            "2022) has created chronic supply uncertainty for importers — confirmed by multiple "
+            "MENA trade monitoring reports.",
+            "**[Fact]** Renault Trucks operates a proven JV assembly plant in Rouiba (Algiers) — "
+            "demonstrating that local manufacturing partnerships are the only sustainable market "
+            "entry model.",
+            "**[Political dynamic]** Algeria's government explicitly prioritises local industrial "
+            "development; JV partners who commit to workforce training and technology transfer "
+            "receive preferential treatment in public procurement (Sonatrach, Ministry of Public Works).",
+            "**[Risk]** Political and commercial relationship between Algeria and China is positive "
+            "at state level, but ministerial-level approval of new JV licences is opaque and can "
+            "take 24–36 months.",
         ],
         "verdict": (
-            "Algeria is a <em>high-barrier but not closed</em> market. "
-            "The Renault Rouiba precedent confirms that committed long-term JV "
-            "manufacturing partnerships can succeed. "
-            "For Chinese CV brands, the strategic entry path is a "
-            "state-endorsed JV with a local industrialist and a credible "
-            "technology transfer commitment. "
-            "Timeframe from initial MOU to first unit production: "
-            "realistically 3–4 years. Market size does not justify greenfield "
-            "investment for volumes below 2,000 units/year."
+            "Algeria is a *high-barrier but not closed* market. The Renault Rouiba precedent confirms "
+            "that committed long-term JV manufacturing partnerships can succeed. For Chinese CV brands, "
+            "the strategic entry path is a state-endorsed JV with a local industrialist and a credible "
+            "technology transfer commitment. Timeframe from initial MOU to first unit production: "
+            "realistically **3–4 years**. Market size does not justify greenfield investment for "
+            "volumes below 2,000 units/year."
         ),
+        "verdict_type": "warning",
         "confidence_items": [
-            {"label": "30% CBU tariff + quota system confirmed", "badge": "verified"},
-            {"label": "Renault Rouiba JV as viable entry template", "badge": "verified"},
-            {"label": "3–4 year JV approval and setup timeline", "badge": "plausible"},
-            {"label": "Ministerial JV approval timeline for Chinese brands", "badge": "field"},
+            ("🟢 Verified Fact", "30% CBU tariff + quota system in force (confirmed)"),
+            ("🟢 Verified Fact", "Renault Rouiba JV as viable and proven entry template"),
+            ("🟡 Plausible Estimate", "3–4 year JV approval and setup timeline estimate"),
+            ("🔴 Needs Field Verification", "Ministerial JV approval timeline for Chinese brand applicants"),
         ],
     },
 
-    # ── Tunisia: EU Alignment ─────────────────────────────────────────────────
     "tn_eu": {
-        "title":  "Tunisia EU-Aligned Market — Gateway or Niche?",
-        "claim":  (
-            "Tunisia's EU Association Agreement and UN-ECE certification "
-            "mutual recognition make it the easiest African market to enter "
-            "for EU-compliant commercial vehicles, with minimal regulatory friction."
+        "title": "Tunisia EU-Aligned Market — Gateway Opportunity or Niche Market?",
+        "claim": (
+            "Tunisia's EU Association Agreement and UN-ECE certification mutual recognition make "
+            "it the **easiest African market to enter** for EU-compliant commercial vehicles, "
+            "with minimal regulatory friction."
         ),
-        "cross_validation": [
-            "<strong>[Fact]</strong> INNORPI confirms UN-ECE mutual recognition — "
-            "EU type-approved vehicles require no additional homologation in Tunisia.",
-            "<strong>[Market size constraint]</strong> Total Tunisian CV market of ~8,000 units/year "
-            "represents approximately 17% of Nigeria's market — the regulatory ease "
-            "must be weighed against limited scale economics.",
-            "<strong>[Chinese brand challenge]</strong> European brands (Renault, Mercedes, MAN, Volvo) "
-            "hold >70% share through decades of network investment. "
-            "Chinese brands entering without a local dealer/service network "
-            "face a trust deficit that no tariff advantage compensates.",
-            "<strong>[Gateway potential]</strong> Tunisia's geographic position and "
-            "EU regulatory alignment could serve as a testbed for "
-            "EU-spec Chinese CV variants before broader European or North African expansion.",
+        "cross_validation_items": [
+            "**[Fact]** INNORPI confirms UN-ECE mutual recognition — EU type-approved vehicles "
+            "require no additional homologation in Tunisia.",
+            "**[Market size constraint]** Total Tunisian CV market of ~8,000 units/year represents "
+            "approximately 17% of Nigeria's market — the regulatory ease must be weighed against "
+            "limited scale economics for any volume-driven strategy.",
+            "**[Chinese brand challenge]** European brands (Renault, Mercedes, MAN, Volvo) hold "
+            ">70% share through decades of network investment. Chinese brands entering without a "
+            "local dealer/service network face a trust deficit that no tariff advantage can "
+            "fully compensate.",
+            "**[Gateway potential]** Tunisia's geographic position and EU regulatory alignment "
+            "could serve as a testbed for EU-spec Chinese CV variants before broader European "
+            "or North African market expansion.",
         ],
         "verdict": (
-            "Tunisia is easiest to enter but hardest to scale. "
-            "It should be approached as a <em>strategic beachhead</em> for "
-            "EU-spec product validation and brand-building, not as a "
-            "primary volume market. "
-            "The gateway value — regulatory learning, reference customer development, "
-            "EU certification precedent — may exceed the direct revenue opportunity "
+            "Tunisia is easiest to enter but hardest to scale. It should be approached as a "
+            "*strategic beachhead* for EU-spec product validation and brand-building, not as a "
+            "primary volume market. The gateway value — regulatory learning, reference customer "
+            "development, EU certification precedent — may exceed the direct revenue opportunity "
             "for Chinese brands in a 3–5 year horizon."
         ),
+        "verdict_type": "success",
         "confidence_items": [
-            {"label": "UN-ECE mutual recognition confirmed (INNORPI)", "badge": "verified"},
-            {"label": "European brands >70% market share", "badge": "verified"},
-            {"label": "Tunisia as EU-spec validation gateway", "badge": "plausible"},
-            {"label": "Chinese brand dealer network viability at 8,000 unit market", "badge": "field"},
+            ("🟢 Verified Fact", "UN-ECE mutual recognition confirmed by INNORPI"),
+            ("🟢 Verified Fact", "European brands hold >70% market share"),
+            ("🟡 Plausible Estimate", "Tunisia as EU-spec validation gateway for Chinese brands"),
+            ("🔴 Needs Field Verification", "Chinese brand dealer network viability at 8,000 unit market scale"),
         ],
     },
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 4. TRIANGULATION RENDERER
+# 4. TRIANGULATION RENDERER — 100% Native Streamlit, zero HTML
 # ══════════════════════════════════════════════════════════════════════════════
-BADGE_HTML = {
-    "verified": '<span class="conf-verified">🟢 Verified Fact</span>',
-    "plausible":'<span class="conf-plausible">🟡 Plausible Estimate</span>',
-    "field":    '<span class="conf-field">🔴 Needs Field Verification</span>',
-}
-
 def render_triangulation(tri_key: str):
-    """Render the full Intelligence Triangulation component for a given key."""
+    """
+    Renders the three-layer Intelligence Triangulation component
+    using only native Streamlit components — no raw HTML tags.
+    """
     if tri_key not in TRIANGULATION:
         return
+
     t = TRIANGULATION[tri_key]
 
-    st.markdown(f"""
-    <div class="tri-outer">
-      <div class="tri-header">
-        <span class="tri-header-title">🔍 &nbsp;Analyst Due Diligence</span>
-        <span class="tri-header-badge">Intelligence Triangulation</span>
-      </div>
-      <div class="tri-body">
+    # ── Layer 1: Market Claim ─────────────────────────────────────────────────
+    st.markdown("**① Market Claim &nbsp;/&nbsp; 市场观点**")
+    st.markdown(f"> {t['claim']}")
+    st.markdown("")
 
-        <!-- Layer 1: Market Claim -->
-        <div class="tri-layer">
-          <div class="tri-layer-label tri-claim-label">
-            <span>①</span>&nbsp;Market Claim &nbsp;/&nbsp; 市场观点
-          </div>
-          <div class="tri-layer-body">{t['claim']}</div>
-        </div>
+    # ── Layer 2: Cross-Validation ─────────────────────────────────────────────
+    cv_text = "\n\n".join(
+        f"- {item}" for item in t["cross_validation_items"]
+    )
+    st.info(
+        f"**② Cross-Validation &nbsp;/&nbsp; 交叉验证**\n\n{cv_text}",
+        icon="🔍",
+    )
 
-        <!-- Layer 2: Cross-Validation -->
-        <div class="tri-layer">
-          <div class="tri-layer-label tri-cross-label">
-            <span>②</span>&nbsp;Cross-Validation &nbsp;/&nbsp; 交叉验证
-          </div>
-          <div class="tri-layer-body">
-            <ul>
-              {''.join(f'<li>{item}</li>' for item in t['cross_validation'])}
-            </ul>
-          </div>
-        </div>
+    # ── Layer 3: Analyst Verdict ──────────────────────────────────────────────
+    verdict_header = "**③ Analyst Verdict &nbsp;/&nbsp; 最终研判**\n\n"
+    verdict_body   = t["verdict"]
 
-        <!-- Layer 3: Analyst Verdict -->
-        <div class="tri-layer">
-          <div class="tri-layer-label tri-verdict-label">
-            <span>③</span>&nbsp;Analyst Verdict &nbsp;/&nbsp; 最终研判
-          </div>
-          <div class="tri-layer-body">
-            {t['verdict']}
-            <div class="conf-row">
-              <span class="conf-row-label">Confidence:</span>
-              {''.join(
-                f'<span style="display:inline-flex;align-items:center;gap:5px;margin-bottom:4px;">'
-                f'{BADGE_HTML[ci["badge"]]}'
-                f'<span style="font-family:Inter;font-size:.7rem;color:#5A6070;">{ci["label"]}</span>'
-                f'</span> '
-                for ci in t['confidence_items']
-              )}
-            </div>
-          </div>
-        </div>
+    # Build confidence summary as plain markdown text
+    conf_lines = "\n".join(
+        f"- {badge} — {label}"
+        for badge, label in t["confidence_items"]
+    )
+    conf_block = f"\n\n---\n**Confidence Assessment:**\n\n{conf_lines}"
 
-      </div>
-    </div>
-    """, unsafe_allow_html=True)
+    full_verdict = verdict_header + verdict_body + conf_block
+
+    if t["verdict_type"] == "success":
+        st.success(full_verdict, icon="✅")
+    else:
+        st.warning(full_verdict, icon="⚠️")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 5. TIER-1 COUNTRY DATABASE
@@ -817,7 +681,7 @@ TIER1 = {
         "trend":{"years":[2021,2022,2023,2024,2025,2026],"ice":[14200,15100,16200,17400,18000,18000],"ev":[0,40,120,260,380,400]},
         "policy":{
             "tariff":      "EU AA Agreement: EU-origin CBU 2.5%. Chinese CBU: ~25% MFN. No dedicated KD incentive.",
-            "certification":"CNEAT: UN-ECE mutual recognition. EU type-approved vehicles: fast-track.",
+            "certification":"CNEAT: UN-ECE mutual recognition. EU type-approved vehicles: fast-track approval.",
             "key_buyers":  "OCP Group (phosphate mining), ONCF (national rail logistics), Casablanca Port operators.",
             "risk":        "Origin rules limit 2.5% benefit to EU-origin vehicles. Chinese CBU at structural tariff disadvantage.",
         },
@@ -1027,12 +891,12 @@ for iso, name in ALL_AFRICA.items():
 ALL_ISO_LIST = list(dict.fromkeys(ISO_TO_NAME.keys()))
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 7. NEWS FETCHER — Wide Net, Smart Filter
+# 7. NEWS FETCHER
 # ══════════════════════════════════════════════════════════════════════════════
 AUTHORITY_DOMAINS = [
     "reuters","bloomberg","ft.com","engineeringnews","businessday",
     "zawya","theafricareport","africanews","afdb","apanews",
-    "businesstimes","naamsa","naddc","statssa","moti.gov",
+    "naamsa","naddc","statssa","moti.gov",
 ]
 NOISE_WORDS = {"rumor","rumour","unconfirmed","alleged","shocking","viral","leaked","clickbait"}
 
@@ -1050,7 +914,7 @@ def fetch_news(query: str, limit: int = 7) -> dict:
                     continue
                 pub_str, pub_dt = "–", None
                 if hasattr(e,"published_parsed") and e.published_parsed:
-                    pub_dt = datetime(*e.published_parsed[:6])
+                    pub_dt  = datetime(*e.published_parsed[:6])
                     pub_str = pub_dt.strftime("%Y-%m-%d")
                 out.append({"title":t,"link":e.get("link","#"),
                              "published":pub_str,"pub_dt":pub_dt,
@@ -1066,16 +930,12 @@ def fetch_news(query: str, limit: int = 7) -> dict:
     def _recent(item):
         return item["pub_dt"] is None or item["pub_dt"] >= cutoff
 
-    enc = (query+" when:30d").replace(" ","+").replace('"',"%22")
-    raw = _parse(f"https://news.google.com/rss/search?q={enc}&hl=en-US&gl=US&ceid=US:en")
+    enc  = (query+" when:30d").replace(" ","+").replace('"',"%22")
+    raw  = _parse(f"https://news.google.com/rss/search?q={enc}&hl=en-US&gl=US&ceid=US:en")
     recent = [x for x in raw if _recent(x)]
     auth   = [x for x in recent if _auth(x)]
-
-    if len(auth) >= 3:
-        return {"items":auth[:limit],"is_authority":True,"is_fallback":False}
-    if len(recent) >= 3:
-        return {"items":recent[:limit],"is_authority":False,"is_fallback":False}
-
+    if len(auth)   >= 3: return {"items":auth[:limit],  "is_authority":True,  "is_fallback":False}
+    if len(recent) >= 3: return {"items":recent[:limit],"is_authority":False, "is_fallback":False}
     enc2 = query.replace(" ","+").replace('"',"%22")
     raw2 = _parse(f"https://news.google.com/rss/search?q={enc2}&hl=en-US&gl=US&ceid=US:en")
     return {"items":raw2[:3],"is_authority":False,"is_fallback":True} if raw2 else \
@@ -1118,7 +978,7 @@ def gen_brand_df(country):
 def gen_trend_df(country):
     t = TIER1[country]["trend"]
     df = pd.DataFrame({"Year":t["years"],"ICE":t["ice"],"EV":t["ev"]})
-    df["Total"] = df["ICE"]+df["EV"]
+    df["Total"]    = df["ICE"] + df["EV"]
     df["EV_Share"] = (df["EV"]/df["Total"]*100).round(2)
     return df
 
@@ -1177,13 +1037,12 @@ def gen_ng_waterfall():
 
 @st.cache_data
 def gen_ma_modal():
-    """Morocco OCP transport modal split — pipeline vs rail vs road (estimated)."""
     return pd.DataFrame({
         "Modal":["Slurry Pipeline\n(Raw Ore)","Rail\n(Concentrate)","Road HCV\n(Contractor / Finished Goods)"],
         "Volume_Mt_yr":[38.0,12.0,6.5],
         "Road_Accessible":[False,False,True],
         "Color":["#9BA3B2","#4C7FA8","#D04A02"],
-        "Note":["Pipeline: 187 km Khouribga–Jorf Lasfar (not road-accessible)",
+        "Note":["187 km pipeline: Khouribga→Jorf Lasfar (not road-accessible)",
                 "Rail: Benguerir–Jorf Lasfar concentrate (not road-accessible)",
                 "Road: Contractor logistics, finished fertiliser, reagent supply"],
     })
@@ -1199,7 +1058,8 @@ def gen_ocp_throughput():
 def gen_eth_ev():
     np.random.seed(4)
     months=pd.date_range("2021-01-01","2026-05-01",freq="MS"); n=len(months); ban=18
-    ev=np.concatenate([np.linspace(0.5,3.0,ban),np.linspace(3.0,92.0,n-ban)+np.random.normal(0,2,n-ban)]).clip(0,100)
+    ev=np.concatenate([np.linspace(0.5,3.0,ban),
+                       np.linspace(3.0,92.0,n-ban)+np.random.normal(0,2,n-ban)]).clip(0,100)
     return pd.DataFrame({"Month":months,"EV_Share_pct":ev.round(1)})
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1259,7 +1119,7 @@ def chart_za_payload_income(df):
         mode="lines+markers",yaxis="y2",line=dict(color="#21325B",width=2.5),marker=dict(size=4,color="#21325B"),
         hovertemplate="<b>%{x|Q%q %Y}</b><br>R%{y:.1f}bn<extra></extra>"))
     fig.add_annotation(x=df["Quarter"].iloc[-4],y=df["Payload_Mt"].iloc[-4],
-        text="▼ Volume falling<br>▲ Revenue rising<br>= Cost squeeze",showarrow=True,
+        text="▼ Volume falling\n▲ Revenue rising\n= Cost squeeze",showarrow=True,
         arrowhead=2,arrowcolor="#D04A02",bgcolor="rgba(208,74,2,0.08)",bordercolor="#D04A02",
         font=dict(size=9,color="#D04A02",family="Inter"),ax=-80,ay=-50)
     return _apply(fig,{"yaxis":{**CHART_BASE["yaxis"],"title":"Payload (Mt)","side":"left"},
@@ -1271,7 +1131,7 @@ def chart_za_channel(df):
         marker=dict(colors=df["Color"].tolist(),line=dict(color="white",width=2)),
         textinfo="label+percent",textfont=dict(size=11,family="Inter"),
         hovertemplate="<b>%{label}</b><br>%{value:.1f}%<extra></extra>"))
-    fig.add_annotation(text="Sales<br>Channel",x=.5,y=.5,font=dict(size=12,family="Inter",color="#5A6070"),showarrow=False)
+    fig.add_annotation(text="Sales\nChannel",x=.5,y=.5,font=dict(size=12,family="Inter",color="#5A6070"),showarrow=False)
     return _apply(fig,{"showlegend":True,"legend":dict(orientation="v",x=1.02,y=.5,font=dict(size=11),bgcolor="rgba(0,0,0,0)"),
                         "margin":dict(l=20,r=120,t=20,b=20),"height":300})
 
@@ -1295,7 +1155,7 @@ def chart_za_scissors():
     fig.add_trace(go.Scatter(x=df["Year"],y=df["HCV_Units"],name="HCV Road Sales (units) →",
         mode="lines+markers",yaxis="y2",line=dict(color="#21325B",width=2.5),marker=dict(size=6,color="#21325B"),
         hovertemplate="<b>%{x}</b><br>HCV: %{y:,} units<extra></extra>"))
-    fig.add_annotation(x=2018,y=228,text="Rail peak 2018:<br>228 Mt",showarrow=True,arrowhead=2,
+    fig.add_annotation(x=2018,y=228,text="Rail peak 2018:\n228 Mt",showarrow=True,arrowhead=2,
         arrowcolor="#D04A02",font=dict(size=9,color="#D04A02",family="Inter"),ax=60,ay=-35)
     return _apply(fig,{"yaxis":{**CHART_BASE["yaxis"],"title":"Rail Volume (Mt)","side":"left"},
                         "yaxis2":{**CHART_BASE["yaxis"],"title":"HCV Sales (units)","side":"right","overlaying":"y","showgrid":False},
@@ -1318,25 +1178,20 @@ def chart_ng_waterfall(df):
                         "margin":dict(l=60,r=20,t=30,b=70)})
 
 def chart_ma_modal(df):
-    """OCP Transport Modal Split — horizontal bar with road-accessible highlight."""
-    colors = ["#C0C8D8" if not r else "#D04A02" for r in df["Road_Accessible"]]
-    fig = go.Figure(go.Bar(
-        x=df["Volume_Mt_yr"], y=df["Modal"], orientation="h",
+    colors=["#C0C8D8" if not r else "#D04A02" for r in df["Road_Accessible"]]
+    fig=go.Figure(go.Bar(x=df["Volume_Mt_yr"],y=df["Modal"],orientation="h",
         text=[f"{v:.1f} Mt/yr" for v in df["Volume_Mt_yr"]],
         textposition="outside",textfont=dict(size=11,family="Inter",color="#2D3142"),
         marker=dict(color=colors,line=dict(color="white",width=2)),
         customdata=df["Note"],
-        hovertemplate="<b>%{y}</b><br>Volume: %{x:.1f} Mt/yr<br>%{customdata}<extra></extra>",
-    ))
+        hovertemplate="<b>%{y}</b><br>%{x:.1f} Mt/yr<br>%{customdata}<extra></extra>"))
     fig.add_annotation(x=6.5,y="Road HCV\n(Contractor / Finished Goods)",
-        text="● Road-accessible segment",showarrow=False,xanchor="left",xshift=8,
+        text="● Road-accessible",showarrow=False,xanchor="left",xshift=8,
         font=dict(size=10,color="#D04A02",family="Inter"))
-    return _apply(fig,{
-        "xaxis":{**CHART_BASE["xaxis"],"title":"Estimated Annual Volume (Mt/year)",
-                 "range":[0,df["Volume_Mt_yr"].max()*1.35]},
-        "yaxis":{**CHART_BASE["yaxis"],"title":"","automargin":True},
-        "showlegend":False,"margin":dict(l=200,r=20,t=20,b=50),"height":280,
-    })
+    return _apply(fig,{"xaxis":{**CHART_BASE["xaxis"],"title":"Estimated Volume (Mt/year)",
+                                 "range":[0,df["Volume_Mt_yr"].max()*1.35]},
+                        "yaxis":{**CHART_BASE["yaxis"],"title":"","automargin":True},
+                        "showlegend":False,"margin":dict(l=200,r=20,t=20,b=50),"height":280})
 
 def chart_ocp_throughput(df):
     x_num=np.arange(len(df)); trend=np.poly1d(np.polyfit(x_num,df["Throughput_kt"],1))(x_num)
@@ -1366,192 +1221,224 @@ def chart_eth_ev(df):
                         "yaxis":{**CHART_BASE["yaxis"],"title":"EV Market Share (%)","range":[0,105]},"showlegend":False})
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 10. HELPER UI FUNCTIONS
+# 10. UI HELPER FUNCTIONS
 # ══════════════════════════════════════════════════════════════════════════════
-def _chdr(label,title,sub,src_name,src_url):
+def _chdr(label, title, sub, src_name, src_url):
     st.markdown(f"""
-    <div class="chart-card">
-        <div class="chart-label">{label}</div>
-        <div class="chart-title">{title}</div>
-        <div class="chart-sub">{sub}</div>
-        <div class="source-link">📌 <a href="{src_url}" target="_blank">{src_name}</a></div>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="chart-card">
+    <div class="chart-label">{label}</div>
+    <div class="chart-title">{title}</div>
+    <div class="chart-sub">{sub}</div>
+    <div class="source-link">📌 <a href="{src_url}" target="_blank">{src_name}</a></div>
+</div>
+""", unsafe_allow_html=True)
 
-def _sdiv(title,sub=""):
+def _sdiv(title, sub=""):
     st.markdown(f"""
-    <div class="section-hdr" style="margin-top:26px;">
-        <div class="section-bar"></div>
-        <div class="section-title">{title}</div>
-        {"<div class='section-sub'>"+sub+"</div>" if sub else ""}
-    </div>
-    """, unsafe_allow_html=True)
+<div class="section-hdr" style="margin-top:26px;">
+    <div class="section-bar"></div>
+    <div class="section-title">{title}</div>
+    {"<div class='section-sub'>"+sub+"</div>" if sub else ""}
+</div>
+""", unsafe_allow_html=True)
 
 def _kpi_row(cdata):
     cols = st.columns(len(cdata["kpi"]))
-    for col,(key,(val,lbl,delta,_)) in zip(cols,cdata["kpi"].items()):
+    for col, (key, (val, lbl, delta, _)) in zip(cols, cdata["kpi"].items()):
         with col:
-            dc="normal" if "+" in delta else "inverse" if "-" in delta else "off"
-            st.metric(key,val,delta,delta_color=dc,help=lbl)
+            dc = "normal" if "+" in delta else "inverse" if "-" in delta else "off"
+            st.metric(key, val, delta, delta_color=dc, help=lbl)
     src = list(cdata["sources"].values())[0]
     st.caption(f"Source: [{src[0]}]({src[1]}) · Simulated data for illustrative purposes.")
-    st.markdown("<br>",unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
 
-def _standard_2col(country,cdata,key_prefix):
-    c1,c2=st.columns(2,gap="large")
-    src=cdata["sources"]["trade"]
+def _standard_2col(country, cdata, key_prefix):
+    c1, c2 = st.columns(2, gap="large")
+    src = cdata["sources"]["trade"]
     with c1:
-        _chdr("Market Share",f"Brand Rankings — {country}","Top 5 brands by annual HCV unit sales",src[0],src[1])
-        st.plotly_chart(chart_brand(gen_brand_df(country),country),use_container_width=True,
-                        config={"displayModeBar":False},key=f"{key_prefix}_brand")
+        _chdr("Market Share", f"Brand Rankings — {country}",
+              "Top 5 brands by annual HCV unit sales", src[0], src[1])
+        st.plotly_chart(chart_brand(gen_brand_df(country), country),
+                        use_container_width=True, config={"displayModeBar":False},
+                        key=f"{key_prefix}_brand")
     with c2:
-        _chdr("Sales Trend 2021–2026",f"ICE vs. EV — {country}","Historical actuals + 2026 forecast",src[0],src[1])
-        st.plotly_chart(chart_trend(gen_trend_df(country)),use_container_width=True,
-                        config={"displayModeBar":False},key=f"{key_prefix}_trend")
+        _chdr("Sales Trend 2021–2026", f"ICE vs. EV — {country}",
+              "Historical actuals + 2026 forecast", src[0], src[1])
+        st.plotly_chart(chart_trend(gen_trend_df(country)),
+                        use_container_width=True, config={"displayModeBar":False},
+                        key=f"{key_prefix}_trend")
+
+def _tri_section(cdata):
+    """Renders the Analyst Due Diligence expander section for any country."""
+    tri_keys = cdata.get("tri_keys", [])
+    if not tri_keys:
+        return
+    _sdiv("Analyst Due Diligence — Intelligence Triangulation",
+          "Critical thinking · Cross-validation · Confidence ratings")
+    for tk in tri_keys:
+        t = TRIANGULATION.get(tk, {})
+        if not t:
+            continue
+        with st.expander(f"🔍  {t['title']}", expanded=False):
+            render_triangulation(tk)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 11. COUNTRY MARKET TAB RENDERERS
 # ══════════════════════════════════════════════════════════════════════════════
-
 def render_south_africa(cdata):
-    STATSSA = "https://www.statssa.gov.za/publications/P7162/P7162.html"
-    NAAMSA  = "https://naamsa.co.za"
-    TRANSNET= "https://www.transnet.net/InvestorCentre/Pages/AnnualReports.aspx"
+    STATSSA  = "https://www.statssa.gov.za/publications/P7162/P7162.html"
+    NAAMSA   = "https://naamsa.co.za"
+    TRANSNET = "https://www.transnet.net/InvestorCentre/Pages/AnnualReports.aspx"
+
     _kpi_row(cdata)
-    _standard_2col("South Africa",cdata,"za")
-    _sdiv("Stats SA P7162 — Road Freight Survey","Exclusive Tier 1 · Modelled on Stats SA P7162 report structure")
+    _standard_2col("South Africa", cdata, "za")
+
+    _sdiv("Stats SA P7162 — Road Freight Survey",
+          "Exclusive Tier 1 · Modelled on Stats SA P7162 report structure")
     _chdr("Exclusive Module 1 · Stats SA P7162","Road Freight Revenue by Commodity Category",
-          "Annual freight revenue (ZAR bn) — Mining dominates at 35.4%","Stats SA — Road Freight Survey P7162",STATSSA)
-    st.plotly_chart(chart_za_freight_cat(gen_za_freight_category()),use_container_width=True,
-                    config={"displayModeBar":False},key="za_fc")
+          "Annual freight revenue (ZAR bn) — Mining dominates at 35.4%",
+          "Stats SA — Road Freight Survey P7162", STATSSA)
+    st.plotly_chart(chart_za_freight_cat(gen_za_freight_category()),
+                    use_container_width=True, config={"displayModeBar":False}, key="za_fc")
     st.caption(f"Source: [Stats SA P7162]({STATSSA}) · Simulated data modelled on actual report structure.")
-    st.markdown("<br>",unsafe_allow_html=True)
+    st.markdown("<br>", unsafe_allow_html=True)
+
     _chdr("Exclusive Module 2 · Stats SA P7162","Payload Volume vs. Freight Income — The Cost Squeeze",
-          "Diverging trends illustrate per-km cost inflation burden on fleet operators","Stats SA — P7162",STATSSA)
-    st.plotly_chart(chart_za_payload_income(gen_za_payload_income()),use_container_width=True,
-                    config={"displayModeBar":False},key="za_pi")
+          "Diverging trends illustrate per-km cost inflation burden on fleet operators",
+          "Stats SA — Road Freight Survey P7162", STATSSA)
+    st.plotly_chart(chart_za_payload_income(gen_za_payload_income()),
+                    use_container_width=True, config={"displayModeBar":False}, key="za_pi")
     st.caption(f"Source: [Stats SA P7162]({STATSSA}) · Simulated quarterly data.")
-    st.markdown("<br>",unsafe_allow_html=True)
-    _sdiv("NAAMSA — Sales Channel & Provincial Distribution","Exclusive Tier 1 · NAAMSA monthly release structure")
-    ch_l,ch_r=st.columns([2,3],gap="large")
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    _sdiv("NAAMSA — Sales Channel & Provincial Distribution",
+          "Exclusive Tier 1 · NAAMSA monthly release structure")
+    ch_l, ch_r = st.columns([2,3], gap="large")
     with ch_l:
-        _chdr("Module 3a · NAAMSA","HCV Sales by Channel","Dealer retail dominates; corporate fleet growing",NAAMSA,NAAMSA)
-        st.plotly_chart(chart_za_channel(gen_za_channel()),use_container_width=True,
-                        config={"displayModeBar":False},key="za_ch")
+        _chdr("Module 3a · NAAMSA","HCV Sales by Channel",
+              "Dealer retail dominates; corporate fleet growing", NAAMSA, NAAMSA)
+        st.plotly_chart(chart_za_channel(gen_za_channel()),
+                        use_container_width=True, config={"displayModeBar":False}, key="za_ch")
         st.caption(f"Source: [NAAMSA]({NAAMSA}) · Simulated data.")
     with ch_r:
-        _chdr("Module 3b · NAAMSA","HCV Sales by Province","Gauteng accounts for 45.1% — industrial heartland concentration",NAAMSA,NAAMSA)
-        st.plotly_chart(chart_za_province(gen_za_province()),use_container_width=True,
-                        config={"displayModeBar":False},key="za_pv")
+        _chdr("Module 3b · NAAMSA","HCV Sales by Province",
+              "Gauteng accounts for 45.1% — industrial heartland concentration", NAAMSA, NAAMSA)
+        st.plotly_chart(chart_za_province(gen_za_province()),
+                        use_container_width=True, config={"displayModeBar":False}, key="za_pv")
         st.caption(f"Source: [NAAMSA]({NAAMSA}) · Simulated provincial distribution.")
-    _sdiv("Transnet Rail Crisis — Road Transport Demand Driver","Structural shift · Scissors effect analysis")
+
+    _sdiv("Transnet Rail Crisis — Road Transport Demand Driver",
+          "Structural shift · Scissors effect analysis")
     _chdr("Exclusive Module 4 · Transnet / NAAMSA",
           "Transnet Rail Volume Collapse vs. HCV Road Sales Surge",
-          "Rail freight down 46% from 2018 peak; road HCV absorbs displaced demand — dual-axis scissors effect",
-          "Transnet Annual Report",TRANSNET)
-    st.plotly_chart(chart_za_scissors(),use_container_width=True,
-                    config={"displayModeBar":False},key="za_sc")
+          "Rail freight down 46% from 2018 peak; road HCV absorbs displaced demand",
+          "Transnet Annual Report", TRANSNET)
+    st.plotly_chart(chart_za_scissors(), use_container_width=True,
+                    config={"displayModeBar":False}, key="za_sc")
     st.caption(f"Source: [Transnet IR]({TRANSNET}) · [NAAMSA]({NAAMSA}) · Simulated data.")
-    # Triangulation modules
-    _sdiv("Analyst Due Diligence — Intelligence Triangulation","Critical thinking · Cross-validation · Confidence ratings")
-    for tk in cdata.get("tri_keys",[]):
-        with st.expander(f"🔍 {TRIANGULATION[tk]['title']}", expanded=False):
-            render_triangulation(tk)
+
+    _tri_section(cdata)
+
 
 def render_nigeria(cdata):
     NADDC   = "https://naddc.gov.ng"
     CUSTOMS = "https://customs.gov.ng"
+
     _kpi_row(cdata)
-    _standard_2col("Nigeria",cdata,"ng")
-    _sdiv("Tariff Structure Analysis — The Zero-Duty Dividend","Exclusive Tier 1 · Per-unit landed cost comparison")
-    _chdr("Exclusive Module · Nigeria Customs / NADDC","CBU vs. CKD/SKD Import Cost Waterfall",
+    _standard_2col("Nigeria", cdata, "ng")
+
+    _sdiv("Tariff Structure Analysis — The Zero-Duty Dividend",
+          "Exclusive Tier 1 · Per-unit landed cost comparison")
+    _chdr("Exclusive Module · Nigeria Customs / NADDC",
+          "CBU vs. CKD/SKD Import Cost Waterfall",
           "Per-unit landed cost (30t HCV, base $100k). CKD route: ~$46k saving under 2023 EV/assembly tariff.",
-          "Nigeria Customs Service",CUSTOMS)
-    st.plotly_chart(chart_ng_waterfall(gen_ng_waterfall()),use_container_width=True,
-                    config={"displayModeBar":False},key="ng_wf")
+          "Nigeria Customs Service", CUSTOMS)
+    st.plotly_chart(chart_ng_waterfall(gen_ng_waterfall()), use_container_width=True,
+                    config={"displayModeBar":False}, key="ng_wf")
     st.caption(f"Source: [Nigeria Customs]({CUSTOMS}) · [NADDC]({NADDC}) · Figures illustrative.")
-    _sdiv("Analyst Due Diligence — Intelligence Triangulation","Critical thinking · Cross-validation · Confidence ratings")
-    for tk in cdata.get("tri_keys",[]):
-        with st.expander(f"🔍 {TRIANGULATION[tk]['title']}", expanded=False):
-            render_triangulation(tk)
+
+    _tri_section(cdata)
+
 
 def render_morocco(cdata):
     OCP   = "https://www.ocpgroup.ma/investor-relations"
     AIVAM = "http://www.aivam.ma"
+
     _kpi_row(cdata)
-    _standard_2col("Morocco",cdata,"ma")
-    _sdiv("OCP Group Transport Modal Assessment","Exclusive Tier 1 · Phosphate logistics structure analysis")
+    _standard_2col("Morocco", cdata, "ma")
+
+    _sdiv("OCP Group Transport Modal Assessment",
+          "Exclusive Tier 1 · Phosphate logistics structure analysis")
     _chdr("Exclusive Module 1 · OCP Group",
           "OCP Phosphate Transport Modal Split — Pipeline vs Rail vs Road",
-          "Estimated annual volume by transport mode. Orange = road-accessible segment. "
-          "Pipeline and rail dominate primary ore; road serves contractor and finished goods logistics.",
-          "OCP Group Investor Relations",OCP)
-    st.plotly_chart(chart_ma_modal(gen_ma_modal()),use_container_width=True,
-                    config={"displayModeBar":False},key="ma_modal")
-    st.caption(f"Source: [OCP Group IR]({OCP}) · [AIVAM]({AIVAM}) · Estimated volumes; OCP does not publish modal split data publicly.")
-    st.markdown("<br>",unsafe_allow_html=True)
+          "Estimated annual volume by transport mode. Orange = road-accessible segment.",
+          "OCP Group Investor Relations", OCP)
+    st.plotly_chart(chart_ma_modal(gen_ma_modal()), use_container_width=True,
+                    config={"displayModeBar":False}, key="ma_modal")
+    st.caption(f"Source: [OCP Group IR]({OCP}) · [AIVAM]({AIVAM}) · Estimated volumes.")
+    st.markdown("<br>", unsafe_allow_html=True)
+
     _chdr("Exclusive Module 2 · OCP Group",
           "OCP Road Freight Throughput — Contractor & Finished Goods Corridor",
-          "Monthly road freight throughput (kt) 2023–2026. Represents road-accessible portion only.",
-          "OCP Group Investor Relations",OCP)
-    st.plotly_chart(chart_ocp_throughput(gen_ocp_throughput()),use_container_width=True,
-                    config={"displayModeBar":False},key="ma_ocp")
+          "Monthly road freight throughput (kt) 2023–2026. Road-accessible portion only.",
+          "OCP Group Investor Relations", OCP)
+    st.plotly_chart(chart_ocp_throughput(gen_ocp_throughput()), use_container_width=True,
+                    config={"displayModeBar":False}, key="ma_ocp")
     st.caption(f"Source: [OCP Group IR]({OCP}) · Simulated data.")
-    _sdiv("Analyst Due Diligence — Intelligence Triangulation","Critical thinking · Cross-validation · Confidence ratings")
-    for tk in cdata.get("tri_keys",[]):
-        with st.expander(f"🔍 {TRIANGULATION[tk]['title']}", expanded=False):
-            render_triangulation(tk)
+
+    _tri_section(cdata)
+
 
 def render_ethiopia(cdata):
     MOTI = "https://www.moti.gov.et"
     ERCA = "https://www.erca.gov.et"
+
     _kpi_row(cdata)
-    _standard_2col("Ethiopia",cdata,"eth")
-    _sdiv("EV Penetration Surge — Post Petroleum Import Ban","Exclusive Tier 1 · Fastest EV transition on the continent")
+    _standard_2col("Ethiopia", cdata, "eth")
+
+    _sdiv("EV Penetration Surge — Post Petroleum Import Ban",
+          "Exclusive Tier 1 · Fastest EV transition on the continent")
     _chdr("Exclusive Module · MoTI Ethiopia / ERCA",
           "EV Market Share Trajectory — Monthly 2021–2026",
           "From <3% to >85% EV share in 30 months following July 2022 petroleum import ban.",
-          "Ministry of Trade & Industry Ethiopia",MOTI)
-    st.plotly_chart(chart_eth_ev(gen_eth_ev()),use_container_width=True,
-                    config={"displayModeBar":False},key="eth_ev")
+          "Ministry of Trade & Industry Ethiopia", MOTI)
+    st.plotly_chart(chart_eth_ev(gen_eth_ev()), use_container_width=True,
+                    config={"displayModeBar":False}, key="eth_ev")
     st.caption(f"Source: [MoTI Ethiopia]({MOTI}) · [ERCA]({ERCA}) · Simulated data.")
-    _sdiv("Analyst Due Diligence — Intelligence Triangulation","Critical thinking · Cross-validation · Confidence ratings")
-    for tk in cdata.get("tri_keys",[]):
-        with st.expander(f"🔍 {TRIANGULATION[tk]['title']}", expanded=False):
-            render_triangulation(tk)
+
+    _tri_section(cdata)
+
 
 def render_generic(country, cdata):
     _kpi_row(cdata)
-    _standard_2col(country,cdata,country[:2].lower())
+    _standard_2col(country, cdata, country[:2].lower())
+
     _sdiv("Market Entry Assessment Scorecard")
-    scores_db={
-        "Egypt":  {"Market Size":7,"EV Readiness":3,"Tariff Advantage":5,"Regulatory Ease":5,"Growth Momentum":8},
-        "Kenya":  {"Market Size":6,"EV Readiness":6,"Tariff Advantage":6,"Regulatory Ease":7,"Growth Momentum":8},
-        "Algeria":{"Market Size":6,"EV Readiness":2,"Tariff Advantage":4,"Regulatory Ease":3,"Growth Momentum":5},
-        "Tunisia":{"Market Size":4,"EV Readiness":5,"Tariff Advantage":7,"Regulatory Ease":7,"Growth Momentum":4},
+    scores_db = {
+        "Egypt":   {"Market Size":7,"EV Readiness":3,"Tariff Advantage":5,"Regulatory Ease":5,"Growth Momentum":8},
+        "Kenya":   {"Market Size":6,"EV Readiness":6,"Tariff Advantage":6,"Regulatory Ease":7,"Growth Momentum":8},
+        "Algeria": {"Market Size":6,"EV Readiness":2,"Tariff Advantage":4,"Regulatory Ease":3,"Growth Momentum":5},
+        "Tunisia": {"Market Size":4,"EV Readiness":5,"Tariff Advantage":7,"Regulatory Ease":7,"Growth Momentum":4},
     }
-    scores=scores_db.get(country,{d:5 for d in ["Market Size","EV Readiness","Tariff Advantage","Regulatory Ease","Growth Momentum"]})
-    for col,(dim,score) in zip(st.columns(5),scores.items()):
-        color="#D04A02" if score>=8 else "#295BA5" if score>=6 else "#9BA3B2"
+    scores = scores_db.get(country, {d:5 for d in ["Market Size","EV Readiness","Tariff Advantage","Regulatory Ease","Growth Momentum"]})
+    for col, (dim, score) in zip(st.columns(5), scores.items()):
+        color = "#D04A02" if score>=8 else "#295BA5" if score>=6 else "#9BA3B2"
         with col:
             st.markdown(f"""
-            <div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
-                        padding:14px 12px;box-shadow:0 1px 4px rgba(0,0,0,.06);text-align:center;">
-                <div style="font-family:'Inter';font-size:.6rem;font-weight:700;text-transform:uppercase;
-                            letter-spacing:.6px;color:#9BA3B2;margin-bottom:7px;">{dim}</div>
-                <div style="font-family:'Inter';font-size:1.5rem;font-weight:700;color:{color};">
-                    {score}<span style="font-size:.72rem;color:#9BA3B2;">/10</span></div>
-                <div style="background:#F0F2F5;border-radius:3px;height:4px;margin-top:8px;">
-                    <div style="background:{color};width:{score*10}%;height:4px;border-radius:3px;"></div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-    src=cdata["sources"]["trade"]
+<div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
+            padding:14px 12px;box-shadow:0 1px 4px rgba(0,0,0,.06);text-align:center;">
+    <div style="font-family:'Inter';font-size:.6rem;font-weight:700;text-transform:uppercase;
+                letter-spacing:.6px;color:#9BA3B2;margin-bottom:7px;">{dim}</div>
+    <div style="font-family:'Inter';font-size:1.5rem;font-weight:700;color:{color};">
+        {score}<span style="font-size:.72rem;color:#9BA3B2;">/10</span></div>
+    <div style="background:#F0F2F5;border-radius:3px;height:4px;margin-top:8px;">
+        <div style="background:{color};width:{score*10}%;height:4px;border-radius:3px;"></div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+    src = cdata["sources"]["trade"]
     st.caption(f"Source: [{src[0]}]({src[1]}) · Simulated market intelligence.")
-    _sdiv("Analyst Due Diligence — Intelligence Triangulation","Critical thinking · Cross-validation · Confidence ratings")
-    for tk in cdata.get("tri_keys",[]):
-        with st.expander(f"🔍 {TRIANGULATION[tk]['title']}", expanded=False):
-            render_triangulation(tk)
+    _tri_section(cdata)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 12. MAP BUILDER
@@ -1559,7 +1446,7 @@ def render_generic(country, cdata):
 def build_map(selected_name):
     sel_iso = next((d["iso"] for n,d in TIER1.items() if n==selected_name),"") or \
               next((iso for iso,name in ALL_AFRICA.items() if name==selected_name),"")
-    rows=[]
+    rows = []
     for iso in ALL_ISO_LIST:
         name=ISO_TO_NAME.get(iso,iso); is_t1=name in TIER1; is_sel=iso==sel_iso
         score=100 if is_sel else 70 if is_t1 else 20
@@ -1569,7 +1456,8 @@ def build_map(selected_name):
             kpi_text="<br>".join(f"<b>{v[0]}</b> {v[1]}" for v in d["kpi"].values())
             tip=(f"<b style='font-size:13px;'>{d['flag']} {name}</b><br>"
                  f"<span style='color:#9BA3B2;font-size:10px;'>TIER 1 · {d['region']}</span><br><br>"
-                 f"{kpi_text}<br><br><span style='color:#D04A02;font-size:10px;'>● Click to drill down</span>")
+                 f"{kpi_text}<br><br>"
+                 f"<span style='color:#D04A02;font-size:10px;'>● Click to drill down</span>")
         else:
             m=TIER2_MACRO.get(iso,{}); flag=m.get("flag","🌍"); region=m.get("region","Africa")
             tip=(f"<b style='font-size:13px;'>{flag} {name}</b><br>"
@@ -1617,219 +1505,256 @@ if "selected_country" not in st.session_state:
 # ══════════════════════════════════════════════════════════════════════════════
 with st.sidebar:
     st.markdown("""
-    <div style="padding:16px 4px 12px 4px;border-bottom:1px solid rgba(255,255,255,.12);">
-        <div style="font-family:'Inter';font-size:1.05rem;font-weight:700;color:white;letter-spacing:-.2px;">
-            Africa CV Intelligence
-        </div>
-        <div style="font-family:'Inter';font-size:.68rem;color:rgba(255,255,255,.4);margin-top:2px;">
-            Enterprise Market Analytics · v7.0
-        </div>
+<div style="padding:16px 4px 12px 4px;border-bottom:1px solid rgba(255,255,255,.12);">
+    <div style="font-family:'Inter';font-size:1.05rem;font-weight:700;color:white;letter-spacing:-.2px;">
+        Africa CV Intelligence
     </div>
-    """, unsafe_allow_html=True)
+    <div style="font-family:'Inter';font-size:.68rem;color:rgba(255,255,255,.4);margin-top:2px;">
+        Enterprise Market Analytics · v7.1
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
     st.markdown('<div class="sb-hdr">Core Markets (Tier 1)</div>', unsafe_allow_html=True)
-    for cname,cd in TIER1.items():
-        is_active=st.session_state.selected_country==cname
+    for cname, cd in TIER1.items():
+        is_active = st.session_state.selected_country == cname
         if is_active:
             st.markdown(f"""
-            <div style="padding:9px 13px;margin:3px 0;border-radius:6px;
-                        background:#D04A02;border:1px solid #D04A02;
-                        font-family:'Inter';font-size:.81rem;font-weight:700;color:white;">
-                {cd['flag']} &nbsp;{cname}
-                <span style="opacity:.7;font-size:.65rem;margin-left:6px;">● Active</span>
-            </div>""", unsafe_allow_html=True)
+<div style="padding:9px 13px;margin:3px 0;border-radius:6px;
+            background:#D04A02;border:1px solid #D04A02;
+            font-family:'Inter';font-size:.81rem;font-weight:700;color:white;">
+    {cd['flag']} &nbsp;{cname}
+    <span style="opacity:.7;font-size:.65rem;margin-left:6px;">● Active</span>
+</div>
+""", unsafe_allow_html=True)
         else:
-            if st.button(f"{cd['flag']}  {cname}",key=f"sb_{cname}",use_container_width=True):
-                st.session_state.selected_country=cname
+            if st.button(f"{cd['flag']}  {cname}", key=f"sb_{cname}", use_container_width=True):
+                st.session_state.selected_country = cname
                 st.cache_data.clear(); st.rerun()
+
     st.markdown('<div class="sb-hdr">Quick Reference</div>', unsafe_allow_html=True)
-    for label,url in [
-        ("📊 Stats SA — P7162","https://www.statssa.gov.za"),
-        ("🏭 NAAMSA","https://naamsa.co.za"),
-        ("🏛 Nigeria Customs","https://www.customs.gov.ng"),
-        ("🚂 Transnet IR","https://www.transnet.net/InvestorCentre"),
-        ("🌾 OCP Group","https://www.ocpgroup.ma"),
-        ("🌍 AfDB","https://www.afdb.org"),
+    for label, url in [
+        ("📊 Stats SA — P7162", "https://www.statssa.gov.za"),
+        ("🏭 NAAMSA",           "https://naamsa.co.za"),
+        ("🏛 Nigeria Customs",  "https://www.customs.gov.ng"),
+        ("🚂 Transnet IR",      "https://www.transnet.net/InvestorCentre"),
+        ("🌾 OCP Group",        "https://www.ocpgroup.ma"),
+        ("🌍 AfDB",             "https://www.afdb.org"),
         ("📰 The Africa Report","https://www.theafricareport.com"),
-        ("📊 Zawya Finance","https://www.zawya.com"),
+        ("📊 Zawya Finance",    "https://www.zawya.com"),
     ]:
-        st.markdown(f'<a class="sb-link" href="{url}" target="_blank">{label}</a>',unsafe_allow_html=True)
-    st.markdown("<br>",unsafe_allow_html=True)
-    if st.button("↺  Refresh Intelligence Feed",use_container_width=True,key="refresh"):
+        st.markdown(f'<a class="sb-link" href="{url}" target="_blank">{label}</a>', unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("↺  Refresh Intelligence Feed", use_container_width=True, key="refresh"):
         st.cache_data.clear(); st.rerun()
+
     st.markdown(f"""
-    <div style="font-family:'Inter';font-size:.58rem;color:rgba(255,255,255,.22);
-                text-align:center;margin-top:16px;line-height:2.1;">
-        Africa CV Intelligence v7.0<br>{datetime.now().strftime('%Y-%m-%d %H:%M')} · Internal use only
-    </div>""", unsafe_allow_html=True)
+<div style="font-family:'Inter';font-size:.58rem;color:rgba(255,255,255,.22);
+            text-align:center;margin-top:16px;line-height:2.1;">
+    Africa CV Intelligence v7.1<br>
+    {datetime.now().strftime('%Y-%m-%d %H:%M')} · Internal use only
+</div>
+""", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 15. PAGE HEADER
 # ══════════════════════════════════════════════════════════════════════════════
-h1,h2=st.columns([3,1])
+h1, h2 = st.columns([3,1])
 with h1:
     st.markdown("""
-    <div style="padding:18px 0 6px 0;">
-        <div style="font-family:'Inter';font-size:1.28rem;font-weight:700;color:#2D3142;letter-spacing:-.3px;">
-            Africa Commercial Vehicle Market Intelligence
-        </div>
-        <div style="font-family:'Inter';font-size:.78rem;color:#9BA3B2;margin-top:3px;">
-            54-nation coverage · Tier 1 deep analytics · Intelligence Triangulation · Analyst Due Diligence Framework
-        </div>
-    </div>""", unsafe_allow_html=True)
+<div style="padding:18px 0 6px 0;">
+    <div style="font-family:'Inter';font-size:1.28rem;font-weight:700;color:#2D3142;letter-spacing:-.3px;">
+        Africa Commercial Vehicle Market Intelligence
+    </div>
+    <div style="font-family:'Inter';font-size:.78rem;color:#9BA3B2;margin-top:3px;">
+        54-nation coverage · Tier 1 deep analytics · Intelligence Triangulation · Analyst Due Diligence Framework · v7.1
+    </div>
+</div>
+""", unsafe_allow_html=True)
 with h2:
     st.markdown(f"""
-    <div style="padding:18px 0 6px 0;text-align:right;">
-        <div style="font-family:'Inter';font-size:.7rem;color:#9BA3B2;">{datetime.now().strftime('%B %d, %Y')}</div>
-        <div style="font-family:'Inter';font-size:.74rem;color:#D04A02;font-weight:600;margin-top:2px;">● Live Intelligence Feed</div>
-    </div>""", unsafe_allow_html=True)
-st.markdown('<hr style="margin:0 0 18px 0;border-color:#E2E5EB;">',unsafe_allow_html=True)
+<div style="padding:18px 0 6px 0;text-align:right;">
+    <div style="font-family:'Inter';font-size:.7rem;color:#9BA3B2;">{datetime.now().strftime('%B %d, %Y')}</div>
+    <div style="font-family:'Inter';font-size:.74rem;color:#D04A02;font-weight:600;margin-top:2px;">
+        ● Live Intelligence Feed
+    </div>
+</div>
+""", unsafe_allow_html=True)
+st.markdown('<hr style="margin:0 0 18px 0;border-color:#E2E5EB;">', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 16. MAP SECTION
 # ══════════════════════════════════════════════════════════════════════════════
-sel=st.session_state.selected_country
-is_t1=sel in TIER1
-cdata=TIER1.get(sel,{})
-sel_iso=cdata.get("iso","") if is_t1 else next((iso for iso,name in ALL_AFRICA.items() if name==sel),"")
-macro=TIER2_MACRO.get(sel_iso,{})
+sel     = st.session_state.selected_country
+is_t1   = sel in TIER1
+cdata   = TIER1.get(sel, {})
+sel_iso = cdata.get("iso","") if is_t1 else next(
+    (iso for iso,name in ALL_AFRICA.items() if name==sel),"")
+macro   = TIER2_MACRO.get(sel_iso, {})
 
-map_col,snap_col=st.columns([5,2],gap="large")
+map_col, snap_col = st.columns([5,2], gap="large")
+
 with map_col:
     st.markdown("""
-    <div style="font-family:'Inter';font-size:.7rem;font-weight:700;letter-spacing:.8px;
-                text-transform:uppercase;color:#5A6070;margin-bottom:8px;">
-        Africa Strategic Market Map
-        <span style="font-weight:400;color:#9BA3B2;margin-left:8px;">
-        · Click any country to drill down · Orange = selected · Blue = Tier 1
-        </span>
-    </div>""", unsafe_allow_html=True)
-    map_fig=build_map(sel)
-    map_event=st.plotly_chart(map_fig,use_container_width=True,
+<div style="font-family:'Inter';font-size:.7rem;font-weight:700;letter-spacing:.8px;
+            text-transform:uppercase;color:#5A6070;margin-bottom:8px;">
+    Africa Strategic Market Map
+    <span style="font-weight:400;color:#9BA3B2;margin-left:8px;">
+        · Click any country · Orange = selected · Blue = Tier 1 coverage
+    </span>
+</div>
+""", unsafe_allow_html=True)
+
+    map_fig   = build_map(sel)
+    map_event = st.plotly_chart(
+        map_fig, use_container_width=True,
         config={"displayModeBar":False,"scrollZoom":False},
-        on_select="rerun",selection_mode="points",key="africa_map")
+        on_select="rerun", selection_mode="points", key="africa_map",
+    )
+
     if map_event and hasattr(map_event,"selection") and map_event.selection:
-        pts=map_event.selection.get("points",[])
+        pts = map_event.selection.get("points",[])
         if pts:
-            clicked_iso=pts[0].get("location","")
-            clicked_name=ISO_TO_NAME.get(clicked_iso,"")
-            if clicked_name and clicked_name!=st.session_state.selected_country:
-                st.session_state.selected_country=clicked_name
+            clicked_iso  = pts[0].get("location","")
+            clicked_name = ISO_TO_NAME.get(clicked_iso,"")
+            if clicked_name and clicked_name != st.session_state.selected_country:
+                st.session_state.selected_country = clicked_name
                 st.cache_data.clear(); st.rerun()
-    leg_cols=st.columns(len(TIER1))
-    for lc,(cname,cd) in zip(leg_cols,TIER1.items()):
-        active=cname==sel; color="#D04A02" if active else "#295BA5"
-        bg="rgba(208,74,2,0.08)" if active else "rgba(41,91,165,0.05)"
+
+    leg_cols = st.columns(len(TIER1))
+    for lc, (cname, cd) in zip(leg_cols, TIER1.items()):
+        active = cname == sel
+        color  = "#D04A02" if active else "#295BA5"
+        bg     = "rgba(208,74,2,0.08)" if active else "rgba(41,91,165,0.05)"
         with lc:
             st.markdown(f"""
-            <div style="text-align:center;padding:5px 3px;border-radius:6px;
-                        background:{bg};border:1px solid {'#D04A02' if active else '#E2E5EB'};">
-                <div style="font-size:.9rem;">{cd['flag']}</div>
-                <div style="font-family:'Inter';font-size:.6rem;font-weight:{'700' if active else '500'};
-                            color:{color};margin-top:1px;">{cname.split()[0]}</div>
-            </div>""", unsafe_allow_html=True)
+<div style="text-align:center;padding:5px 3px;border-radius:6px;
+            background:{bg};border:1px solid {'#D04A02' if active else '#E2E5EB'};">
+    <div style="font-size:.9rem;">{cd['flag']}</div>
+    <div style="font-family:'Inter';font-size:.6rem;font-weight:{'700' if active else '500'};
+                color:{color};margin-top:1px;">{cname.split()[0]}</div>
+</div>
+""", unsafe_allow_html=True)
 
 with snap_col:
-    flag=cdata.get("flag","🌍") if is_t1 else macro.get("flag","🌍")
-    region=cdata.get("region","Africa") if is_t1 else macro.get("region","Africa")
-    sources=cdata.get("sources",{}) if is_t1 else {}
-    main_src=list(sources.values())[0] if sources else ("","")
+    flag   = cdata.get("flag","🌍") if is_t1 else macro.get("flag","🌍")
+    region = cdata.get("region","Africa") if is_t1 else macro.get("region","Africa")
+    sources = cdata.get("sources",{}) if is_t1 else {}
+    main_src = list(sources.values())[0] if sources else ("","")
+
     st.markdown(f"""
-    <div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
-                padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-top:4px solid #D04A02;">
-        <div style="font-family:'Inter';font-size:.68rem;font-weight:700;letter-spacing:.8px;
-                    text-transform:uppercase;color:#9BA3B2;margin-bottom:10px;">Currently Viewing</div>
-        <div style="font-size:1.8rem;margin-bottom:3px;">{flag}</div>
-        <div style="font-family:'Inter';font-size:1.05rem;font-weight:700;color:#2D3142;">{sel}</div>
-        <div style="font-family:'Inter';font-size:.72rem;color:#9BA3B2;margin-bottom:12px;">{region}</div>
-        <div style="border-top:1px solid #F0F2F5;padding-top:12px;">
-    """, unsafe_allow_html=True)
+<div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
+            padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-top:4px solid #D04A02;">
+    <div style="font-family:'Inter';font-size:.68rem;font-weight:700;letter-spacing:.8px;
+                text-transform:uppercase;color:#9BA3B2;margin-bottom:10px;">Currently Viewing</div>
+    <div style="font-size:1.8rem;margin-bottom:3px;">{flag}</div>
+    <div style="font-family:'Inter';font-size:1.05rem;font-weight:700;color:#2D3142;">{sel}</div>
+    <div style="font-family:'Inter';font-size:.72rem;color:#9BA3B2;margin-bottom:12px;">{region}</div>
+    <div style="border-top:1px solid #F0F2F5;padding-top:12px;">
+""", unsafe_allow_html=True)
+
     if not is_t1:
-        st.markdown('<div class="fallback-badge">⚠ Tier 2 — General Coverage</div>',unsafe_allow_html=True)
-        for label,val in [("Est. GDP","${:,.1f}B".format(macro.get("gdp",0))),
-                           ("Road Network","{:,}k km".format(macro.get("roads",0))),
-                           ("Est. CV Imports","{:,} units/yr".format(macro.get("cv_imports",0)))]:
+        st.markdown('<div class="fallback-badge">⚠ Tier 2 — General Coverage</div>', unsafe_allow_html=True)
+        for label, val in [
+            ("Est. GDP",       "${:,.1f}B".format(macro.get("gdp",0))),
+            ("Road Network",   "{:,}k km".format(macro.get("roads",0))),
+            ("Est. CV Imports","{:,} units/yr".format(macro.get("cv_imports",0))),
+        ]:
             st.markdown(f"""
-            <div style="margin-bottom:10px;">
-                <div style="font-family:'Inter';font-size:.65rem;color:#9BA3B2;text-transform:uppercase;letter-spacing:.5px;">{label}</div>
-                <div style="font-family:'Inter';font-size:1.1rem;font-weight:700;color:#2D3142;">{val}</div>
-            </div>""", unsafe_allow_html=True)
+<div style="margin-bottom:10px;">
+    <div style="font-family:'Inter';font-size:.65rem;color:#9BA3B2;text-transform:uppercase;letter-spacing:.5px;">{label}</div>
+    <div style="font-family:'Inter';font-size:1.1rem;font-weight:700;color:#2D3142;">{val}</div>
+</div>
+""", unsafe_allow_html=True)
     else:
-        for key,(value,label,delta,_) in cdata["kpi"].items():
-            dc="#1A8C5B" if "+" in delta else "#D04A02" if "-" in delta else "#5A6070"
+        for key, (value, label, delta, _) in cdata["kpi"].items():
+            dc = "#1A8C5B" if "+" in delta else "#D04A02" if "-" in delta else "#5A6070"
             st.markdown(f"""
-            <div style="margin-bottom:11px;padding-bottom:11px;border-bottom:1px solid #F0F2F5;">
-                <div style="font-family:'Inter';font-size:.65rem;color:#9BA3B2;text-transform:uppercase;letter-spacing:.5px;">{label}</div>
-                <div style="font-family:'Inter';font-size:1.1rem;font-weight:700;color:#2D3142;margin:2px 0;">{value}</div>
-                <div style="font-family:'Inter';font-size:.68rem;color:{dc};font-weight:500;">{delta}</div>
-            </div>""", unsafe_allow_html=True)
+<div style="margin-bottom:11px;padding-bottom:11px;border-bottom:1px solid #F0F2F5;">
+    <div style="font-family:'Inter';font-size:.65rem;color:#9BA3B2;text-transform:uppercase;letter-spacing:.5px;">{label}</div>
+    <div style="font-family:'Inter';font-size:1.1rem;font-weight:700;color:#2D3142;margin:2px 0;">{value}</div>
+    <div style="font-family:'Inter';font-size:.68rem;color:{dc};font-weight:500;">{delta}</div>
+</div>
+""", unsafe_allow_html=True)
         if main_src[0]:
-            st.markdown(f'<div style="font-family:Inter;font-size:.62rem;color:#295BA5;margin-top:4px;">📌 <a href="{main_src[1]}" target="_blank" style="color:#295BA5;">{main_src[0]}</a></div>',unsafe_allow_html=True)
-    st.markdown("</div></div>",unsafe_allow_html=True)
+            st.markdown(
+                f'<div style="font-family:Inter;font-size:.62rem;color:#295BA5;margin-top:4px;">'
+                f'📌 <a href="{main_src[1]}" target="_blank" style="color:#295BA5;">{main_src[0]}</a></div>',
+                unsafe_allow_html=True)
+    st.markdown("</div></div>", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 17. COUNTRY DASHBOARD TABS
 # ══════════════════════════════════════════════════════════════════════════════
-flag_display=cdata.get("flag",macro.get("flag","🌍")) if is_t1 else macro.get("flag","🌍")
-tri_count=len(cdata.get("tri_keys",[])) if is_t1 else 0
+flag_display = cdata.get("flag", macro.get("flag","🌍")) if is_t1 else macro.get("flag","🌍")
+tri_count    = len(cdata.get("tri_keys",[])) if is_t1 else 0
+
 st.markdown(f"""
 <div class="section-hdr">
     <div class="section-bar"></div>
     <div class="section-title">{flag_display} &nbsp;{sel} — Country Dashboard</div>
     <div class="section-sub">
         {"Full Tier 1 · Stats SA P7162 · NAAMSA" if sel=="South Africa" else
-         f"Full Tier 1 analytics · {tri_count} Triangulation module{'s' if tri_count!=1 else ''}" if is_t1 else
+         f"Full Tier 1 analytics · {tri_count} Due Diligence module{'s' if tri_count!=1 else ''}" if is_t1 else
          "General coverage — live news + macro indicators"}
     </div>
-</div>""", unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
-tab_market,tab_policy,tab_news=st.tabs([
+tab_market, tab_policy, tab_news = st.tabs([
     "📊  Market Analytics",
     "📋  Policy & Market Access",
     "📡  Intelligence Feed",
 ])
 
+# ── TAB 1 ─────────────────────────────────────────────────────────────────────
 with tab_market:
     if not is_t1:
         st.info(f"**{sel}** is a Tier 2 market. Full analytics available for 8 Tier 1 core markets.",icon="ℹ️")
-        m1,m2,m3=st.columns(3)
-        with m1: st.metric("Est. GDP","${:,.1f}B".format(macro.get("gdp",0)),help="IMF WEO estimate")
-        with m2: st.metric("Road Network","{:,}k km".format(macro.get("roads",0)),help="AfDB infrastructure data")
-        with m3: st.metric("Est. CV Imports","{:,} units/yr".format(macro.get("cv_imports",0)),help="Regional trade estimate")
+        m1, m2, m3 = st.columns(3)
+        with m1: st.metric("Est. GDP",        "${:,.1f}B".format(macro.get("gdp",0)),  help="IMF WEO estimate")
+        with m2: st.metric("Road Network",    "{:,}k km".format(macro.get("roads",0)), help="AfDB infrastructure data")
+        with m3: st.metric("Est. CV Imports", "{:,} units/yr".format(macro.get("cv_imports",0)), help="Regional trade estimate")
         st.caption("Source: [AfDB](https://www.afdb.org) · [IMF WEO](https://www.imf.org) · Indicative estimates.")
-    elif sel=="South Africa": render_south_africa(cdata)
-    elif sel=="Nigeria":      render_nigeria(cdata)
-    elif sel=="Morocco":      render_morocco(cdata)
-    elif sel=="Ethiopia":     render_ethiopia(cdata)
-    else:                     render_generic(sel,cdata)
+    elif sel == "South Africa": render_south_africa(cdata)
+    elif sel == "Nigeria":      render_nigeria(cdata)
+    elif sel == "Morocco":      render_morocco(cdata)
+    elif sel == "Ethiopia":     render_ethiopia(cdata)
+    else:                       render_generic(sel, cdata)
 
+# ── TAB 2 ─────────────────────────────────────────────────────────────────────
 with tab_policy:
     if not is_t1:
-        st.info(f"Detailed policy brief for **{sel}** not yet available. Showing AfCFTA general framework.",icon="📋")
+        st.info(f"Detailed policy brief for **{sel}** not yet available. Showing AfCFTA general framework.", icon="📋")
         st.markdown("""
-        <div class="pol-card">
-            <div class="pol-card-title">🌍 African Continental Free Trade Area (AfCFTA)</div>
-            <p>Member states are progressively eliminating tariffs on 90% of goods.
-            Commercial vehicles are classified as sensitive goods with 10–15 year phase-out timelines.
-            Check the AfCFTA Secretariat for country-specific schedules.</p>
-        </div>""", unsafe_allow_html=True)
+<div class="pol-card">
+    <div class="pol-card-title">🌍 African Continental Free Trade Area (AfCFTA)</div>
+    <p>Member states are progressively eliminating tariffs on 90% of goods. Commercial vehicles
+    are classified as sensitive goods with 10–15 year phase-out timelines. Check the AfCFTA
+    Secretariat for country-specific schedules.</p>
+</div>
+""", unsafe_allow_html=True)
         st.caption("Source: [AfCFTA Secretariat](https://au-afcfta.org) · [AfDB](https://www.afdb.org)")
     else:
-        p=cdata["policy"]
-        src_c=cdata["sources"].get("customs",("",""))
-        src_m=cdata["sources"].get("market",("",""))
-        src_t=cdata["sources"].get("trade",("",""))
-        pl,pr=st.columns(2,gap="large")
+        p       = cdata["policy"]
+        src_c   = cdata["sources"].get("customs",("",""))
+        src_m   = cdata["sources"].get("market",("",""))
+        src_t   = cdata["sources"].get("trade",("",""))
+
+        pl, pr  = st.columns(2, gap="large")
         with pl:
-            st.markdown(f'<div class="pol-card"><div class="pol-card-title">🏷 Tariff & Import Structure</div><p>{p["tariff"]}</p></div>',unsafe_allow_html=True)
+            st.markdown(f'<div class="pol-card"><div class="pol-card-title">🏷 Tariff & Import Structure</div><p>{p["tariff"]}</p></div>', unsafe_allow_html=True)
             st.caption(f"Source: [{src_c[0]}]({src_c[1]})")
-            st.markdown(f'<div class="pol-card ok"><div class="pol-card-title">📋 Certification & Homologation</div><p>{p["certification"]}</p></div>',unsafe_allow_html=True)
+            st.markdown(f'<div class="pol-card ok"><div class="pol-card-title">📋 Certification & Homologation</div><p>{p["certification"]}</p></div>', unsafe_allow_html=True)
             st.caption(f"Source: [{src_m[0]}]({src_m[1]})")
         with pr:
-            st.markdown(f'<div class="pol-card"><div class="pol-card-title">🏗 Key Buyers & Procurement Bodies</div><p>{p["key_buyers"]}</p></div>',unsafe_allow_html=True)
+            st.markdown(f'<div class="pol-card"><div class="pol-card-title">🏗 Key Buyers & Procurement Bodies</div><p>{p["key_buyers"]}</p></div>', unsafe_allow_html=True)
             st.caption(f"Source: [{src_t[0]}]({src_t[1]})")
-            st.markdown(f'<div class="pol-card warn"><div class="pol-card-title">⚠ Risk Factors & Operational Considerations</div><p>{p["risk"]}</p></div>',unsafe_allow_html=True)
+            st.markdown(f'<div class="pol-card warn"><div class="pol-card-title">⚠ Risk Factors & Operational Considerations</div><p>{p["risk"]}</p></div>', unsafe_allow_html=True)
+
         _sdiv("Market Entry Assessment Scorecard")
-        all_sc={
+        all_sc = {
             "Nigeria":      {"Market Size":9,"EV Readiness":7,"Tariff Advantage":9,"Regulatory Ease":5,"Growth Momentum":7},
             "South Africa": {"Market Size":8,"EV Readiness":5,"Tariff Advantage":4,"Regulatory Ease":8,"Growth Momentum":4},
             "Morocco":      {"Market Size":6,"EV Readiness":6,"Tariff Advantage":8,"Regulatory Ease":8,"Growth Momentum":8},
@@ -1839,91 +1764,107 @@ with tab_policy:
             "Algeria":      {"Market Size":6,"EV Readiness":2,"Tariff Advantage":4,"Regulatory Ease":3,"Growth Momentum":5},
             "Tunisia":      {"Market Size":4,"EV Readiness":5,"Tariff Advantage":7,"Regulatory Ease":7,"Growth Momentum":4},
         }
-        scores=all_sc.get(sel,{d:5 for d in ["Market Size","EV Readiness","Tariff Advantage","Regulatory Ease","Growth Momentum"]})
-        for col,(dim,score) in zip(st.columns(5),scores.items()):
-            color="#D04A02" if score>=8 else "#295BA5" if score>=6 else "#9BA3B2"
+        scores = all_sc.get(sel, {d:5 for d in ["Market Size","EV Readiness","Tariff Advantage","Regulatory Ease","Growth Momentum"]})
+        for col, (dim, score) in zip(st.columns(5), scores.items()):
+            color = "#D04A02" if score>=8 else "#295BA5" if score>=6 else "#9BA3B2"
             with col:
                 st.markdown(f"""
-                <div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
-                            padding:14px 12px;box-shadow:0 1px 4px rgba(0,0,0,.06);text-align:center;">
-                    <div style="font-family:'Inter';font-size:.6rem;font-weight:700;text-transform:uppercase;
-                                letter-spacing:.6px;color:#9BA3B2;margin-bottom:7px;">{dim}</div>
-                    <div style="font-family:'Inter';font-size:1.5rem;font-weight:700;color:{color};">
-                        {score}<span style="font-size:.72rem;color:#9BA3B2;">/10</span></div>
-                    <div style="background:#F0F2F5;border-radius:3px;height:4px;margin-top:8px;">
-                        <div style="background:{color};width:{score*10}%;height:4px;border-radius:3px;"></div>
-                    </div>
-                </div>""", unsafe_allow_html=True)
+<div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
+            padding:14px 12px;box-shadow:0 1px 4px rgba(0,0,0,.06);text-align:center;">
+    <div style="font-family:'Inter';font-size:.6rem;font-weight:700;text-transform:uppercase;
+                letter-spacing:.6px;color:#9BA3B2;margin-bottom:7px;">{dim}</div>
+    <div style="font-family:'Inter';font-size:1.5rem;font-weight:700;color:{color};">
+        {score}<span style="font-size:.72rem;color:#9BA3B2;">/10</span></div>
+    <div style="background:#F0F2F5;border-radius:3px;height:4px;margin-top:8px;">
+        <div style="background:{color};width:{score*10}%;height:4px;border-radius:3px;"></div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
         st.caption(f"Source: [{src_t[0]}]({src_t[1]}) · Assessment based on simulated market intelligence.")
 
+# ── TAB 3 ─────────────────────────────────────────────────────────────────────
 with tab_news:
-    news_query=cdata.get("news_query","") if is_t1 else f"{sel} transport logistics commercial vehicle"
+    news_query = cdata.get("news_query","") if is_t1 else f"{sel} transport logistics commercial vehicle"
+
     st.markdown(f"""
-    <div style="background:#F8F9FB;border:1px solid #E2E5EB;border-radius:8px;
-                padding:11px 16px;margin-bottom:18px;font-family:'Inter';font-size:.78rem;color:#5A6070;line-height:1.7;">
-        <strong style="color:#2D3142;">Intelligence parameters:</strong>
-        &nbsp;Focus: <strong style="color:#D04A02;">{sel}</strong>
-        &nbsp;·&nbsp; Sources: Reuters · Bloomberg · FT · Engineering News · BusinessDay · Zawya · Africa Report
-        &nbsp;·&nbsp; Window: <strong>Last 30 days</strong>
-        &nbsp;·&nbsp; Wide-net fetch → authority filter → fallback guarantee
-        {"&nbsp;·&nbsp; <span style='color:#D04A02;'>⚠ Tier 2 — general coverage</span>" if not is_t1 else ""}
-    </div>""", unsafe_allow_html=True)
-    nc,pc=st.columns([3,1],gap="large")
+<div style="background:#F8F9FB;border:1px solid #E2E5EB;border-radius:8px;
+            padding:11px 16px;margin-bottom:18px;font-family:'Inter';
+            font-size:.78rem;color:#5A6070;line-height:1.7;">
+    <strong style="color:#2D3142;">Intelligence parameters:</strong>
+    &nbsp;Focus: <strong style="color:#D04A02;">{sel}</strong>
+    &nbsp;·&nbsp; Sources: Reuters · Bloomberg · FT · Engineering News · BusinessDay · Zawya · Africa Report
+    &nbsp;·&nbsp; Window: <strong>Last 30 days</strong>
+    &nbsp;·&nbsp; Wide-net fetch → authority filter → fallback guarantee
+    {"&nbsp;·&nbsp; <span style='color:#D04A02;'>⚠ Tier 2 — general coverage</span>" if not is_t1 else ""}
+</div>
+""", unsafe_allow_html=True)
+
+    nc, pc = st.columns([3,1], gap="large")
     with nc:
-        render_news_panel(news_query,sel)
+        render_news_panel(news_query, sel)
     with pc:
         st.markdown("""
-        <div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
-                    padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
-            <div style="font-family:'Inter';font-size:.68rem;font-weight:700;text-transform:uppercase;
-                        letter-spacing:.6px;color:#9BA3B2;margin-bottom:12px;">Fetch Strategy</div>""",
-        unsafe_allow_html=True)
-        for label,val in [("Pass 1","Broad query + when:30d"),("Pass 2","Authority domain filter"),
-                           ("Pass 3","All recent results"),("Pass 4","90-day fallback"),("Cache TTL","30 min")]:
+<div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
+            padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+    <div style="font-family:'Inter';font-size:.68rem;font-weight:700;text-transform:uppercase;
+                letter-spacing:.6px;color:#9BA3B2;margin-bottom:12px;">Fetch Strategy</div>
+""", unsafe_allow_html=True)
+        for label, val in [
+            ("Pass 1","Broad query + when:30d"),
+            ("Pass 2","Authority domain filter"),
+            ("Pass 3","All recent results"),
+            ("Pass 4","90-day fallback"),
+            ("Cache TTL","30 minutes"),
+        ]:
             st.markdown(f"""
-            <div style="margin-bottom:9px;">
-                <div style="font-family:'Inter';font-size:.62rem;color:#9BA3B2;">{label}</div>
-                <div style="font-family:'Inter';font-size:.78rem;font-weight:500;color:#2D3142;">{val}</div>
-            </div>""", unsafe_allow_html=True)
+<div style="margin-bottom:9px;">
+    <div style="font-family:'Inter';font-size:.62rem;color:#9BA3B2;">{label}</div>
+    <div style="font-family:'Inter';font-size:.78rem;font-weight:500;color:#2D3142;">{val}</div>
+</div>
+""", unsafe_allow_html=True)
         st.markdown(f"""
-            <div style="margin-top:8px;padding-top:8px;border-top:1px solid #F0F2F5;">
-                <div style="font-family:'Inter';font-size:.62rem;color:#9BA3B2;margin-bottom:4px;">Keywords</div>
-                <div style="font-family:'Inter';font-size:.72rem;color:#5A6070;line-height:1.6;
-                            word-break:break-word;background:#F8F9FB;border-radius:5px;padding:7px 9px;">
-                    {news_query}
-                </div>
-            </div>
-        </div>""", unsafe_allow_html=True)
-        st.markdown("<br>",unsafe_allow_html=True)
+<div style="margin-top:8px;padding-top:8px;border-top:1px solid #F0F2F5;">
+    <div style="font-family:'Inter';font-size:.62rem;color:#9BA3B2;margin-bottom:4px;">Keywords</div>
+    <div style="font-family:'Inter';font-size:.72rem;color:#5A6070;line-height:1.6;
+                word-break:break-word;background:#F8F9FB;border-radius:5px;padding:7px 9px;">
+        {news_query}
+    </div>
+</div>
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
         st.markdown("""
-        <div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
-                    padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
-            <div style="font-family:'Inter';font-size:.68rem;font-weight:700;text-transform:uppercase;
-                        letter-spacing:.6px;color:#9BA3B2;margin-bottom:10px;">Authority Domains</div>""",
-        unsafe_allow_html=True)
-        for src,url in [("Reuters","https://reuters.com"),("Bloomberg","https://bloomberg.com"),
-                         ("Financial Times","https://ft.com"),("Engineering News ZA","https://engineeringnews.co.za"),
-                         ("BusinessDay NG","https://businessday.ng"),("Zawya","https://zawya.com"),
-                         ("The Africa Report","https://theafricareport.com"),("AfDB","https://afdb.org")]:
+<div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
+            padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
+    <div style="font-family:'Inter';font-size:.68rem;font-weight:700;text-transform:uppercase;
+                letter-spacing:.6px;color:#9BA3B2;margin-bottom:10px;">Authority Domains</div>
+""", unsafe_allow_html=True)
+        for src, url in [
+            ("Reuters","https://reuters.com"),("Bloomberg","https://bloomberg.com"),
+            ("Financial Times","https://ft.com"),("Engineering News ZA","https://engineeringnews.co.za"),
+            ("BusinessDay NG","https://businessday.ng"),("Zawya","https://zawya.com"),
+            ("The Africa Report","https://theafricareport.com"),("AfDB","https://afdb.org"),
+        ]:
             st.markdown(f"""
-            <div style="font-family:'Inter';font-size:.72rem;color:#5A6070;
-                        padding:4px 0;border-bottom:1px solid #F4F5F7;">
-                <span style="display:inline-block;width:6px;height:6px;border-radius:50%;
-                             background:#1A8C5B;margin-right:6px;"></span>
-                <a href="https://{url}" target="_blank" style="color:#295BA5;text-decoration:none;">{src}</a>
-            </div>""", unsafe_allow_html=True)
-        st.markdown("</div>",unsafe_allow_html=True)
+<div style="font-family:'Inter';font-size:.72rem;color:#5A6070;padding:4px 0;border-bottom:1px solid #F4F5F7;">
+    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;
+                 background:#1A8C5B;margin-right:6px;"></span>
+    <a href="https://{url}" target="_blank" style="color:#295BA5;text-decoration:none;">{src}</a>
+</div>
+""", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 18. FOOTER
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown("<br>",unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 st.markdown(f"""
 <div style="border-top:1px solid #E2E5EB;padding-top:14px;
             font-family:'Inter';font-size:.68rem;color:#9BA3B2;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
         <div>
-            <strong style="color:#5A6070;">Africa CV Market Intelligence Platform v7.0</strong>
+            <strong style="color:#5A6070;">Africa CV Market Intelligence Platform v7.1</strong>
             &nbsp;·&nbsp; Internal strategic use only &nbsp;·&nbsp; Simulated data for illustrative purposes
             &nbsp;·&nbsp; Intelligence Triangulation Framework · 54-nation coverage
         </div>
@@ -1932,4 +1873,5 @@ st.markdown(f"""
             &nbsp;·&nbsp; {datetime.now().strftime('%Y-%m-%d %H:%M')} UTC
         </div>
     </div>
-</div>""", unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
