@@ -1,7 +1,7 @@
 """
 Africa Commercial Vehicle Market Intelligence Platform
-Enterprise BI Engine v9.0
-McKinsey-grade · Rwanda EAC Sandbox · NAAMSA 2025 · Tunisia TCO · ZA 150% Tax Pivot
+Enterprise BI Engine v10.0
+VP Commercial Analysis Edition — TCO Break-even · Segment Heatmap · Operational Risk Radar
 """
 
 import streamlit as st
@@ -163,7 +163,6 @@ def _apply(fig, ov=None):
         layout.update(ov)
     fig.update_layout(**layout)
     return fig
-
 # ══════════════════════════════════════════════════════════════════════════════
 # 3. TRIANGULATION DATA
 # ══════════════════════════════════════════════════════════════════════════════
@@ -173,18 +172,18 @@ TRIANGULATION = {
         "claim": "Rwanda's total CV market of ~3,200 units/year is too small to justify meaningful commercial investment in fleet sales or local distribution infrastructure for a Chinese commercial vehicle manufacturer.",
         "cross_validation_items": [
             "**[Fact]** Rwanda Development Board (RDB) confirmed: EV commercial vehicles enjoy **0% import duty, 0% VAT, 0% excise tax** — the most comprehensive EV fiscal exemption package in Sub-Saharan Africa (RDB Investment Incentives 2024).",
-            "**[Fact]** Rwanda's corporate income tax for qualifying EV/clean energy enterprises is **15%** (vs standard 30%) under the Special Economic Zone and Priority Sector incentive regime (RRA — Rwanda Revenue Authority, 2024).",
-            "**[Fact]** RURA (Rwanda Utilities Regulatory Authority) has established a dedicated **e-mobility electricity tariff** of RWF 115/kWh for commercial charging operators — approximately **14× cheaper than diesel-equivalent energy cost** at RWF 1,600/litre pump price.",
-            "**[Fact]** Kigali's grid reliability is among Africa's highest: **<2% outage rate** (REG — Rwanda Energy Group), powered predominantly by hydro, methane, and solar — structurally unlike load-shedding-prone South Africa.",
-            "**[Structural logic]** Rwanda is the **EAC headquarters hub**: AfDB East Africa Regional Office, AU Development Agency (AUDA-NEPAD), and 47+ international organisations are based in Kigali. A flagship EV fleet deployment in Kigali is witnessed by the entire EAC decision-making community.",
-            "**[Market trajectory]** Rwanda's 2035 target to transition 100% of public transport and 70% of commercial vehicles to EV (RURA Green Mobility Strategy 2023) creates a **policy-locked demand pipeline** — not cyclical sales.",
-            "**[Counter-evidence]** Absolute unit volume will remain low (<5,000 CVs/yr through 2030). B2C consumer EV adoption is negligible. Infrastructure outside Kigali (Northern and Southern Provinces) is limited.",
+            "**[Fact]** Rwanda's corporate income tax for qualifying EV/clean energy enterprises is **15%** (vs standard 30%) under the Special Economic Zone and Priority Sector incentive regime (RRA, 2024).",
+            "**[Fact]** RURA has established a dedicated **e-mobility electricity tariff** of RWF 115/kWh — approximately **14× cheaper** than diesel-equivalent energy cost.",
+            "**[Fact]** Kigali's grid reliability is among Africa's highest: **<2% outage rate** (REG), powered predominantly by hydro, methane, and solar.",
+            "**[Structural logic]** Rwanda is the **EAC headquarters hub**: AfDB East Africa Regional Office, AUDA-NEPAD, and 47+ international organisations are based in Kigali.",
+            "**[Market trajectory]** Rwanda's 2035 target to transition 100% of public transport and 70% of commercial vehicles to EV creates a **policy-locked demand pipeline**.",
+            "**[Counter-evidence]** Absolute unit volume will remain low (<5,000 CVs/yr through 2030). Infrastructure outside Kigali is limited.",
         ],
-        "verdict": "Rwanda is **not a volume market** — it is a **strategic sandbox and EAC showcase**. The correct investment thesis is: deploy 20–50 EV commercial units in Kigali via G2G (Government-to-Government) bus programmes and B2B city logistics partnerships, generate verifiable performance data under Africa's most stable grid, and leverage that proof-of-concept to unlock EAC-wide fleet tenders in Kenya, Tanzania, and Uganda. The cost of entry is low; the strategic dividend is outsized.",
+        "verdict": "Rwanda is **not a volume market** — it is a **strategic sandbox and EAC showcase**. Deploy 20–50 EV commercial units in Kigali via G2G bus programmes and B2B city logistics, generate verifiable performance data, and leverage that proof-of-concept to unlock EAC-wide fleet tenders.",
         "verdict_type": "success",
         "confidence_items": [
-            ("🟢 Verified Fact", "0% import duty / 0% VAT for EV CVs (RDB Investment Code 2024)"),
-            ("🟢 Verified Fact", "15% CIT for qualifying clean energy enterprises (RRA 2024)"),
+            ("🟢 Verified Fact", "0% import duty / 0% VAT for EV CVs (RDB 2024)"),
+            ("🟢 Verified Fact", "15% CIT for qualifying clean energy enterprises"),
             ("🟢 Verified Fact", "RURA e-mobility tariff RWF 115/kWh vs RWF 1,600/L diesel"),
             ("🟢 Verified Fact", "<2% grid outage rate (REG Annual Report 2024)"),
             ("🟡 Plausible Estimate", "Kigali EV deployment as EAC-wide proof-of-concept accelerator"),
@@ -196,13 +195,13 @@ TRIANGULATION = {
         "title": "Rwanda as EAC Gateway — Does the Regulatory Advantage Transfer to Neighbouring Markets?",
         "claim": "A Rwanda-registered EV fleet operation automatically grants preferential access to Kenya, Uganda, and Tanzania markets under the EAC Common Market Protocol.",
         "cross_validation_items": [
-            "**[Fact]** The EAC Common Market Protocol (2010) establishes free movement of goods, services, and capital among Partner States — but vehicle *registration* and *homologation* requirements remain national, not harmonised.",
-            "**[Fact]** Kenya Bureau of Standards (KEBS) PVoC (Pre-Export Verification of Conformity) is required for all vehicles entering Kenya, regardless of EAC origin country.",
-            "**[Fact]** Tanzania Bureau of Standards (TBS) maintains separate type-approval requirements. An EV commercially registered in Rwanda does not receive automatic TBS homologation.",
-            "**[Nuance]** EAC Customs Union eliminates *tariffs* on goods moving between Partner States — but technical standards, axle load regulations, and registration requirements remain independently enforced.",
-            "**[Strategic reality]** The gateway value is **reputational and relational**, not regulatory: a Kigali proof-of-concept generates case studies, operator references, and RDB endorsement letters that carry significant weight in EAC government procurement evaluations.",
+            "**[Fact]** The EAC Common Market Protocol establishes free movement of goods — but vehicle registration and homologation requirements remain national, not harmonised.",
+            "**[Fact]** KEBS PVoC is required for all vehicles entering Kenya, regardless of EAC origin country.",
+            "**[Fact]** TBS maintains separate type-approval requirements; Rwanda registration does not grant automatic TBS homologation.",
+            "**[Nuance]** EAC Customs Union eliminates tariffs between Partner States — but technical standards remain independently enforced.",
+            "**[Strategic reality]** The gateway value is **reputational and relational**: a Kigali proof-of-concept generates case studies and RDB endorsement letters with significant weight in EAC procurement evaluations.",
         ],
-        "verdict": "The EAC gateway thesis is **partially valid**: tariff elimination is real and confirmed, but technical standards barriers in Kenya and Tanzania require separate homologation investment. The strategic value of Rwanda entry is primarily **proof-of-concept documentation and G2G relationship capital**, not automatic regulatory passthrough. Manufacturers should budget for KEBS and TBS type-approval as part of EAC expansion planning.",
+        "verdict": "The EAC gateway thesis is **partially valid**: tariff elimination is confirmed, but technical standards barriers in Kenya and Tanzania require separate homologation investment. The strategic value is primarily proof-of-concept documentation, not automatic regulatory passthrough.",
         "verdict_type": "warning",
         "confidence_items": [
             ("🟢 Verified Fact", "EAC Customs Union: zero tariffs between Partner States"),
@@ -215,13 +214,13 @@ TRIANGULATION = {
         "title": "OCP Transport Modal & Road HCV Procurement Potential",
         "claim": "Industry commentators cite OCP Group as a flagship anchor client with annual HCV procurement of **800–1,000 units/year**, driven by the Khouribga–Jorf Lasfar phosphate corridor.",
         "cross_validation_items": [
-            "**[Fact]** OCP operates a dedicated **187 km slurry pipeline** (Khouribga → Jorf Lasfar) — structurally inaccessible to road HCVs (OCP Integrated Annual Report 2023).",
-            "**[Fact]** OCP also operates the **Benguerir–Jorf Lasfar rail corridor** for phosphate concentrate.",
-            "**[Structural logic]** Pipeline and rail serve only the *primary ore trunk*. ~60 contractor companies perform auxiliary logistics — *structurally road-dependent*.",
+            "**[Fact]** OCP operates a dedicated **187 km slurry pipeline** — structurally inaccessible to road HCVs (OCP Integrated Annual Report 2023).",
+            "**[Fact]** OCP also operates the Benguerir–Jorf Lasfar rail corridor for phosphate concentrate.",
+            "**[Structural logic]** Pipeline and rail serve only the primary ore trunk. ~60 contractor companies perform auxiliary logistics — structurally road-dependent.",
             "**[Counter-evidence]** No publicly accessible OCP tender database confirms a recurring 800-unit annual HCV figure.",
-            "**[Supportive proxy]** OCP 2023 capex of USD 2.1 billion includes mining fleet renewal — a portion attributable to road HCVs.",
+            "**[Supportive proxy]** OCP 2023 capex of USD 2.1 billion includes mining fleet renewal.",
         ],
-        "verdict": "The slurry pipeline dominates primary ore haulage. The contractor ecosystem represents a *real and recurring* HCV demand segment. The 800 units/year figure is a bottom-up estimate, not a verified tender disclosure. Prioritise direct engagement with OCP Procurement & tier-1 contractors.",
+        "verdict": "The slurry pipeline dominates primary ore haulage. The contractor ecosystem represents a real and recurring HCV demand segment. The 800 units/year figure is a bottom-up estimate, not a verified tender disclosure.",
         "verdict_type": "warning",
         "confidence_items": [
             ("🟢 Verified Fact", "Pipeline dominates primary ore trunk (OCP Annual Report)"),
@@ -236,11 +235,11 @@ TRIANGULATION = {
         "claim": "Morocco's EU Association Agreement confers a **2.5% CBU import tariff** — cited as the lowest in Africa and a decisive advantage for EU-origin vehicles.",
         "cross_validation_items": [
             "**[Fact]** EU–Morocco Association Agreement sets preferential tariff rates confirmed by Direction Générale des Douanes.",
-            "**[Complication]** The 2.5% applies to vehicles of EU *origin* (Rules of Origin). Chinese-built trucks face standard MFN rates (~25%) unless locally assembled.",
+            "**[Complication]** The 2.5% applies to vehicles of EU origin (Rules of Origin). Chinese-built trucks face standard MFN rates (~25%) unless locally assembled.",
             "**[Strategic implication]** Structurally advantages European brands. Chinese players must pursue CKD assembly or third-country EU-FTA routing.",
             "**[Risk]** UK–Morocco post-Brexit continuity agreement is periodically renegotiated.",
         ],
-        "verdict": "The 2.5% tariff is *origin-conditioned*, not a blanket benefit. Chinese CBU entrants face a de facto ~22.5pp tariff disadvantage. The commercially rational China entry strategy is local CKD assembly or a Morocco-based JV.",
+        "verdict": "The 2.5% tariff is origin-conditioned, not a blanket benefit. Chinese CBU entrants face a de facto ~22.5pp tariff disadvantage. The rational China entry strategy is local CKD assembly or a Morocco-based JV.",
         "verdict_type": "warning",
         "confidence_items": [
             ("🟢 Verified Fact", "2.5% tariff for EU-origin vehicles (Douane.gov.ma)"),
@@ -259,7 +258,7 @@ TRIANGULATION = {
             "**[Critical counter-risk]** Durban Container Terminal concession (initiated 2023) could restore rail competitiveness within 5–8 years.",
             "**[Additional risk]** Private rail operators (Grindrod, Traxtion) entering under open-access policy.",
         ],
-        "verdict": "The Transnet modal shift is *empirically well-supported* by multiple independent data sources. However, consensus *systematically underweights* rail recovery risk. Stress-test models against a 30–40% rail volume recovery scenario within 5 years.",
+        "verdict": "The Transnet modal shift is empirically well-supported by multiple independent data sources. However, consensus systematically underweights rail recovery risk. Stress-test models against a 30–40% rail volume recovery scenario within 5 years.",
         "verdict_type": "warning",
         "confidence_items": [
             ("🟢 Verified Fact", "Transnet volume collapse 228→122 Mt (Transnet Annual Reports)"),
@@ -275,10 +274,10 @@ TRIANGULATION = {
         "cross_validation_items": [
             "**[Fact]** Eskom implemented load-shedding for **335 days in 2023** (Eskom operational reports).",
             "**[Fact]** National EV Strategy (SAIT, 2023) acknowledges grid reliability as primary EV barrier.",
-            "**[Nuance]** Large fleet operators deploy *behind-the-meter solar + battery* systems decoupling depot charging from Eskom grid.",
+            "**[Nuance]** Large fleet operators deploy behind-the-meter solar + battery systems decoupling depot charging from Eskom grid.",
             "**[Counter-trend]** Eskom FY2025 data shows load-shedding days declining sharply as Kusile Unit 5 and private IPPs come online.",
         ],
-        "verdict": "Load-shedding is *real but potentially transient*. The 5–10 year delay thesis is overstated for *captive depot fleets* with solar/battery backup. EV strategy should be segmented: depot distribution fleets viable now; long-haul intercity EV remains a 2028+ proposition.",
+        "verdict": "Load-shedding is real but potentially transient. The 5–10 year delay thesis is overstated for captive depot fleets with solar/battery backup. EV strategy should be segmented: depot distribution fleets viable now; long-haul intercity EV remains a 2028+ proposition.",
         "verdict_type": "warning",
         "confidence_items": [
             ("🟢 Verified Fact", "335 load-shedding days in 2023 (Eskom reports)"),
@@ -291,17 +290,17 @@ TRIANGULATION = {
         "title": "2026 New Energy Manufacturing — 150% Tax Allowance Strategic Pivot",
         "claim": "South Africa's 2026 Budget introduced a **150% accelerated tax deduction** on qualifying NEV manufacturing investment, effective 1 March 2026, capped at R500 million in Year 1.",
         "cross_validation_items": [
-            "**[Fact]** National Treasury 2026 Budget Review confirmed Section 12V expansion: 150% first-year deduction on qualifying EV/NEV manufacturing capex, R500m annual cap (SARS Draft Taxation Laws Amendment Bill 2026).",
-            "**[Fact]** APDP Phase 2 continues to issue **Production Rebate Certificates (PRCs)** — a parallel, stackable incentive allowing import duty offsets on locally assembled vehicles.",
-            "**[Structural implication]** On R500m qualifying investment, 150% deduction generates ~R210m tax saving vs ~R140m under standard deduction — **net R70m incremental benefit per cycle**.",
-            "**[Strategic consequence]** Pure CBU importers cannot access the 150% deduction or APDP PRCs. Only entities with **qualifying local assembly** capture both incentive streams.",
+            "**[Fact]** National Treasury 2026 Budget Review confirmed Section 12V expansion: 150% first-year deduction on qualifying EV/NEV manufacturing capex, R500m annual cap.",
+            "**[Fact]** APDP Phase 2 continues to issue Production Rebate Certificates (PRCs) — a parallel, stackable incentive.",
+            "**[Structural implication]** On R500m qualifying investment, 150% deduction generates ~R210m tax saving vs ~R140m under standard deduction — net R70m incremental benefit.",
+            "**[Strategic consequence]** Pure CBU importers cannot access the 150% deduction or APDP PRCs.",
             "**[Market validation]** Ford, Toyota, and Isuzu cited the combined 150%/APDP stack as primary driver of 2026–2028 EV localization commitments (Reuters, March 2026).",
         ],
-        "verdict": "Pure CBU import will structurally lose competitiveness against locally-assembled competitors capturing the 150% deduction + APDP PRC stack. The long-term commercial moat in South Africa is **CKD/local assembly + APDP enrolment** — not tariff arbitrage alone.",
+        "verdict": "Pure CBU import will structurally lose competitiveness against locally-assembled competitors capturing the 150% deduction + APDP PRC stack. The long-term commercial moat is CKD/local assembly + APDP enrolment.",
         "verdict_type": "warning",
         "confidence_items": [
-            ("🟢 Verified Fact", "150% deduction from 1 March 2026 (National Treasury Budget Review 2026)"),
-            ("🟢 Verified Fact", "APDP Phase 2 PRC stackability confirmed (dti APDP guidelines)"),
+            ("🟢 Verified Fact", "150% deduction from 1 March 2026 (National Treasury)"),
+            ("🟢 Verified Fact", "APDP Phase 2 PRC stackability confirmed"),
             ("🟡 Plausible Estimate", "R70m incremental tax benefit per R500m qualifying investment"),
             ("🟡 Plausible Estimate", "CBU competitiveness erosion vs local assemblers within 3–5 years"),
             ("🔴 Needs Field Verification", "SARS qualifying asset definition for Chinese CKD assembly lines"),
@@ -314,10 +313,10 @@ TRIANGULATION = {
             "**[Fact]** Nigeria Customs Service confirmed 0% import duty on EV commercial vehicles and CKD/SKD kits under 2023 Finance Act amendments.",
             "**[Fact]** NADDC's NAIDP explicitly targets local assembly partnerships as a core strategic pillar.",
             "**[Risk: Policy]** Nigeria has modified automotive tariff policy 3 times in 6 years (2013–2019).",
-            "**[Risk: FX]** NGN depreciation >60% since 2022 increases USD cost of KD kits for naira-revenue businesses.",
+            "**[Risk: FX]** NGN depreciation >60% since 2022 increases USD cost of KD kits.",
             "**[Operational risk]** NADDC assembly licence approval averaging 18–24 months in practice.",
         ],
-        "verdict": "The zero-tariff CKD advantage is *legally confirmed and financially material*. Structure JVs with USD-indexed kit pricing, multi-year FX forwards, and exit clauses. Realistic net savings after FX and operational costs: **$28,000–$35,000 per unit**.",
+        "verdict": "The zero-tariff CKD advantage is legally confirmed and financially material. Structure JVs with USD-indexed kit pricing, multi-year FX forwards, and exit clauses. Realistic net savings after FX: **$28,000–$35,000 per unit**.",
         "verdict_type": "warning",
         "confidence_items": [
             ("🟢 Verified Fact", "0% CKD/EV tariff (2023 Finance Act)"),
@@ -334,10 +333,10 @@ TRIANGULATION = {
             "**[Fact]** ERCA formally suspended import permits for petroleum vehicles mid-2022.",
             "**[Implementation gap]** Enforcement is uneven; grey market imports via Djibouti and South Sudan documented.",
             "**[Infrastructure constraint]** <120 public EV charging points nationwide; Addis–Djibouti corridor has zero public chargers.",
-            "**[Fleet reality]** High EV share reflects *new registrations* only. Existing ICE fleet of ~80,000 CVs operates for its full economic life.",
+            "**[Fleet reality]** High EV share reflects new registrations only. Existing ICE fleet of ~80,000 CVs operates for its full economic life.",
             "**[Chinese dominance]** BYD, Foton, King Long collectively >75% of new EV commercial vehicle registrations.",
         ],
-        "verdict": "The ban is real; its impact on *new registration sales* is transformative. However, '90% EV' conflates sales share with operational fleet electrification. Chinese EV brands have genuine first-mover advantage in urban fleets; long-haul requires 3–5 year charging build-out.",
+        "verdict": "The ban is real; its impact on new registration sales is transformative. However, '90% EV' conflates sales share with operational fleet electrification. Chinese EV brands have genuine first-mover advantage in urban fleets; long-haul requires 3–5 year charging build-out.",
         "verdict_type": "warning",
         "confidence_items": [
             ("🟢 Verified Fact", "Petroleum import ban enacted by ERCA (mid-2022)"),
@@ -356,7 +355,7 @@ TRIANGULATION = {
             "**[Operational limit]** SGR operates Mombasa–Nairobi only (472 km). Last-mile to Kampala, Kigali, Juba remains road-dependent.",
             "**[Financial distress]** SGR debt to Exim Bank China (~KES 500bn); extension to Uganda stalled.",
         ],
-        "verdict": "SGR is a *complement to, not substitute for* HCV demand in Kenya. Most Kenyan freight — and all EAC cross-border freight — remains road-dependent. HCV demand correlates more with EAC trade volumes and fuel subsidy policy than SGR capacity.",
+        "verdict": "SGR is a complement to, not substitute for, HCV demand in Kenya. Most Kenyan freight — and all EAC cross-border freight — remains road-dependent.",
         "verdict_type": "success",
         "confidence_items": [
             ("🟢 Verified Fact", "SGR volumes 5.8 Mt 2023 (Kenya Railways)"),
@@ -374,7 +373,7 @@ TRIANGULATION = {
             "**[Precedent]** GB Auto/MAN Trucks Egypt has navigated KD assembly successfully.",
             "**[FX risk]** EGP devaluation >50% since 2022 compresses margins for local assemblers.",
         ],
-        "verdict": "The 5% KD tariff is genuine but the 40% local content threshold requires deliberate supply chain engineering. GB Auto/MAN precedent confirms viability; Chinese manufacturers should structure JVs with established Egyptian assembly partners. FX hedging is non-negotiable.",
+        "verdict": "The 5% KD tariff is genuine but the 40% local content threshold requires deliberate supply chain engineering. GB Auto/MAN precedent confirms viability.",
         "verdict_type": "warning",
         "confidence_items": [
             ("🟢 Verified Fact", "5% KD rate requires 40% local content (IDA confirmed)"),
@@ -392,7 +391,7 @@ TRIANGULATION = {
             "**[Political dynamic]** JV partners committing to technology transfer receive preferential treatment in public procurement.",
             "**[Risk]** Ministerial-level JV licence approval is opaque; typical timeline 24–36 months.",
         ],
-        "verdict": "Algeria is *high-barrier but not closed*. The Renault Rouiba precedent confirms JV manufacturing partnerships can succeed. Realistic timeline from MOU to first unit production: **3–4 years**.",
+        "verdict": "Algeria is high-barrier but not closed. The Renault Rouiba precedent confirms JV manufacturing partnerships can succeed. Realistic timeline from MOU to first unit production: 3–4 years.",
         "verdict_type": "warning",
         "confidence_items": [
             ("🟢 Verified Fact", "30% CBU tariff + quota system confirmed"),
@@ -405,13 +404,13 @@ TRIANGULATION = {
         "title": "Tunisia 2026 EV Policy Arbitrage — TCO Advantage for Chinese Electric CV",
         "claim": "Tunisia's 2026 Finance Law EV incentives create a structural TCO advantage of **~TND 151,000 per unit** for EV commercial vehicles vs conventional diesel imports.",
         "cross_validation_items": [
-            "**[Fact]** Tunisia Loi de Finances 2026: BEV commercial vehicles exempt from customs duty (0%), exempt from Taxe de Consommation (0%), eligible for reduced TVA of 7% (vs standard 19%) — Ministry of Finance circular published January 2026.",
+            "**[Fact]** Tunisia Loi de Finances 2026: BEV commercial vehicles exempt from customs duty (0%), exempt from Taxe de Consommation (0%), eligible for reduced TVA of 7% (vs standard 19%).",
             "**[Fact]** ANME confirmed TND 10,000 direct subsidy for BEV commercial vehicles registered in Tunisia from January 2026.",
             "**[Fact]** Conventional diesel commercial vehicle (≥12t) subject to: 10% customs duty, 19% TVA, Taxe de Consommation 25% on CIF value.",
-            "**[Structural advantage]** On a CIF base price of TND 300,000, all-in tax loading for diesel = ~TND 162,000; for BEV = ~TND 11,000. Net delta: **~TND 151,000 per unit**.",
+            "**[Structural advantage]** On a CIF base price of TND 300,000, all-in tax loading for diesel = ~TND 162,000; for BEV = ~TND 11,000.",
             "**[Market readiness risk]** Tunisia has <50 commercial EV charging points as of early 2026 (STEG data).",
         ],
-        "verdict": "The Tunisia 2026 EV policy arbitrage is the **most clearly quantifiable policy-driven TCO advantage** in North Africa for Chinese EV commercial vehicles. Key risk is operational charging infrastructure — limiting near-term EV suitability to *urban distribution and depot-return routes*.",
+        "verdict": "The Tunisia 2026 EV policy arbitrage is the most clearly quantifiable policy-driven TCO advantage in North Africa. Key risk is operational charging infrastructure — limiting near-term EV suitability to urban distribution and depot-return routes.",
         "verdict_type": "success",
         "confidence_items": [
             ("🟢 Verified Fact", "0% customs + 0% excise + 7% VAT for BEV (Loi de Finances 2026)"),
@@ -424,14 +423,14 @@ TRIANGULATION = {
     },
     "tn_eu": {
         "title": "Tunisia EU-Aligned Market — Gateway Opportunity or Niche?",
-        "claim": "Tunisia's EU Association Agreement and UN-ECE certification mutual recognition make it the **easiest African market to enter** for EU-compliant commercial vehicles.",
+        "claim": "Tunisia's EU Association Agreement and UN-ECE certification mutual recognition make it the easiest African market to enter for EU-compliant commercial vehicles.",
         "cross_validation_items": [
             "**[Fact]** INNORPI confirms UN-ECE mutual recognition — EU type-approved vehicles require no additional homologation.",
             "**[Market size]** ~8,000 units/year total CV market — regulatory ease must be weighed against limited scale economics.",
             "**[Chinese brand challenge]** European brands hold >70% share through decades of network investment.",
             "**[Gateway potential]** Tunisia's EU regulatory alignment could serve as a testbed for EU-spec Chinese CV variants.",
         ],
-        "verdict": "Tunisia is easiest to enter but hardest to scale. Approach as a *strategic beachhead* for EU-spec product validation. The 2026 EV policy arbitrage fundamentally changes this calculus — making Tunisia potentially the **most commercially attractive immediate entry market** for Chinese EV commercial vehicles in North Africa.",
+        "verdict": "Tunisia is easiest to enter but hardest to scale. The 2026 EV policy arbitrage fundamentally changes this calculus — making Tunisia potentially the most commercially attractive immediate entry market for Chinese EV commercial vehicles in North Africa.",
         "verdict_type": "success",
         "confidence_items": [
             ("🟢 Verified Fact", "UN-ECE mutual recognition (INNORPI confirmed)"),
@@ -464,9 +463,13 @@ def render_triangulation(tri_key: str):
         st.success(full_verdict, icon="✅")
     else:
         st.warning(full_verdict, icon="⚠️")
-
 # ══════════════════════════════════════════════════════════════════════════════
 # 5. TIER-1 COUNTRY DATABASE
+#    New fields added in v10.0:
+#      - tco_params: dict with ICE_Capex, EV_Capex, ICE_Energy_Cost_per_km, EV_Energy_Cost_per_km
+#      - segment_data: dict with LCV / MCV_Rigid / EHCV_Tractor -> {volume, ev_readiness}
+#      - risk_radar: dict with FX_Liquidity, Tariff_Advantage, Port_Efficiency,
+#                     Grid_Stability, Policy_Consistency (all 0-10 scale)
 # ══════════════════════════════════════════════════════════════════════════════
 TIER1 = {
     "Nigeria": {
@@ -491,6 +494,28 @@ TIER1 = {
             "trade":  ("NADDC — National Automotive Design & Development Council","https://naddc.gov.ng"),
             "customs":("Nigeria Customs Service","https://customs.gov.ng"),
             "market": ("Nigeria Trade Hub","https://trade.gov.ng"),
+        },
+        # ── v10.0 new fields ────────────────────────────────────────────────────
+        "tco_params": {
+            "ICE_Capex":               95000,
+            "EV_Capex":                145000,
+            "ICE_Energy_Cost_per_km":  0.42,
+            "EV_Energy_Cost_per_km":   0.11,
+            "Monthly_km":              8000,
+            "source_name": "NADDC / Nigeria Customs — Tariff & Fuel Price Modelling 2026",
+            "source_url":  "https://naddc.gov.ng",
+        },
+        "segment_data": {
+            "LCV":         {"volume": 18500, "ev_readiness": 7.2},
+            "MCV_Rigid":   {"volume": 16200, "ev_readiness": 3.8},
+            "EHCV_Tractor":{"volume": 10500, "ev_readiness": 1.1},
+        },
+        "risk_radar": {
+            "FX_Liquidity":        1.5,
+            "Tariff_Advantage":    9.0,
+            "Port_Efficiency":     3.5,
+            "Grid_Stability":      4.0,
+            "Policy_Consistency":  4.5,
         },
     },
 
@@ -517,6 +542,27 @@ TIER1 = {
             "customs":("ITAC — International Trade Administration Commission","https://itac.org.za"),
             "market": ("National Treasury 2026 Budget Review","https://www.treasury.gov.za"),
         },
+        "tco_params": {
+            "ICE_Capex":               110000,
+            "EV_Capex":                168000,
+            "ICE_Energy_Cost_per_km":  0.46,
+            "EV_Energy_Cost_per_km":   0.09,
+            "Monthly_km":              9500,
+            "source_name": "NAAMSA / Eskom Tariff Schedule 2026",
+            "source_url":  "https://naamsa.co.za",
+        },
+        "segment_data": {
+            "LCV":         {"volume": 11800, "ev_readiness": 6.5},
+            "MCV_Rigid":   {"volume": 12200, "ev_readiness": 3.2},
+            "EHCV_Tractor":{"volume": 7500,  "ev_readiness": 1.4},
+        },
+        "risk_radar": {
+            "FX_Liquidity":        6.5,
+            "Tariff_Advantage":    4.0,
+            "Port_Efficiency":     5.0,
+            "Grid_Stability":      4.5,
+            "Policy_Consistency":  7.0,
+        },
     },
 
     "Morocco": {
@@ -541,6 +587,27 @@ TIER1 = {
             "trade":  ("AIVAM — Association des Importateurs de Véhicules au Maroc","http://www.aivam.ma"),
             "customs":("Direction Générale des Douanes","https://www.douane.gov.ma"),
             "market": ("CNEAT — Centre National d'Essais et d'Homologation","https://www.cneat.ma"),
+        },
+        "tco_params": {
+            "ICE_Capex":               92000,
+            "EV_Capex":                139000,
+            "ICE_Energy_Cost_per_km":  0.38,
+            "EV_Energy_Cost_per_km":   0.10,
+            "Monthly_km":              7800,
+            "source_name": "AIVAM / ONHYM Energy Price Bulletin 2026",
+            "source_url":  "http://www.aivam.ma",
+        },
+        "segment_data": {
+            "LCV":         {"volume": 6800, "ev_readiness": 6.0},
+            "MCV_Rigid":   {"volume": 7100, "ev_readiness": 3.0},
+            "EHCV_Tractor":{"volume": 4500, "ev_readiness": 1.2},
+        },
+        "risk_radar": {
+            "FX_Liquidity":        7.5,
+            "Tariff_Advantage":    7.0,
+            "Port_Efficiency":     7.5,
+            "Grid_Stability":      6.5,
+            "Policy_Consistency":  8.0,
         },
     },
 
@@ -567,6 +634,27 @@ TIER1 = {
             "customs":("GOEIC — General Organisation for Export & Import Control","https://www.goeic.gov.eg"),
             "market": ("IDSC — Information and Decision Support Center","https://www.idsc.gov.eg"),
         },
+        "tco_params": {
+            "ICE_Capex":               78000,
+            "EV_Capex":                132000,
+            "ICE_Energy_Cost_per_km":  0.10,
+            "EV_Energy_Cost_per_km":   0.07,
+            "Monthly_km":              7200,
+            "source_name": "EOS / Egypt Ministry of Petroleum Subsidised Fuel Schedule 2026",
+            "source_url":  "https://www.mop.gov.eg",
+        },
+        "segment_data": {
+            "LCV":         {"volume": 9800, "ev_readiness": 3.5},
+            "MCV_Rigid":   {"volume": 9500, "ev_readiness": 1.8},
+            "EHCV_Tractor":{"volume": 6500, "ev_readiness": 0.6},
+        },
+        "risk_radar": {
+            "FX_Liquidity":        2.5,
+            "Tariff_Advantage":    5.0,
+            "Port_Efficiency":     5.5,
+            "Grid_Stability":      5.5,
+            "Policy_Consistency":  5.0,
+        },
     },
 
     "Kenya": {
@@ -591,6 +679,27 @@ TIER1 = {
             "trade":  ("KEBS — Kenya Bureau of Standards","https://kebs.org"),
             "customs":("KRA — Kenya Revenue Authority","https://kra.go.ke"),
             "market": ("EPRA — Energy & Petroleum Regulatory Authority","https://www.epra.go.ke"),
+        },
+        "tco_params": {
+            "ICE_Capex":               74000,
+            "EV_Capex":                118000,
+            "ICE_Energy_Cost_per_km":  0.39,
+            "EV_Energy_Cost_per_km":   0.13,
+            "Monthly_km":              6800,
+            "source_name": "EPRA Fuel Price Bulletin / KEBS 2026",
+            "source_url":  "https://www.epra.go.ke",
+        },
+        "segment_data": {
+            "LCV":         {"volume": 6200, "ev_readiness": 5.2},
+            "MCV_Rigid":   {"volume": 5100, "ev_readiness": 2.4},
+            "EHCV_Tractor":{"volume": 2900, "ev_readiness": 0.8},
+        },
+        "risk_radar": {
+            "FX_Liquidity":        4.5,
+            "Tariff_Advantage":    4.5,
+            "Port_Efficiency":     5.5,
+            "Grid_Stability":      6.0,
+            "Policy_Consistency":  6.0,
         },
     },
 
@@ -617,6 +726,27 @@ TIER1 = {
             "customs":("ERCA — Ethiopian Revenue & Customs Authority","https://www.erca.gov.et"),
             "market": ("EthSA — Ethiopian Standards Agency","https://www.ethsa.gov.et"),
         },
+        "tco_params": {
+            "ICE_Capex":               68000,
+            "EV_Capex":                102000,
+            "ICE_Energy_Cost_per_km":  0.0,
+            "EV_Energy_Cost_per_km":   0.02,
+            "Monthly_km":              6200,
+            "source_name": "ERCA Import Ban Notice / EEPCO Tariff Schedule 2026",
+            "source_url":  "https://www.erca.gov.et",
+        },
+        "segment_data": {
+            "LCV":         {"volume": 4200, "ev_readiness": 8.8},
+            "MCV_Rigid":   {"volume": 3600, "ev_readiness": 6.0},
+            "EHCV_Tractor":{"volume": 2000, "ev_readiness": 2.5},
+        },
+        "risk_radar": {
+            "FX_Liquidity":        2.0,
+            "Tariff_Advantage":    9.5,
+            "Port_Efficiency":     4.0,
+            "Grid_Stability":      5.5,
+            "Policy_Consistency":  5.5,
+        },
     },
 
     "Algeria": {
@@ -641,6 +771,27 @@ TIER1 = {
             "trade":  ("Ministère du Commerce — Algeria","https://www.commerce.gov.dz"),
             "customs":("Direction Générale des Douanes","https://www.douane.gov.dz"),
             "market": ("IANOR — Institut Algérien de Normalisation","https://www.ianor.dz"),
+        },
+        "tco_params": {
+            "ICE_Capex":               85000,
+            "EV_Capex":                136000,
+            "ICE_Energy_Cost_per_km":  0.07,
+            "EV_Energy_Cost_per_km":   0.06,
+            "Monthly_km":              6500,
+            "source_name": "Ministère de l'Energie — Subsidised Diesel Schedule 2026",
+            "source_url":  "https://www.energy.gov.dz",
+        },
+        "segment_data": {
+            "LCV":         {"volume": 5200, "ev_readiness": 2.0},
+            "MCV_Rigid":   {"volume": 4800, "ev_readiness": 1.0},
+            "EHCV_Tractor":{"volume": 2600, "ev_readiness": 0.4},
+        },
+        "risk_radar": {
+            "FX_Liquidity":        2.5,
+            "Tariff_Advantage":    3.0,
+            "Port_Efficiency":     3.5,
+            "Grid_Stability":      6.5,
+            "Policy_Consistency":  3.5,
         },
     },
 
@@ -668,16 +819,32 @@ TIER1 = {
             "market": ("ANME — Agence Nationale pour la Maîtrise de l'Énergie","https://www.anme.tn"),
             "finance":("Ministère des Finances — Loi de Finances 2026","https://www.finances.gov.tn"),
         },
+        "tco_params": {
+            "ICE_Capex":               95000,
+            "EV_Capex":                99000,
+            "ICE_Energy_Cost_per_km":  0.32,
+            "EV_Energy_Cost_per_km":   0.08,
+            "Monthly_km":              6000,
+            "source_name": "Loi de Finances 2026 / ANME e-Mobility Programme",
+            "source_url":  "https://www.finances.gov.tn",
+        },
+        "segment_data": {
+            "LCV":         {"volume": 3600, "ev_readiness": 7.8},
+            "MCV_Rigid":   {"volume": 3000, "ev_readiness": 3.5},
+            "EHCV_Tractor":{"volume": 1500, "ev_readiness": 1.0},
+        },
+        "risk_radar": {
+            "FX_Liquidity":        4.0,
+            "Tariff_Advantage":    9.5,
+            "Port_Efficiency":     6.0,
+            "Grid_Stability":      6.5,
+            "Policy_Consistency":  6.5,
+        },
     },
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # ★ NEW: RWANDA — EAC Sandbox & Showcase Centre ★
-    # ══════════════════════════════════════════════════════════════════════════
     "Rwanda": {
         "flag":"🇷🇼","iso":"RWA","region":"East Africa (EAC)",  "tier":1,
         "kpi":{
-            # Sources: RDB Investment Incentives 2024, RURA Green Mobility Strategy 2023,
-            # Rwanda Energy Group Annual Report 2024, MINICOM Vehicle Import Statistics 2024
             "Annual CV Sales":       ("~3,200","units/yr","+12.5% YoY","https://www.rdb.rw"),
             "EV Penetration (CVs)":  ("~6.2%","of new CV registrations","+3.1pp YoY","https://www.rura.rw"),
             "EV Import Tariff":      ("0%","EAC Pioneer — 0% Duty + 0% VAT","Most generous in Sub-Sahara","https://www.rra.gov.rw"),
@@ -694,9 +861,9 @@ TIER1 = {
         },
         "policy":{
             "tariff":      "EAC Pioneer: 0% import duty + 0% VAT on all EV commercial vehicles (RDB Investment Code 2024). ICE CVs: 25% EAC CET + 18% VAT. Corporate income tax for qualifying EV enterprises: 15% (vs standard 30%).",
-            "certification":"Rwanda Standards Board (RSB) mandatory type-approval; RURA e-mobility operator licence for fleet charging; EAC CoC (Certificate of Conformity) accepted.",
-            "key_buyers":  "Kigali Bus Services (KBS — public transit authority), RwandAir cargo, BRALIRWA (Heineken) distribution, MTN Rwanda fleet, La Colombière construction logistics.",
-            "risk":        "Market volume cap (~5,000 CVs/yr through 2030). Charging infrastructure outside Kigali limited (Northern/Southern Provinces). RWF/USD stability depends on foreign aid inflows.",
+            "certification":"Rwanda Standards Board (RSB) mandatory type-approval; RURA e-mobility operator licence for fleet charging; EAC CoC accepted.",
+            "key_buyers":  "Kigali Bus Services (KBS), RwandAir cargo, BRALIRWA (Heineken) distribution, MTN Rwanda fleet, La Colombière construction logistics.",
+            "risk":        "Market volume cap (~5,000 CVs/yr through 2030). Charging infrastructure outside Kigali limited. RWF/USD stability depends on foreign aid inflows.",
         },
         "news_query":"Rwanda Kigali electric vehicle commercial transport e-mobility EV bus",
         "tri_keys":["rw_sandbox","rw_eac_gateway"],
@@ -706,9 +873,29 @@ TIER1 = {
             "market":  ("RURA — Rwanda Utilities Regulatory Authority","https://www.rura.rw"),
             "energy":  ("REG — Rwanda Energy Group","https://www.reg.rw"),
         },
+        "tco_params": {
+            "ICE_Capex":               80000,
+            "EV_Capex":                108000,
+            "ICE_Energy_Cost_per_km":  0.40,
+            "EV_Energy_Cost_per_km":   0.0099,
+            "Monthly_km":              6700,
+            "source_name": "RURA e-Mobility Tariff Order 2023 / RDB Investment Incentives 2024",
+            "source_url":  "https://www.rura.rw",
+        },
+        "segment_data": {
+            "LCV":         {"volume": 1600, "ev_readiness": 9.2},
+            "MCV_Rigid":   {"volume": 1100, "ev_readiness": 5.5},
+            "EHCV_Tractor":{"volume": 500,  "ev_readiness": 1.5},
+        },
+        "risk_radar": {
+            "FX_Liquidity":        5.0,
+            "Tariff_Advantage":    10.0,
+            "Port_Efficiency":     6.5,
+            "Grid_Stability":      9.5,
+            "Policy_Consistency":  9.0,
+        },
     },
 }
-
 # ══════════════════════════════════════════════════════════════════════════════
 # 6. FULL 54-NATION MAP DATA
 # ══════════════════════════════════════════════════════════════════════════════
@@ -784,7 +971,7 @@ for iso, name in ALL_AFRICA.items():
 ALL_ISO_LIST = list(dict.fromkeys(ISO_TO_NAME.keys()))
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 7. NEWS FETCHER
+# 7. NEWS FETCHER — Wide net, smart filter, guaranteed no blank
 # ══════════════════════════════════════════════════════════════════════════════
 AUTHORITY_DOMAINS = [
     "reuters","bloomberg","ft.com","engineeringnews","businessday",
@@ -862,7 +1049,6 @@ def fetch_news(query: str, country: str = "", limit: int = 7) -> dict:
     def _recent(item, cutoff):
         return item["pub_dt"] is None or item["pub_dt"] >= cutoff
 
-    # Pass 1: 30-day
     enc1 = (query+" when:30d").replace(" ","+").replace('"',"%22")
     raw1 = _parse(f"https://news.google.com/rss/search?q={enc1}&hl=en-US&gl=US&ceid=US:en")
     r30 = [x for x in raw1 if _recent(x, cutoff_30)]
@@ -872,20 +1058,17 @@ def fetch_news(query: str, country: str = "", limit: int = 7) -> dict:
     if len(r30) >= 3:
         return {"items":r30[:limit],"is_authority":False,"is_fallback":False}
 
-    # Pass 2: 90-day
     enc2 = (query+" when:90d").replace(" ","+").replace('"',"%22")
     raw2 = _parse(f"https://news.google.com/rss/search?q={enc2}&hl=en-US&gl=US&ceid=US:en")
     r90 = [x for x in raw2 if _recent(x, cutoff_90)]
     if len(r90) >= 3:
         return {"items":r90[:limit],"is_authority":False,"is_fallback":False}
 
-    # Pass 3: No time limit
     enc3 = query.replace(" ","+").replace('"',"%22")
     raw3 = _parse(f"https://news.google.com/rss/search?q={enc3}&hl=en-US&gl=US&ceid=US:en")
     if len(raw3) >= 2:
         return {"items":raw3[:limit],"is_authority":False,"is_fallback":False}
 
-    # Pass 4: Curated fallback
     fb = FALLBACK_INSIGHTS.get(country, [])
     if fb:
         return {"items":fb[:limit],"is_authority":False,"is_fallback":True}
@@ -923,7 +1106,6 @@ def render_news_panel(query: str, country: str):
                 f'</div>',
                 unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
-
 # ══════════════════════════════════════════════════════════════════════════════
 # 8. DATA GENERATORS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1086,56 +1268,158 @@ def gen_tn_b2b_targets():
 # ── Rwanda ────────────────────────────────────────────────────────────────────
 @st.cache_data
 def gen_rw_tariff_comparison():
-    """
-    Rwanda: EAC Standard Tariff (ICE trucks) vs Rwanda EV Zero-Tax Policy.
-    Source: RRA Customs Tariff Schedule 2024, RDB EV Investment Incentives 2024.
-    CIF base: USD 80,000 (medium HCV, ≈ RWF 112,000,000 at 1,400 RWF/USD).
-    Future: replace with pd.read_csv('rw_tariff_2024.csv')
-    """
     return pd.DataFrame({
         "Label": [
-            "ICE Truck\nCIF Base (USD 80k)",
-            "EAC Import Duty\n(ICE: 25%)",
-            "VAT\n(ICE: 18%)",
-            "ICE Total\nLanded Cost",
-            "EV Truck\nCIF Base (USD 80k)",
-            "EAC Import Duty\n(EV: 0%)",
-            "VAT\n(EV: 0%)",
-            "EV Total\nLanded Cost",
+            "ICE Truck\nCIF Base (USD 80k)","EAC Import Duty\n(ICE: 25%)","VAT\n(ICE: 18%)",
+            "ICE Total\nLanded Cost","EV Truck\nCIF Base (USD 80k)","EAC Import Duty\n(EV: 0%)",
+            "VAT\n(EV: 0%)","EV Total\nLanded Cost",
         ],
-        "Value_USD": [
-            80000,
-            20000,
-            14400,
-            114400,
-            80000,
-            0,
-            0,
-            80000,
-        ],
-        "Measure": [
-            "absolute","relative","relative","total",
-            "absolute","relative","relative","total",
-        ],
+        "Value_USD": [80000,20000,14400,114400,80000,0,0,80000],
+        "Measure": ["absolute","relative","relative","total","absolute","relative","relative","total"],
         "Group": ["ice","ice","ice","ice","ev","ev","ev","ev"],
     })
 
 @st.cache_data
 def gen_rw_ev_adoption():
-    """
-    Kigali Urban EV Adoption: Public Buses + e-LCV city logistics.
-    Source: RURA Annual Report 2024, MINICOM Vehicle Registration Statistics 2024.
-    2026+ = forecast. Future: replace with pd.read_csv('rw_ev_adoption.csv')
-    """
     years = [2022, 2023, 2024, 2025, 2026, 2027]
     return pd.DataFrame({
-        "Year":            years,
-        "Bus_ICE":         [180, 175, 160, 140, 110,  80],
-        "Bus_EV":          [  5,  15,  40,  80, 130, 190],
-        "eLCV_ICE":        [320, 330, 320, 300, 270, 230],
-        "eLCV_EV":         [  8,  25,  65, 130, 230, 380],
+        "Year":     years,
+        "Bus_ICE":  [180, 175, 160, 140, 110,  80],
+        "Bus_EV":   [  5,  15,  40,  80, 130, 190],
+        "eLCV_ICE": [320, 330, 320, 300, 270, 230],
+        "eLCV_EV":  [  8,  25,  65, 130, 230, 380],
     })
 
+# ══════════════════════════════════════════════════════════════════════════════
+# 8B. NEW v10.0 GENERATORS — TCO Break-even, Segment Heatmap, Risk Radar
+# ══════════════════════════════════════════════════════════════════════════════
+@st.cache_data
+def gen_tco_36month_df(country: str) -> pd.DataFrame:
+    """
+    36-month cumulative TCO comparison: ICE vs EV.
+    Uses TIER1[country]["tco_params"]: ICE_Capex, EV_Capex,
+    ICE_Energy_Cost_per_km, EV_Energy_Cost_per_km, Monthly_km.
+    Future: replace with pd.read_csv(f'{country}_tco_actuals.csv')
+    """
+    p = TIER1[country]["tco_params"]
+    months = np.arange(0, 37)  # month 0 to 36
+    ice_capex = p["ICE_Capex"]
+    ev_capex  = p["EV_Capex"]
+    ice_per_km = p["ICE_Energy_Cost_per_km"]
+    ev_per_km  = p["EV_Energy_Cost_per_km"]
+    km_per_month = p["Monthly_km"]
+
+    ice_cumulative = ice_capex + (ice_per_km * km_per_month * months)
+    ev_cumulative  = ev_capex  + (ev_per_km  * km_per_month * months)
+
+    df = pd.DataFrame({
+        "Month":  months,
+        "ICE_Cumulative_Cost": ice_cumulative,
+        "EV_Cumulative_Cost":  ev_cumulative,
+    })
+    return df
+
+def calc_tco_breakeven(country: str):
+    """
+    Returns (breakeven_month, breakeven_cost) or (None, None) if EV never
+    reaches cost parity with ICE within the 36-month horizon.
+
+    Handles three cases:
+      1. EV starts more expensive and crosses below ICE within 36mo
+         -> standard crossing detection via linear interpolation.
+      2. EV starts at or BELOW ICE cost from Month 0 (e.g. equal/lower
+         capex + cheaper energy, as in Rwanda's zero-duty EV policy)
+         -> breakeven is Month 0 (EV is TCO-superior from day one).
+      3. EV never catches up within 36 months -> returns (None, None).
+    """
+    df = gen_tco_36month_df(country)
+    diff = df["EV_Cumulative_Cost"] - df["ICE_Cumulative_Cost"]
+
+    # Case 2: EV already at or below ICE cost at Month 0
+    if diff.iloc[0] <= 0:
+        return 0.0, df["ICE_Cumulative_Cost"].iloc[0]
+
+    # Case 1: find first month where EV crosses from above to at/below ICE
+    crossing = None
+    for i in range(1, len(diff)):
+        if diff.iloc[i-1] > 0 and diff.iloc[i] <= 0:
+            # Linear interpolation for a more precise month estimate
+            x0, x1 = df["Month"].iloc[i-1], df["Month"].iloc[i]
+            y0, y1 = diff.iloc[i-1], diff.iloc[i]
+            if y1 != y0:
+                frac = y0 / (y0 - y1)
+                crossing = x0 + frac * (x1 - x0)
+            else:
+                crossing = x1
+            break
+    if crossing is None:
+        return None, None
+    # Cost at crossing point (interpolated from ICE line)
+    cost_at_crossing = np.interp(crossing, df["Month"], df["ICE_Cumulative_Cost"])
+    return crossing, cost_at_crossing
+
+@st.cache_data
+def gen_segment_df(country: str) -> pd.DataFrame:
+    """
+    Segment breakdown: LCV / MCV_Rigid / EHCV_Tractor with volume and EV readiness.
+    Future: replace with pd.read_csv(f'{country}_segments.csv')
+    """
+    seg = TIER1[country]["segment_data"]
+    labels_map = {
+        "LCV": "LCV (Light Urban)",
+        "MCV_Rigid": "MCV / Rigid (Construction)",
+        "EHCV_Tractor": "EHCV / Tractor (Long-Haul)",
+    }
+    rows = []
+    for key, label in labels_map.items():
+        d = seg[key]
+        rows.append({
+            "Segment": label,
+            "Volume": d["volume"],
+            "EV_Readiness": d["ev_readiness"],
+        })
+    return pd.DataFrame(rows)
+
+@st.cache_data
+def gen_all_countries_segment_df() -> pd.DataFrame:
+    """Combined segment data across all Tier 1 countries for the continental heatmap."""
+    labels_map = {
+        "LCV": "LCV (Light Urban)",
+        "MCV_Rigid": "MCV / Rigid (Construction)",
+        "EHCV_Tractor": "EHCV / Tractor (Long-Haul)",
+    }
+    rows = []
+    for country, cdata in TIER1.items():
+        seg = cdata.get("segment_data", {})
+        for key, label in labels_map.items():
+            if key in seg:
+                d = seg[key]
+                rows.append({
+                    "Country": country,
+                    "Segment": label,
+                    "Volume": d["volume"],
+                    "EV_Readiness": d["ev_readiness"],
+                })
+    return pd.DataFrame(rows)
+
+@st.cache_data
+def gen_risk_radar_df(country: str) -> pd.DataFrame:
+    """
+    Operational risk radar: 5 dimensions, 0-10 scale.
+    Future: replace with pd.read_csv(f'{country}_risk.csv')
+    """
+    r = TIER1[country]["risk_radar"]
+    labels_map = {
+        "FX_Liquidity":       "FX Liquidity",
+        "Tariff_Advantage":   "Tariff Advantage",
+        "Port_Efficiency":    "Port Efficiency",
+        "Grid_Stability":     "Grid Stability",
+        "Policy_Consistency": "Policy Consistency",
+    }
+    rows = []
+    for key, label in labels_map.items():
+        rows.append({"Dimension": label, "Score": r[key]})
+    return pd.DataFrame(rows)
 # ══════════════════════════════════════════════════════════════════════════════
 # 9. CHART BUILDERS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1335,12 +1619,7 @@ def chart_tn_tco_waterfall(df):
                         "xaxis":{**CHART_BASE["xaxis"],"title":"","tickangle":-15},
                         "showlegend":False,"margin":dict(l=60,r=20,t=50,b=90),"height":520})
 
-# ── Rwanda exclusive charts ───────────────────────────────────────────────────
 def chart_rw_tariff_comparison(df):
-    """
-    Rwanda: EAC ICE Tariff Burden vs EV Zero-Tax Waterfall.
-    Source: RRA Customs Tariff Schedule 2024, RDB EV Incentives 2024.
-    """
     fig = go.Figure(go.Waterfall(
         orientation="v",
         measure=df["Measure"].tolist(),
@@ -1360,8 +1639,6 @@ def chart_rw_tariff_comparison(df):
         totals=dict(marker_color="#21325B"),
         hovertemplate="<b>%{x}</b><br>$%{y:,.0f}<extra></extra>",
     ))
-
-    # Saving annotation
     fig.add_annotation(
         x="EV Total\nLanded Cost", y=80000,
         text="✅ EV saves $34,400\nper unit vs ICE\n(43% cost reduction)",
@@ -1384,65 +1661,227 @@ def chart_rw_tariff_comparison(df):
     })
 
 def chart_rw_ev_adoption(df):
-    """
-    Kigali Urban EV Adoption — Stacked Area Chart: Bus + e-LCV segments.
-    Source: RURA Annual Report 2024, MINICOM 2024. 2026+ = RURA Green Mobility Forecast.
-    """
     fig = go.Figure()
-
-    # Bus ICE (declining)
     fig.add_trace(go.Scatter(
-        x=df["Year"], y=df["Bus_ICE"],
-        name="Public Buses — ICE",
+        x=df["Year"], y=df["Bus_ICE"], name="Public Buses — ICE",
         mode="lines", stackgroup="buses",
-        line=dict(color="#9BA3B2", width=0),
-        fillcolor="rgba(155,163,178,0.35)",
-        hovertemplate="<b>%{x}</b><br>Bus ICE: <b>%{y}</b> units<extra></extra>",
-    ))
-    # Bus EV (growing)
+        line=dict(color="#9BA3B2", width=0), fillcolor="rgba(155,163,178,0.35)",
+        hovertemplate="<b>%{x}</b><br>Bus ICE: <b>%{y}</b> units<extra></extra>"))
     fig.add_trace(go.Scatter(
-        x=df["Year"], y=df["Bus_EV"],
-        name="Public Buses — EV",
+        x=df["Year"], y=df["Bus_EV"], name="Public Buses — EV",
         mode="lines", stackgroup="buses",
-        line=dict(color="#21325B", width=0),
-        fillcolor="rgba(33,50,91,0.55)",
-        hovertemplate="<b>%{x}</b><br>Bus EV: <b>%{y}</b> units<extra></extra>",
-    ))
-
-    # e-LCV ICE (declining)
+        line=dict(color="#21325B", width=0), fillcolor="rgba(33,50,91,0.55)",
+        hovertemplate="<b>%{x}</b><br>Bus EV: <b>%{y}</b> units<extra></extra>"))
     fig.add_trace(go.Scatter(
-        x=df["Year"], y=df["eLCV_ICE"],
-        name="Urban LCV — ICE",
+        x=df["Year"], y=df["eLCV_ICE"], name="Urban LCV — ICE",
         mode="lines", stackgroup="lcv",
-        line=dict(color="#C0C8D8", width=0),
-        fillcolor="rgba(192,200,216,0.30)",
-        hovertemplate="<b>%{x}</b><br>LCV ICE: <b>%{y}</b> units<extra></extra>",
-    ))
-    # e-LCV EV (growing fastest)
+        line=dict(color="#C0C8D8", width=0), fillcolor="rgba(192,200,216,0.30)",
+        hovertemplate="<b>%{x}</b><br>LCV ICE: <b>%{y}</b> units<extra></extra>"))
     fig.add_trace(go.Scatter(
-        x=df["Year"], y=df["eLCV_EV"],
-        name="Urban LCV — EV",
+        x=df["Year"], y=df["eLCV_EV"], name="Urban LCV — EV",
         mode="lines", stackgroup="lcv",
-        line=dict(color="#D04A02", width=0),
-        fillcolor="rgba(208,74,2,0.45)",
-        hovertemplate="<b>%{x}</b><br>LCV EV: <b>%{y}</b> units<extra></extra>",
-    ))
-
-    # Forecast divider
+        line=dict(color="#D04A02", width=0), fillcolor="rgba(208,74,2,0.45)",
+        hovertemplate="<b>%{x}</b><br>LCV EV: <b>%{y}</b> units<extra></extra>"))
     fig.add_vline(x=2025.5, line_dash="dash", line_color="#9BA3B2", line_width=1.2)
-    fig.add_annotation(x=2025.7, y=550,
-        text="← Actual | Forecast →",
-        showarrow=False,
-        font=dict(size=9, color="#9BA3B2", family="Inter"))
-
+    fig.add_annotation(x=2025.7, y=550, text="← Actual | Forecast →",
+        showarrow=False, font=dict(size=9, color="#9BA3B2", family="Inter"))
     return _apply(fig, {
-        "xaxis":{**CHART_BASE["xaxis"],"title":"Year",
-                 "tickmode":"array","tickvals":df["Year"].tolist()},
+        "xaxis":{**CHART_BASE["xaxis"],"title":"Year","tickmode":"array","tickvals":df["Year"].tolist()},
         "yaxis":{**CHART_BASE["yaxis"],"title":"Units in Fleet / Registered"},
         "legend":{**CHART_BASE["legend"],"y":-0.25},
         "height":420,
     })
 
+# ══════════════════════════════════════════════════════════════════════════════
+# 9B. NEW v10.0 CHARTS — TCO Break-even, Segment Bubble, Risk Radar
+# ══════════════════════════════════════════════════════════════════════════════
+def chart_tco_breakeven(country: str) -> go.Figure:
+    """
+    36-month cumulative TCO comparison line chart with break-even point highlighted.
+    """
+    df = gen_tco_36month_df(country)
+    breakeven_month, breakeven_cost = calc_tco_breakeven(country)
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df["Month"], y=df["ICE_Cumulative_Cost"],
+        name="ICE — Cumulative TCO",
+        mode="lines",
+        line=dict(color="#21325B", width=2.5),
+        hovertemplate="<b>Month %{x}</b><br>ICE Cumulative: <b>$%{y:,.0f}</b><extra></extra>",
+    ))
+    fig.add_trace(go.Scatter(
+        x=df["Month"], y=df["EV_Cumulative_Cost"],
+        name="EV — Cumulative TCO",
+        mode="lines",
+        line=dict(color="#D04A02", width=2.5),
+        hovertemplate="<b>Month %{x}</b><br>EV Cumulative: <b>$%{y:,.0f}</b><extra></extra>",
+    ))
+
+    if breakeven_month is not None:
+        fig.add_trace(go.Scatter(
+            x=[breakeven_month], y=[breakeven_cost],
+            mode="markers+text",
+            marker=dict(size=14, color="#1A8C5B", symbol="star",
+                       line=dict(color="white", width=2)),
+            text=[f"  Break-even: Month {breakeven_month:.1f}"],
+            textposition="middle right",
+            textfont=dict(size=11, color="#1A8C5B", family="Inter"),
+            name="Break-even Point",
+            hovertemplate=f"<b>TCO Parity</b><br>Month: {breakeven_month:.1f}<br>Cost: ${breakeven_cost:,.0f}<extra></extra>",
+            showlegend=False,
+        ))
+        fig.add_vline(x=breakeven_month, line_dash="dot", line_color="#1A8C5B", line_width=1.5)
+        fig.add_annotation(
+            x=breakeven_month, y=df["EV_Cumulative_Cost"].max()*0.15,
+            text=f"🟢 TCO Parity reached<br>at Month {breakeven_month:.1f}",
+            showarrow=False,
+            bgcolor="rgba(26,140,91,0.1)", bordercolor="#1A8C5B",
+            font=dict(size=10, color="#1A8C5B", family="Inter"),
+        )
+    else:
+        # No breakeven within 36 months — show warning annotation
+        final_diff = df["EV_Cumulative_Cost"].iloc[-1] - df["ICE_Cumulative_Cost"].iloc[-1]
+        if final_diff > 0:
+            fig.add_annotation(
+                x=18, y=df["EV_Cumulative_Cost"].max()*0.9,
+                text="⚠ No TCO parity within 36 months<br>at current energy price differential",
+                showarrow=False,
+                bgcolor="rgba(208,74,2,0.1)", bordercolor="#D04A02",
+                font=dict(size=10, color="#D04A02", family="Inter"),
+            )
+
+    return _apply(fig, {
+        "xaxis": {**CHART_BASE["xaxis"], "title": "Month of Operation"},
+        "yaxis": {**CHART_BASE["yaxis"], "title": "Cumulative Cost (USD)"},
+        "legend": {**CHART_BASE["legend"], "y": -0.2},
+        "height": 440,
+    })
+
+
+def chart_segment_bubble(df: pd.DataFrame, title_suffix: str = "") -> go.Figure:
+    """
+    Bubble chart: x=Segment, y=EV_Readiness, bubble size=Volume.
+    Used for single-country segment view.
+    """
+    colors = ["#D04A02", "#295BA5", "#9BA3B2"]
+    fig = go.Figure()
+    for i, row in df.iterrows():
+        fig.add_trace(go.Scatter(
+            x=[row["Segment"]], y=[row["EV_Readiness"]],
+            mode="markers+text",
+            marker=dict(
+                size=np.sqrt(row["Volume"]) * 1.6,
+                color=colors[i % len(colors)],
+                opacity=0.75,
+                line=dict(color="white", width=2),
+            ),
+            text=[f"{row['Volume']:,}"],
+            textposition="middle center",
+            textfont=dict(size=10, color="white", family="Inter"),
+            hovertemplate=(f"<b>{row['Segment']}</b><br>"
+                          f"Volume: {row['Volume']:,} units/yr<br>"
+                          f"EV Readiness: {row['EV_Readiness']}/10<extra></extra>"),
+            showlegend=False,
+        ))
+    return _apply(fig, {
+        "xaxis": {**CHART_BASE["xaxis"], "title": "Commercial Vehicle Segment"},
+        "yaxis": {**CHART_BASE["yaxis"], "title": "EV Readiness Score (0–10)", "range": [-0.5, 10.5]},
+        "height": 420,
+        "showlegend": False,
+    })
+
+
+def chart_segment_heatmap_continental(df: pd.DataFrame) -> go.Figure:
+    """
+    Continental heatmap: rows = countries, columns = segments, color = EV readiness,
+    cell text = volume. Reveals the "LCV electrifies fast, EHCV stays diesel" pattern.
+    """
+    pivot_readiness = df.pivot(index="Country", columns="Segment", values="EV_Readiness")
+    pivot_volume = df.pivot(index="Country", columns="Segment", values="Volume")
+
+    seg_order = ["LCV (Light Urban)", "MCV / Rigid (Construction)", "EHCV / Tractor (Long-Haul)"]
+    pivot_readiness = pivot_readiness[seg_order]
+    pivot_volume = pivot_volume[seg_order]
+
+    text_matrix = [
+        [f"{pivot_readiness.iloc[i,j]:.1f}<br>({pivot_volume.iloc[i,j]:,.0f} u)"
+         for j in range(len(seg_order))]
+        for i in range(len(pivot_readiness))
+    ]
+
+    fig = go.Figure(go.Heatmap(
+        z=pivot_readiness.values,
+        x=seg_order,
+        y=pivot_readiness.index.tolist(),
+        text=text_matrix,
+        texttemplate="%{text}",
+        textfont=dict(size=10, family="Inter", color="#2D3142"),
+        colorscale=[
+            [0.0, "#F4F5F7"],
+            [0.15, "#E8ECF4"],
+            [0.35, "#C0C8D8"],
+            [0.55, "#8BA7C4"],
+            [0.75, "#EB6C2D"],
+            [1.0, "#D04A02"],
+        ],
+        zmin=0, zmax=10,
+        colorbar=dict(
+            title=dict(text="EV Readiness", font=dict(size=10, family="Inter", color="#5A6070")),
+            tickfont=dict(size=9, family="Inter", color="#9BA3B2"),
+            thickness=12, len=0.7,
+        ),
+        hovertemplate="<b>%{y} — %{x}</b><br>EV Readiness: %{z:.1f}/10<extra></extra>",
+    ))
+    return _apply(fig, {
+        "xaxis": {**CHART_BASE["xaxis"], "title": "", "side": "top"},
+        "yaxis": {**CHART_BASE["yaxis"], "title": "", "automargin": True},
+        "height": 460,
+        "margin": dict(l=110, r=20, t=60, b=20),
+    })
+
+
+def chart_risk_radar(df: pd.DataFrame, country: str) -> go.Figure:
+    """
+    Operational risk radar chart — 5 dimensions on 0-10 scale.
+    """
+    categories = df["Dimension"].tolist()
+    values = df["Score"].tolist()
+    categories_closed = categories + [categories[0]]
+    values_closed = values + [values[0]]
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatterpolar(
+        r=values_closed,
+        theta=categories_closed,
+        fill="toself",
+        fillcolor="rgba(208,74,2,0.15)",
+        line=dict(color="#D04A02", width=2.5),
+        marker=dict(size=7, color="#D04A02"),
+        name=country,
+        hovertemplate="<b>%{theta}</b><br>Score: %{r:.1f}/10<extra></extra>",
+    ))
+    fig.update_layout(
+        polar=dict(
+            bgcolor="rgba(0,0,0,0)",
+            radialaxis=dict(
+                visible=True, range=[0, 10],
+                tickfont=dict(size=9, color="#9BA3B2", family="Inter"),
+                gridcolor="#E2E5EB", linecolor="#E2E5EB",
+            ),
+            angularaxis=dict(
+                tickfont=dict(size=11, color="#2D3142", family="Inter"),
+                gridcolor="#E2E5EB", linecolor="#E2E5EB",
+            ),
+        ),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, sans-serif", color="#2D3142", size=12),
+        showlegend=False,
+        margin=dict(l=60, r=60, t=40, b=40),
+        height=440,
+    )
+    return fig
 # ══════════════════════════════════════════════════════════════════════════════
 # 10. UI HELPER FUNCTIONS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1503,6 +1942,121 @@ def _tri_section(cdata):
             continue
         with st.expander(f"🔍  {t['title']}", expanded=False):
             render_triangulation(tk)
+
+def _render_tco_module(country: str, cdata: dict, key_prefix: str):
+    """
+    VP-level financial module: 36-month TCO break-even analysis.
+    Renders for any Tier 1 country that has tco_params defined.
+    """
+    if "tco_params" not in cdata:
+        return
+    p = cdata["tco_params"]
+    breakeven_month, breakeven_cost = calc_tco_breakeven(country)
+
+    _sdiv("TCO Break-even Analysis — 36-Month Horizon",
+          "VP Commercial Finance Module · ICE vs EV cumulative cost crossover")
+
+    _chdr(
+        f"Exclusive Financial Module · {country}",
+        "36-Month Cumulative TCO: ICE vs. EV Commercial Vehicle",
+        f"Capex: ICE ${p['ICE_Capex']:,.0f} vs EV ${p['EV_Capex']:,.0f}. "
+        f"Energy cost: ICE ${p['ICE_Energy_Cost_per_km']:.3f}/km vs EV ${p['EV_Energy_Cost_per_km']:.3f}/km "
+        f"at {p['Monthly_km']:,} km/month utilisation.",
+        p["source_name"], p["source_url"],
+    )
+    st.plotly_chart(chart_tco_breakeven(country), use_container_width=True,
+                    config={"displayModeBar": False}, key=f"{key_prefix}_tco")
+
+    t1, t2, t3, t4 = st.columns(4)
+    with t1:
+        st.metric("ICE Capex", f"${p['ICE_Capex']:,.0f}", help="Upfront purchase price, ICE vehicle")
+    with t2:
+        st.metric("EV Capex", f"${p['EV_Capex']:,.0f}",
+                  f"+${p['EV_Capex']-p['ICE_Capex']:,.0f} premium", delta_color="inverse")
+    with t3:
+        if breakeven_month is not None:
+            st.metric("TCO Break-even", f"Month {breakeven_month:.1f}",
+                     f"≈ {breakeven_month/12:.1f} years", delta_color="normal")
+        else:
+            st.metric("TCO Break-even", "Not reached", "Beyond 36 months", delta_color="inverse")
+    with t4:
+        energy_saving_per_km = p["ICE_Energy_Cost_per_km"] - p["EV_Energy_Cost_per_km"]
+        monthly_saving = energy_saving_per_km * p["Monthly_km"]
+        st.metric("Monthly Energy Saving", f"${monthly_saving:,.0f}",
+                 f"${energy_saving_per_km:.3f}/km delta")
+    st.caption(
+        f"Source: [{p['source_name']}]({p['source_url']}) · "
+        "Simulated TCO model. Capex figures are illustrative landed costs; "
+        "excludes maintenance, residual value, and financing cost differentials."
+    )
+
+
+def _render_segment_module(country: str, cdata: dict, key_prefix: str):
+    """
+    Segment opportunity bubble chart: LCV / MCV-Rigid / EHCV-Tractor.
+    """
+    if "segment_data" not in cdata:
+        return
+    _sdiv("Segment Opportunity Map — Where EV Wins, Where Diesel Still Rules",
+          "VP Commercial Strategy Module · Volume vs EV Readiness by sub-segment")
+
+    src = cdata["sources"]["trade"]
+    _chdr(
+        f"Exclusive Segment Module · {country}",
+        "LCV vs MCV/Rigid vs EHCV/Tractor — Volume & EV Readiness",
+        "Bubble size = annual volume. Y-axis = EV readiness score (0–10). "
+        "Pattern: light urban segments electrify fastest; long-haul tractors remain diesel-dependent.",
+        src[0], src[1],
+    )
+    df_seg = gen_segment_df(country)
+    st.plotly_chart(chart_segment_bubble(df_seg), use_container_width=True,
+                    config={"displayModeBar": False}, key=f"{key_prefix}_segment")
+
+    s1, s2, s3 = st.columns(3)
+    for col, (_, row) in zip([s1, s2, s3], df_seg.iterrows()):
+        with col:
+            color_label = "🟢" if row["EV_Readiness"] >= 6 else "🟡" if row["EV_Readiness"] >= 3 else "🔴"
+            st.metric(row["Segment"], f"{row['Volume']:,} units/yr",
+                     f"{color_label} EV Readiness: {row['EV_Readiness']:.1f}/10")
+    st.caption(f"Source: [{src[0]}]({src[1]}) · Segment volumes and EV readiness scores are simulated estimates.")
+
+
+def _render_risk_radar_module(country: str, cdata: dict, key_prefix: str):
+    """
+    Operational risk radar — rendered in the Policy & Market Access tab.
+    """
+    if "risk_radar" not in cdata:
+        return
+    _sdiv("Operational Risk Radar — Beyond Tariffs",
+          "VP Risk & Compliance Module · 5-dimension quantified market risk profile")
+
+    src = cdata["sources"]["trade"]
+    _chdr(
+        f"Exclusive Risk Module · {country}",
+        "5-Dimension Operational Risk Profile",
+        "FX Liquidity · Tariff Advantage · Port Efficiency · Grid Stability · Policy Consistency. "
+        "Each dimension scored 0 (severe risk) to 10 (best-in-class).",
+        src[0], src[1],
+    )
+    df_risk = gen_risk_radar_df(country)
+    rc1, rc2 = st.columns([2, 1], gap="large")
+    with rc1:
+        st.plotly_chart(chart_risk_radar(df_risk, country), use_container_width=True,
+                        config={"displayModeBar": False}, key=f"{key_prefix}_radar")
+    with rc2:
+        st.markdown("#### Risk Dimension Scores")
+        for _, row in df_risk.iterrows():
+            color = "#1A8C5B" if row["Score"] >= 7 else "#B45309" if row["Score"] >= 4 else "#B91C1C"
+            risk_label = "Low Risk" if row["Score"] >= 7 else "Moderate Risk" if row["Score"] >= 4 else "High Risk"
+            st.markdown(f"""
+<div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #F0F2F5;">
+    <div style="font-family:'Inter';font-size:.7rem;color:#9BA3B2;text-transform:uppercase;letter-spacing:.5px;">{row['Dimension']}</div>
+    <div style="font-family:'Inter';font-size:1.1rem;font-weight:700;color:{color};">{row['Score']:.1f}/10</div>
+    <div style="font-family:'Inter';font-size:.68rem;color:{color};font-weight:500;">{risk_label}</div>
+</div>
+""", unsafe_allow_html=True)
+    st.caption(f"Source: [{src[0]}]({src[1]}) · Risk scores are analyst-assessed estimates based on simulated and publicly available indicators.")
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 11. COUNTRY MARKET TAB RENDERERS
@@ -1588,6 +2142,10 @@ def render_south_africa(cdata):
                     use_container_width=True, config={"displayModeBar":False}, key="za_sc")
     st.caption(f"Source: [Transnet IR]({TRANSNET}) · [NAAMSA]({NAAMSA}) · Simulated data.")
 
+    # ── v10.0 new modules ──────────────────────────────────────────────────────
+    _render_tco_module("South Africa", cdata, "za")
+    _render_segment_module("South Africa", cdata, "za")
+
     _sdiv("2026 Policy Alert — 150% NEV Manufacturing Tax Deduction", "Strategic pivot · From 1 March 2026")
     st.warning(
         "**⚡ STRATEGIC PIVOT ALERT — South Africa 2026 Budget**\n\n"
@@ -1624,6 +2182,11 @@ def render_nigeria(cdata):
     st.plotly_chart(chart_ng_waterfall(gen_ng_waterfall()),
                     use_container_width=True, config={"displayModeBar":False}, key="ng_wf")
     st.caption(f"Source: [Nigeria Customs]({CUSTOMS}) · [NADDC]({NADDC}) · Figures illustrative.")
+
+    # ── v10.0 new modules ──────────────────────────────────────────────────────
+    _render_tco_module("Nigeria", cdata, "ng")
+    _render_segment_module("Nigeria", cdata, "ng")
+
     _tri_section(cdata)
 
 
@@ -1648,6 +2211,11 @@ def render_morocco(cdata):
     st.plotly_chart(chart_ocp_throughput(gen_ocp_throughput()),
                     use_container_width=True, config={"displayModeBar":False}, key="ma_ocp")
     st.caption(f"Source: [OCP Group IR]({OCP}) · Simulated data.")
+
+    # ── v10.0 new modules ──────────────────────────────────────────────────────
+    _render_tco_module("Morocco", cdata, "ma")
+    _render_segment_module("Morocco", cdata, "ma")
+
     _tri_section(cdata)
 
 
@@ -1665,6 +2233,11 @@ def render_ethiopia(cdata):
     st.plotly_chart(chart_eth_ev(gen_eth_ev()),
                     use_container_width=True, config={"displayModeBar":False}, key="eth_ev")
     st.caption(f"Source: [MoTI Ethiopia]({MOTI}) · [ERCA]({ERCA}) · Simulated data.")
+
+    # ── v10.0 new modules ──────────────────────────────────────────────────────
+    _render_tco_module("Ethiopia", cdata, "eth")
+    _render_segment_module("Ethiopia", cdata, "eth")
+
     _tri_section(cdata)
 
 
@@ -1759,13 +2332,15 @@ def render_tunisia(cdata):
             icon="✅"
         )
         st.caption("Assessment: STEG infrastructure data + operator interviews Q1 2026")
+
+    # ── v10.0 new modules ──────────────────────────────────────────────────────
+    _render_tco_module("Tunisia", cdata, "tn")
+    _render_segment_module("Tunisia", cdata, "tn")
+
     _tri_section(cdata)
 
 
 def render_rwanda(cdata):
-    """
-    Rwanda exclusive panel — EAC Sandbox & Showcase Centre.
-    """
     RDB    = "https://www.rdb.rw"
     RURA   = "https://www.rura.rw"
     RRA    = "https://www.rra.gov.rw"
@@ -1774,7 +2349,6 @@ def render_rwanda(cdata):
 
     _kpi_row(cdata)
 
-    # ── Strategic Context Hero Callout
     st.success(
         "**🇷🇼 Rwanda — EAC Strategic Sandbox & EV Showcase Centre**\n\n"
         "Rwanda is **not a volume market** — it is the **lowest-risk, highest-visibility** "
@@ -1800,7 +2374,6 @@ def render_rwanda(cdata):
     )
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # ── Energy Cost Comparison Callout
     st.info(
         "**⚡ Energy Economics — The Rwanda EV Advantage**\n\n"
         "**Diesel truck operating cost (per 100 km):**\n"
@@ -1823,7 +2396,6 @@ def render_rwanda(cdata):
 
     _standard_2col("Rwanda", cdata, "rw")
 
-    # ── Chart 1: EAC Tariff Comparison Waterfall
     _sdiv("Policy Arbitrage — EAC ICE Tariff vs Rwanda EV Zero-Tax",
           "Exclusive Tier 1 · Per-unit duty & tax comparison · RDB Investment Code 2024")
     _chdr(
@@ -1848,7 +2420,6 @@ def render_rwanda(cdata):
         "USD exchange rate: 1 USD = 1,400 RWF (BNR average Q1 2026). Figures illustrative."
     )
 
-    # ── Chart 2: Kigali EV Adoption Stacked Area
     st.markdown("<br>", unsafe_allow_html=True)
     _sdiv("Kigali Urban EV Fleet Adoption Trend",
           "Exclusive Tier 1 · Public Buses + Urban e-LCV · 2022–2027 · RURA data + forecast")
@@ -1856,8 +2427,7 @@ def render_rwanda(cdata):
         "Exclusive Module 2 · RURA / MINICOM",
         "Kigali Public Transport & City Logistics — EV Displacing ICE (Stacked Area)",
         "EV share of Kigali public buses and urban light commercial vehicles (e-LCV). "
-        "2022–2025 actuals; 2026–2027 RURA Green Mobility forecast. "
-        "Orange = EV (growing); Grey = ICE (declining).",
+        "2022–2025 actuals; 2026–2027 RURA Green Mobility forecast.",
         "RURA — Rwanda Utilities Regulatory Authority · Green Mobility Annual Report 2024", RURA,
     )
     df_ev = gen_rw_ev_adoption()
@@ -1876,7 +2446,10 @@ def render_rwanda(cdata):
     )
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # ── B2B Target Accounts
+    # ── v10.0 new modules ──────────────────────────────────────────────────────
+    _render_tco_module("Rwanda", cdata, "rw")
+    _render_segment_module("Rwanda", cdata, "rw")
+
     _sdiv("B2B Target Ecosystem — Kigali",
           "Priority Fleet Accounts for EV Commercial Vehicle Introduction")
     st.info(
@@ -1889,7 +2462,7 @@ def render_rwanda(cdata):
         "**Tier B — B2B Corporate Fleet:**\n"
         "- **RwandAir Cargo:** Ground support and airside logistics fleet renewal (Kigali International).\n"
         "- **BRALIRWA (Heineken Rwanda):** Kigali distribution fleet — 30–40 units. Depot-based, "
-        "ideal for EV conversion. Contact: Supply Chain Director.\n"
+        "ideal for EV conversion.\n"
         "- **MTN Rwanda:** Network maintenance vehicles + corporate shuttle fleet — 60+ units.\n"
         "- **La Colombière / COLAS Rwanda:** Construction logistics for Vision 2050 infrastructure projects.\n\n"
         "**Tender Portal:** [Rwanda Public Procurement Authority (RPPA)](https://www.rppa.gov.rw)",
@@ -1901,7 +2474,6 @@ def render_rwanda(cdata):
     )
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # ── Infrastructure Assessment
     _sdiv("Infrastructure & Operational Readiness", "Grid, charging, and logistics context")
     c_grid1, c_grid2 = st.columns(2, gap="large")
     with c_grid1:
@@ -1909,8 +2481,7 @@ def render_rwanda(cdata):
             "**✅ Infrastructure Strengths (Unique in Sub-Sahara)**\n\n"
             "- **Grid reliability: <2% annual outage rate** (REG 2024) — structurally unlike "
             "South Africa's load-shedding or Nigeria's grid volatility\n"
-            "- **Electricity mix: ~80% renewable** (hydro + methane + solar) — "
-            "lowest carbon intensity EV charging in East Africa\n"
+            "- **Electricity mix: ~80% renewable** (hydro + methane + solar)\n"
             "- **RURA e-mobility tariff: RWF 115/kWh** — dedicated commercial fleet rate\n"
             "- **Kigali urban grid:** Dedicated 33kV feeder lines for Kigali Special Economic Zone\n"
             "- **Emerging charging network:** 12 commercial fast-chargers in Kigali (2025), "
@@ -1921,8 +2492,7 @@ def render_rwanda(cdata):
     with c_grid2:
         st.warning(
             "**⚠ Infrastructure Constraints**\n\n"
-            "- **Outside Kigali:** Northern Province (Musanze), Southern Province (Huye), "
-            "Eastern Province (Kayonza) have zero commercial chargers as of Q1 2026\n"
+            "- **Outside Kigali:** Northern, Southern, Eastern Provinces have zero commercial chargers as of Q1 2026\n"
             "- **Rwanda–DRC border logistics:** No EV charging on Kigali–Goma corridor (235 km)\n"
             "- **Rwanda–Tanzania corridor:** Kigali–Rusumo–Mwanza (650 km) has zero chargers "
             "— long-haul EAC cross-border EV remains 2028+ proposition\n"
@@ -1961,8 +2531,14 @@ def render_generic(country, cdata):
 """, unsafe_allow_html=True)
     src = cdata["sources"]["trade"]
     st.caption(f"Source: [{src[0]}]({src[1]}) · Assessment based on simulated market intelligence.")
-    _tri_section(cdata)
 
+    # ── v10.0 new modules (only render if data present) ───────────────────────
+    if "tco_params" in cdata:
+        _render_tco_module(country, cdata, country[:2].lower())
+    if "segment_data" in cdata:
+        _render_segment_module(country, cdata, country[:2].lower())
+
+    _tri_section(cdata)
 # ══════════════════════════════════════════════════════════════════════════════
 # 12. MAP BUILDER
 # ══════════════════════════════════════════════════════════════════════════════
@@ -2038,7 +2614,7 @@ with st.sidebar:
         Africa CV Intelligence
     </div>
     <div style="font-family:'Inter';font-size:.68rem;color:rgba(255,255,255,.4);margin-top:2px;">
-        Enterprise Market Analytics · v9.0
+        VP Commercial Analysis Edition · v10.0
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -2082,11 +2658,10 @@ with st.sidebar:
     st.markdown(f"""
 <div style="font-family:'Inter';font-size:.58rem;color:rgba(255,255,255,.22);
             text-align:center;margin-top:16px;line-height:2.1;">
-    Africa CV Intelligence v9.0<br>
+    Africa CV Intelligence v10.0<br>
     {datetime.now().strftime('%Y-%m-%d %H:%M')} · Internal use only
 </div>
 """, unsafe_allow_html=True)
-
 # ══════════════════════════════════════════════════════════════════════════════
 # 15. PAGE HEADER
 # ══════════════════════════════════════════════════════════════════════════════
@@ -2098,7 +2673,7 @@ with h1:
         Africa Commercial Vehicle Market Intelligence
     </div>
     <div style="font-family:'Inter';font-size:.78rem;color:#9BA3B2;margin-top:3px;">
-        9 Tier 1 markets · Rwanda EAC Sandbox · NAAMSA 2025 real data · Tunisia TCO · ZA 150% Tax Pivot · Deal-making intelligence
+        9 Tier 1 markets · TCO Break-even Modelling · Segment Opportunity Mapping · Operational Risk Radar · Deal-making intelligence
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -2150,7 +2725,6 @@ with map_col:
                 st.session_state.selected_country = clicked_name
                 st.cache_data.clear(); st.rerun()
 
-    # Legend row — now 9 countries
     leg_cols = st.columns(len(TIER1))
     for lc, (cname, cd) in zip(leg_cols, TIER1.items()):
         active = cname == sel
@@ -2220,11 +2794,11 @@ flag_display = cdata.get("flag", macro.get("flag","🌍")) if is_t1 else macro.g
 tri_count    = len(cdata.get("tri_keys",[])) if is_t1 else 0
 
 subtitles = {
-    "South Africa": "Full Tier 1 · NAAMSA 2025 Real Data · Stats SA P7162 · 150% Tax Pivot Alert",
+    "South Africa": "Full Tier 1 · NAAMSA 2025 Real Data · TCO Break-even · Segment Map · 150% Tax Pivot",
     "Tunisia":      "Full Tier 1 · TCO Waterfall · B2B Ecosystem · EV Policy Arbitrage 2026",
-    "Rwanda":       "★ EAC Sandbox · 0% Duty + 0% VAT · G2G Bus Programme · e-LCV Urban Logistics",
+    "Rwanda":       "★ EAC Sandbox · 0% Duty + 0% VAT · G2G Bus Programme · TCO Break-even · Segment Map",
 }
-sub_default = f"Full Tier 1 analytics · {tri_count} Due Diligence module{'s' if tri_count!=1 else ''}" if is_t1 else "General coverage — live news + macro indicators"
+sub_default = f"Full Tier 1 analytics · TCO Break-even · Segment Map · {tri_count} Due Diligence module{'s' if tri_count!=1 else ''}" if is_t1 else "General coverage — live news + macro indicators"
 
 st.markdown(f"""
 <div class="section-hdr">
@@ -2240,7 +2814,7 @@ tab_market, tab_policy, tab_news = st.tabs([
     "📡  Intelligence Feed",
 ])
 
-# ── TAB 1 ─────────────────────────────────────────────────────────────────────
+# ── TAB 1: Market Analytics ───────────────────────────────────────────────────
 with tab_market:
     if not is_t1:
         st.info(f"**{sel}** is a Tier 2 market. Full analytics available for 9 Tier 1 core markets.", icon="ℹ️")
@@ -2257,7 +2831,7 @@ with tab_market:
     elif sel == "Rwanda":       render_rwanda(cdata)
     else:                       render_generic(sel, cdata)
 
-# ── TAB 2 ─────────────────────────────────────────────────────────────────────
+# ── TAB 2: Policy & Market Access ─────────────────────────────────────────────
 with tab_policy:
     if not is_t1:
         st.info(f"Detailed policy brief for **{sel}** not yet available. Showing AfCFTA general framework.", icon="📋")
@@ -2286,6 +2860,9 @@ with tab_policy:
             st.markdown(f'<div class="pol-card"><div class="pol-card-title">🏗 Key Buyers & Procurement Bodies</div><p>{p["key_buyers"]}</p></div>', unsafe_allow_html=True)
             st.caption(f"Source: [{src_t[0]}]({src_t[1]})")
             st.markdown(f'<div class="pol-card warn"><div class="pol-card-title">⚠ Risk Factors & Operational Considerations</div><p>{p["risk"]}</p></div>', unsafe_allow_html=True)
+
+        # ── v10.0: Operational Risk Radar (new module) ──────────────────────
+        _render_risk_radar_module(sel, cdata, sel[:2].lower())
 
         _sdiv("Market Entry Assessment Scorecard")
         all_sc = {
@@ -2317,7 +2894,7 @@ with tab_policy:
 """, unsafe_allow_html=True)
         st.caption(f"Source: [{src_t[0]}]({src_t[1]}) · Assessment based on simulated and publicly available market intelligence.")
 
-# ── TAB 3 ─────────────────────────────────────────────────────────────────────
+# ── TAB 3: Intelligence Feed ───────────────────────────────────────────────────
 with tab_news:
     news_query = cdata.get("news_query","") if is_t1 else f"{sel} transport logistics commercial vehicle"
     st.markdown(f"""
@@ -2399,9 +2976,9 @@ st.markdown(f"""
             font-family:'Inter';font-size:.68rem;color:#9BA3B2;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
         <div>
-            <strong style="color:#5A6070;">Africa CV Market Intelligence Platform v9.0</strong>
+            <strong style="color:#5A6070;">Africa CV Market Intelligence Platform v10.0</strong>
             &nbsp;·&nbsp; Internal strategic use only
-            &nbsp;·&nbsp; Rwanda EAC Sandbox · NAAMSA 2025 · Tunisia Loi 2026 · ZA 150% Tax Pivot · 9 Tier 1 Markets
+            &nbsp;·&nbsp; VP Commercial Analysis Edition · TCO Break-even · Segment Map · Risk Radar · 9 Tier 1 Markets
         </div>
         <div style="text-align:right;">
             RDB · RURA · NAAMSA · Stats SA · National Treasury ZA · ANME TN · OCP · Reuters · Bloomberg · AfDB
