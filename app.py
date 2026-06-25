@@ -1,7 +1,7 @@
 """
 Africa Commercial Vehicle Market Intelligence Platform
-Enterprise BI Engine v10.0
-VP Commercial Analysis Edition — TCO Break-even · Segment Heatmap · Operational Risk Radar
+Enterprise BI Engine v11.0
+McKinsey UX Refactor — Narrative-Flow Layout · Zero Text Overlap · Collapsed Intel Feed
 """
 
 import streamlit as st
@@ -22,7 +22,7 @@ st.set_page_config(
 )
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 1. GLOBAL CSS
+# 1. GLOBAL CSS — including mandatory anti text-overlap rule
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown("""
 <style>
@@ -69,9 +69,14 @@ button[aria-selected="true"][data-baseweb="tab"]{
 [data-testid="stMetricValue"]{font-size:1.65rem!important;font-weight:700!important;color:var(--txt)!important;}
 .section-hdr{
     display:flex;align-items:center;gap:10px;
-    margin:26px 0 14px 0;padding-bottom:10px;border-bottom:1px solid var(--border);
+    margin:30px 0 16px 0;padding-bottom:10px;border-bottom:1px solid var(--border);
 }
 .section-bar{width:4px;height:20px;background:var(--orange);border-radius:2px;flex-shrink:0;}
+.level-badge{
+    font-size:.62rem;font-weight:700;letter-spacing:1px;color:#fff;
+    background:var(--navy);padding:3px 10px;border-radius:20px;text-transform:uppercase;
+    flex-shrink:0;
+}
 .section-title{font-size:.88rem;font-weight:700;letter-spacing:.4px;color:var(--txt);text-transform:uppercase;}
 .section-sub{font-size:.72rem;color:var(--dim);margin-left:4px;}
 .chart-card{
@@ -90,11 +95,6 @@ button[aria-selected="true"][data-baseweb="tab"]{
 .pol-card.warn{border-left-color:var(--orange);}
 .pol-card.ok{border-left-color:var(--green);}
 .pol-card-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mid);margin-bottom:7px;}
-.pol-card p,.pol-card li{
-    font-size:.82rem;color:var(--txt);line-height:1.65;margin:0;
-    word-wrap:break-word;overflow-wrap:break-word;white-space:normal;
-}
-.pol-card ul{margin:5px 0 0 0;padding-left:15px;}
 .sb-hdr{
     font-size:.6rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
     color:rgba(255,255,255,.38)!important;margin:16px 0 6px 0;
@@ -104,35 +104,46 @@ button[aria-selected="true"][data-baseweb="tab"]{
     display:block;padding:7px 11px;margin:3px 0;border-radius:6px;font-size:.77rem;
     color:#C8D3E8!important;text-decoration:none!important;
     border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);
-    word-wrap:break-word;overflow-wrap:break-word;white-space:normal;transition:all .15s;
+    transition:all .15s;
 }
 .sb-link:hover{background:rgba(208,74,2,.2);border-color:rgba(208,74,2,.5);color:#fff!important;}
-.news-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);}
+.news-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
 .news-hdr{background:var(--navy);padding:11px 16px;display:flex;align-items:center;gap:10px;}
 .news-hdr-title{font-size:.78rem;font-weight:600;color:#fff;letter-spacing:.4px;text-transform:uppercase;}
 .news-badge{background:var(--orange);color:#fff;font-size:.58rem;font-weight:700;padding:2px 8px;border-radius:20px;}
 .news-fb-badge{background:#F0F3F8;color:var(--mid);font-size:.58rem;font-weight:700;padding:2px 8px;border-radius:20px;}
-.news-item{padding:13px 16px;border-bottom:1px solid var(--border);transition:background .15s;}
+.news-item{padding:13px 16px;border-bottom:1px solid var(--border);}
 .news-item:last-child{border-bottom:none;}
-.news-item:hover{background:#FAFBFC;}
 .news-title-a{
     font-size:.83rem;font-weight:500;color:var(--txt)!important;
     text-decoration:none!important;line-height:1.55;display:block;
-    word-wrap:break-word;overflow-wrap:break-word;word-break:break-word;white-space:normal;
 }
 .news-title-a:hover{color:var(--orange)!important;}
-.news-meta{font-size:.68rem;color:var(--dim);margin-top:5px;word-wrap:break-word;white-space:normal;}
+.news-meta{font-size:.68rem;color:var(--dim);margin-top:5px;}
 .news-src{display:inline-block;background:#F0F3F8;color:var(--navy);font-size:.6rem;font-weight:600;padding:1px 7px;border-radius:4px;margin-right:5px;}
 .news-fb-src{display:inline-block;background:#FFF3ED;color:var(--orange);font-size:.6rem;font-weight:600;padding:1px 7px;border-radius:4px;margin-right:5px;}
 .news-empty{padding:28px 16px;text-align:center;color:var(--dim);font-size:.8rem;line-height:1.8;}
-.fallback-badge{
-    display:inline-flex;align-items:center;gap:6px;background:#FFF3ED;
-    border:1px solid #F0C4AC;border-radius:20px;padding:4px 14px;
-    font-size:.72rem;font-weight:600;color:var(--orange);margin-bottom:14px;
+.action-box{
+    background:linear-gradient(135deg,#FFF8F5 0%,#FFF3ED 100%);
+    border:2px solid var(--orange);border-radius:var(--radius);
+    padding:18px 20px;margin-top:16px;box-shadow:var(--shadow);
 }
+.action-box-title{
+    font-size:.78rem;font-weight:700;letter-spacing:.6px;color:var(--orange);
+    text-transform:uppercase;margin-bottom:8px;
+}
+.gate-index-card{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius);
+    padding:16px 18px;box-shadow:var(--shadow);text-align:center;
+}
+.gate-index-value{font-size:2.2rem;font-weight:700;font-family:'Inter';}
+.gate-index-label{font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;margin-top:4px;}
 #MainMenu,footer,header{visibility:hidden;}
 [data-testid="stToolbar"]{display:none;}
 .block-container{padding-top:0!important;}
+
+/* ── MANDATORY ANTI TEXT-OVERLAP RULE (Task 1) ── */
+.stMarkdown, p, div {word-wrap: break-word; overflow-wrap: break-word;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -163,8 +174,10 @@ def _apply(fig, ov=None):
         layout.update(ov)
     fig.update_layout(**layout)
     return fig
+
+PLOTLY_CFG = {"displayModeBar": False}
 # ══════════════════════════════════════════════════════════════════════════════
-# 3. TRIANGULATION DATA
+# 3. TRIANGULATION DATA — unchanged structure, reused verbatim
 # ══════════════════════════════════════════════════════════════════════════════
 TRIANGULATION = {
     "rw_sandbox": {
@@ -442,17 +455,26 @@ TRIANGULATION = {
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 4. TRIANGULATION RENDERER — 100% native Streamlit
+# 4. TRIANGULATION RENDERER — strictly single-column, top-to-bottom (Task 1 + 2)
 # ══════════════════════════════════════════════════════════════════════════════
 def render_triangulation(tri_key: str):
+    """
+    Renders the three-layer Due Diligence logic in a single vertical column.
+    No st.columns are used here by design — long-form text must never sit
+    side-by-side with another long-form text block (this was the source of
+    the text-overlap bug in earlier versions).
+    """
     if tri_key not in TRIANGULATION:
         return
     t = TRIANGULATION[tri_key]
+
     st.markdown("**① Market Claim &nbsp;/&nbsp; 市场观点**")
     st.markdown(f"> {t['claim']}")
     st.markdown("")
+
     cv_text = "\n\n".join(f"- {item}" for item in t["cross_validation_items"])
     st.info(f"**② Cross-Validation &nbsp;/&nbsp; 交叉验证**\n\n{cv_text}", icon="🔍")
+
     conf_lines = "\n".join(f"- {badge} — {label}" for badge, label in t["confidence_items"])
     full_verdict = (
         f"**③ Analyst Verdict &nbsp;/&nbsp; 最终研判**\n\n"
@@ -463,13 +485,36 @@ def render_triangulation(tri_key: str):
         st.success(full_verdict, icon="✅")
     else:
         st.warning(full_verdict, icon="⚠️")
+
+
+def render_strategic_action(cdata: dict):
+    """
+    Level 4 closing element — a single, visually distinct action box that
+    converts the Due Diligence verdict into a concrete sales instruction.
+    Pulled from cdata['action'], which every Tier 1 country dict defines.
+    """
+    action = cdata.get("action")
+    if not action:
+        return
+    st.markdown(f"""
+<div class="action-box">
+    <div class="action-box-title">🎯 Strategic Action / 销售行动指令</div>
+    <div style="font-size:.86rem;color:#2D3142;line-height:1.7;">
+        {action}
+    </div>
+</div>
+""", unsafe_allow_html=True)
 # ══════════════════════════════════════════════════════════════════════════════
 # 5. TIER-1 COUNTRY DATABASE
-#    New fields added in v10.0:
-#      - tco_params: dict with ICE_Capex, EV_Capex, ICE_Energy_Cost_per_km, EV_Energy_Cost_per_km
-#      - segment_data: dict with LCV / MCV_Rigid / EHCV_Tractor -> {volume, ev_readiness}
-#      - risk_radar: dict with FX_Liquidity, Tariff_Advantage, Port_Efficiency,
-#                     Grid_Stability, Policy_Consistency (all 0-10 scale)
+#    v11.0 schema additions:
+#      - risk_radar:  unchanged 5-dim 0-10 scores (FX_Liquidity is the gate trigger)
+#      - tco_params:  + Interest_Rate (annual financing cost, used to compound
+#                      monthly capital carrying cost into the TCO curve)
+#      - segment_apps: replaces old segment_data; reframed into the three
+#                      application scenarios requested: 城市快消 (Urban FMCG),
+#                      港口倒短 (Port Drayage), 长途矿业 (Long-Haul Mining)
+#      - action:      single sentence/paragraph sales instruction, rendered
+#                      in the Level 4 Strategic Action box
 # ══════════════════════════════════════════════════════════════════════════════
 TIER1 = {
     "Nigeria": {
@@ -481,7 +526,6 @@ TIER1 = {
             "Diesel Price":     ("₦1,180","/litre","≈ $0.74 USD","https://pppra.gov.ng"),
         },
         "brand_share":{"brands":["Sinotruk","FAW","Foton","Volvo","Scania"],"sales":[1840,1420,980,560,410]},
-        "trend":{"years":[2021,2022,2023,2024,2025,2026],"ice":[38200,39500,40100,41800,43200,43800],"ev":[0,80,320,820,1640,1400]},
         "policy":{
             "tariff":      "CBU EV: 0% (2023–2028). CKD/SKD: 0%. Conventional CBU: 35%.",
             "certification":"SON mandatory; NAFDAC for specialist vehicles; Form M import approval required.",
@@ -495,20 +539,20 @@ TIER1 = {
             "customs":("Nigeria Customs Service","https://customs.gov.ng"),
             "market": ("Nigeria Trade Hub","https://trade.gov.ng"),
         },
-        # ── v10.0 new fields ────────────────────────────────────────────────────
         "tco_params": {
             "ICE_Capex":               95000,
             "EV_Capex":                145000,
             "ICE_Energy_Cost_per_km":  0.42,
             "EV_Energy_Cost_per_km":   0.11,
             "Monthly_km":              8000,
+            "Interest_Rate":           0.24,   # 24% annual — NGN lending rate environment
             "source_name": "NADDC / Nigeria Customs — Tariff & Fuel Price Modelling 2026",
             "source_url":  "https://naddc.gov.ng",
         },
-        "segment_data": {
-            "LCV":         {"volume": 18500, "ev_readiness": 7.2},
-            "MCV_Rigid":   {"volume": 16200, "ev_readiness": 3.8},
-            "EHCV_Tractor":{"volume": 10500, "ev_readiness": 1.1},
+        "segment_apps": {
+            "Urban FMCG (城市快消)":      {"volume": 14200, "ev_readiness": 7.0},
+            "Port Drayage (港口倒短)":    {"volume": 9800,  "ev_readiness": 4.5},
+            "Long-Haul Mining (长途矿业)":{"volume": 21200, "ev_readiness": 0.9},
         },
         "risk_radar": {
             "FX_Liquidity":        1.5,
@@ -517,6 +561,13 @@ TIER1 = {
             "Grid_Stability":      4.0,
             "Policy_Consistency":  4.5,
         },
+        "action": (
+            "FX liquidity is the binding constraint, not tariffs. Structure all contracts in "
+            "<b>USD-denominated CKD kits</b> with a Nigerian assembly partner (capturing the 0% CKD "
+            "duty) rather than CBU export — this avoids NGN devaluation risk on the bulk of the deal "
+            "value. Target Dangote and BUA Group fleet renewal cycles directly; Apapa port delays make "
+            "CKD-Lagos-assembly strictly faster to deliver than CBU import in 2026."
+        ),
     },
 
     "South Africa": {
@@ -528,7 +579,6 @@ TIER1 = {
             "Diesel Price":             ("R21.60","/litre","≈ $1.18 USD","https://www.energy.gov.za"),
         },
         "brand_share":{"brands":["Mercedes-Benz","Volvo","MAN","Scania","FAW"],"sales":[7200,6100,5800,5200,3100]},
-        "trend":{"years":[2021,2022,2023,2024,2025,2026],"ice":[29800,31200,32500,31800,30900,30900],"ev":[0,0,120,320,540,600]},
         "policy":{
             "tariff":      "25% CBU import duty. APDP Phase 2: >50% localisation earns PRCs. From 1 March 2026: 150% accelerated tax deduction on qualifying NEV manufacturing capex (cap R500m/yr).",
             "certification":"NRCS mandatory LoA; Euro 5-equivalent emissions; SABS type approval.",
@@ -548,13 +598,14 @@ TIER1 = {
             "ICE_Energy_Cost_per_km":  0.46,
             "EV_Energy_Cost_per_km":   0.09,
             "Monthly_km":              9500,
+            "Interest_Rate":           0.11,   # 11% — SA prime lending environment
             "source_name": "NAAMSA / Eskom Tariff Schedule 2026",
             "source_url":  "https://naamsa.co.za",
         },
-        "segment_data": {
-            "LCV":         {"volume": 11800, "ev_readiness": 6.5},
-            "MCV_Rigid":   {"volume": 12200, "ev_readiness": 3.2},
-            "EHCV_Tractor":{"volume": 7500,  "ev_readiness": 1.4},
+        "segment_apps": {
+            "Urban FMCG (城市快消)":      {"volume": 9600,  "ev_readiness": 6.2},
+            "Port Drayage (港口倒短)":    {"volume": 8100,  "ev_readiness": 3.8},
+            "Long-Haul Mining (长途矿业)":{"volume": 13000, "ev_readiness": 1.2},
         },
         "risk_radar": {
             "FX_Liquidity":        6.5,
@@ -563,6 +614,13 @@ TIER1 = {
             "Grid_Stability":      4.5,
             "Policy_Consistency":  7.0,
         },
+        "action": (
+            "Lead with the <b>150% tax deduction + APDP PRC stack</b> — this is the only durable moat "
+            "in this market. Do not pitch CBU export as a long-term strategy; pitch a <b>local assembly "
+            "JV</b> structured to qualify for both incentives before the 1 March 2026 deadline. Target "
+            "Transnet and Imperial Logistics for the Gauteng-corridor depot fleets where Eskom grid "
+            "reliability already supports overnight EV charging."
+        ),
     },
 
     "Morocco": {
@@ -574,7 +632,6 @@ TIER1 = {
             "Diesel Price":     ("MAD 13.50","/litre","≈ $1.34 USD","https://www.onhym.com"),
         },
         "brand_share":{"brands":["Renault Trucks","Mercedes-Benz","Volvo","Sinotruk","MAN"],"sales":[4200,3600,3100,2800,2100]},
-        "trend":{"years":[2021,2022,2023,2024,2025,2026],"ice":[14200,15100,16200,17400,18000,18000],"ev":[0,40,120,260,380,400]},
         "policy":{
             "tariff":      "EU AA Agreement: EU-origin CBU 2.5%. Chinese CBU: ~25% MFN. No dedicated KD incentive.",
             "certification":"CNEAT: UN-ECE mutual recognition. EU type-approved vehicles: fast-track.",
@@ -594,13 +651,14 @@ TIER1 = {
             "ICE_Energy_Cost_per_km":  0.38,
             "EV_Energy_Cost_per_km":   0.10,
             "Monthly_km":              7800,
+            "Interest_Rate":           0.06,   # 6% — Morocco's stable, low-cost capital
             "source_name": "AIVAM / ONHYM Energy Price Bulletin 2026",
             "source_url":  "http://www.aivam.ma",
         },
-        "segment_data": {
-            "LCV":         {"volume": 6800, "ev_readiness": 6.0},
-            "MCV_Rigid":   {"volume": 7100, "ev_readiness": 3.0},
-            "EHCV_Tractor":{"volume": 4500, "ev_readiness": 1.2},
+        "segment_apps": {
+            "Urban FMCG (城市快消)":      {"volume": 5400, "ev_readiness": 5.8},
+            "Port Drayage (港口倒短)":    {"volume": 5800, "ev_readiness": 4.2},
+            "Long-Haul Mining (长途矿业)":{"volume": 7200, "ev_readiness": 1.1},
         },
         "risk_radar": {
             "FX_Liquidity":        7.5,
@@ -609,6 +667,12 @@ TIER1 = {
             "Grid_Stability":      6.5,
             "Policy_Consistency":  8.0,
         },
+        "action": (
+            "Chinese CBU cannot win on tariff — the 2.5% EU-origin rate is structurally closed to "
+            "non-EU brands. Pitch a <b>CKD assembly JV</b> co-located near Casablanca Port to access the "
+            "2.5% rate via local content rules, and target OCP Group's contractor fleet (road-accessible "
+            "segment only — not the slurry pipeline trunk) as the anchor reference customer."
+        ),
     },
 
     "Egypt": {
@@ -620,7 +684,6 @@ TIER1 = {
             "Diesel Price":    ("EGP 9.75","/litre (subsidised)","≈ $0.20 USD","https://www.mop.gov.eg"),
         },
         "brand_share":{"brands":["Sinotruk","SAIC Maxus","Foton","Mercedes-Benz","MAN"],"sales":[6200,4800,3900,3500,2800]},
-        "trend":{"years":[2021,2022,2023,2024,2025,2026],"ice":[18000,20500,22100,24800,25600,25600],"ev":[0,0,60,130,200,200]},
         "policy":{
             "tariff":      "CBU: 40%. KD (>40% local content): 5%. SCZone production: 0%.",
             "certification":"EOS mandatory; GOEIC import licence; SCZone simplified clearance.",
@@ -640,13 +703,14 @@ TIER1 = {
             "ICE_Energy_Cost_per_km":  0.10,
             "EV_Energy_Cost_per_km":   0.07,
             "Monthly_km":              7200,
+            "Interest_Rate":           0.20,   # 20% — CBE policy rate environment
             "source_name": "EOS / Egypt Ministry of Petroleum Subsidised Fuel Schedule 2026",
             "source_url":  "https://www.mop.gov.eg",
         },
-        "segment_data": {
-            "LCV":         {"volume": 9800, "ev_readiness": 3.5},
-            "MCV_Rigid":   {"volume": 9500, "ev_readiness": 1.8},
-            "EHCV_Tractor":{"volume": 6500, "ev_readiness": 0.6},
+        "segment_apps": {
+            "Urban FMCG (城市快消)":      {"volume": 7200, "ev_readiness": 3.2},
+            "Port Drayage (港口倒短)":    {"volume": 8400, "ev_readiness": 2.0},
+            "Long-Haul Mining (长途矿业)":{"volume": 10200,"ev_readiness": 0.5},
         },
         "risk_radar": {
             "FX_Liquidity":        2.5,
@@ -655,6 +719,12 @@ TIER1 = {
             "Grid_Stability":      5.5,
             "Policy_Consistency":  5.0,
         },
+        "action": (
+            "Subsidised diesel (EGP 9.75/L) makes EV TCO uncompetitive without a KD tariff play. "
+            "Pitch <b>SCZone-based KD assembly</b> (0% production tariff) targeting EGPC logistics "
+            "contracts, and insist on EGP-indexed pricing with quarterly FX reset clauses — do not "
+            "accept fixed EGP pricing given 45-90 day payment delays under current FX controls."
+        ),
     },
 
     "Kenya": {
@@ -666,7 +736,6 @@ TIER1 = {
             "Diesel Price":    ("KES 188","/litre","≈ $1.42 USD","https://www.epra.go.ke"),
         },
         "brand_share":{"brands":["Isuzu","Toyota","Foton","Sinotruk","Volvo"],"sales":[3800,2900,2400,2100,1200]},
-        "trend":{"years":[2021,2022,2023,2024,2025,2026],"ice":[10800,11500,12200,13100,13800,13900],"ev":[0,20,80,210,340,370]},
         "policy":{
             "tariff":      "EAC CET: 25%. COMESA: 0%. EV: currently 25% (policy review underway).",
             "certification":"KEBS mandatory PVoC at origin; NTSA inspection on arrival.",
@@ -686,13 +755,14 @@ TIER1 = {
             "ICE_Energy_Cost_per_km":  0.39,
             "EV_Energy_Cost_per_km":   0.13,
             "Monthly_km":              6800,
+            "Interest_Rate":           0.16,   # 16% — CBK rate environment
             "source_name": "EPRA Fuel Price Bulletin / KEBS 2026",
             "source_url":  "https://www.epra.go.ke",
         },
-        "segment_data": {
-            "LCV":         {"volume": 6200, "ev_readiness": 5.2},
-            "MCV_Rigid":   {"volume": 5100, "ev_readiness": 2.4},
-            "EHCV_Tractor":{"volume": 2900, "ev_readiness": 0.8},
+        "segment_apps": {
+            "Urban FMCG (城市快消)":      {"volume": 4800, "ev_readiness": 4.8},
+            "Port Drayage (港口倒短)":    {"volume": 4400, "ev_readiness": 3.5},
+            "Long-Haul Mining (长途矿业)":{"volume": 5000, "ev_readiness": 0.7},
         },
         "risk_radar": {
             "FX_Liquidity":        4.5,
@@ -701,6 +771,12 @@ TIER1 = {
             "Grid_Stability":      6.0,
             "Policy_Consistency":  6.0,
         },
+        "action": (
+            "Mombasa Port drayage is the highest near-term EV-readiness segment (3.5/10, but best in "
+            "this market) given short, predictable routes. Target <b>Kenya Ports Authority</b> directly "
+            "for a depot-charging pilot before committing to long-haul SGR-feeder routes, where diesel "
+            "still dominates structurally."
+        ),
     },
 
     "Ethiopia": {
@@ -712,7 +788,6 @@ TIER1 = {
             "Electricity Price": ("ETB 1.42","/kWh","≈ $0.025 USD","https://www.eepco.gov.et"),
         },
         "brand_share":{"brands":["BYD","Foton EV","King Long EV","Sinotruk","Skywell"],"sales":[2800,2100,1600,1200,800]},
-        "trend":{"years":[2021,2022,2023,2024,2025,2026],"ice":[7200,6800,5400,3200,1800,1200],"ev":[200,800,2800,5800,7400,8200]},
         "policy":{
             "tariff":      "Petroleum vehicle imports BANNED (2022). EV: 0% duty.",
             "certification":"EthSA; EV charging under national grid expansion.",
@@ -729,16 +804,17 @@ TIER1 = {
         "tco_params": {
             "ICE_Capex":               68000,
             "EV_Capex":                102000,
-            "ICE_Energy_Cost_per_km":  0.0,
+            "ICE_Energy_Cost_per_km":  0.0,    # ICE imports banned: no fuel market reference
             "EV_Energy_Cost_per_km":   0.02,
             "Monthly_km":              6200,
+            "Interest_Rate":           0.18,   # 18% — NBE policy rate environment
             "source_name": "ERCA Import Ban Notice / EEPCO Tariff Schedule 2026",
             "source_url":  "https://www.erca.gov.et",
         },
-        "segment_data": {
-            "LCV":         {"volume": 4200, "ev_readiness": 8.8},
-            "MCV_Rigid":   {"volume": 3600, "ev_readiness": 6.0},
-            "EHCV_Tractor":{"volume": 2000, "ev_readiness": 2.5},
+        "segment_apps": {
+            "Urban FMCG (城市快消)":      {"volume": 3400, "ev_readiness": 8.5},
+            "Port Drayage (港口倒短)":    {"volume": 2600, "ev_readiness": 6.0},
+            "Long-Haul Mining (长途矿业)":{"volume": 3800, "ev_readiness": 2.0},
         },
         "risk_radar": {
             "FX_Liquidity":        2.0,
@@ -747,6 +823,12 @@ TIER1 = {
             "Grid_Stability":      5.5,
             "Policy_Consistency":  5.5,
         },
+        "action": (
+            "ICE imports are simply illegal — there is no fuel-cost comparison to make, only a sales "
+            "execution question. Move fast on <b>Urban FMCG fleets</b> (8.5/10 readiness, Addis Ababa "
+            "depot routes) before competitors saturate the market; avoid Addis–Djibouti long-haul "
+            "until charging infrastructure is confirmed beyond the capital."
+        ),
     },
 
     "Algeria": {
@@ -758,7 +840,6 @@ TIER1 = {
             "Diesel Price":    ("DZD 45","/litre (subsidised)","≈ $0.33 USD","https://www.energy.gov.dz"),
         },
         "brand_share":{"brands":["Mercedes-Benz","Renault Trucks","MAN","Sinotruk","Volvo"],"sales":[3200,2800,2400,2000,1400]},
-        "trend":{"years":[2021,2022,2023,2024,2025,2026],"ice":[10200,10800,11400,12000,12400,12400],"ev":[0,0,20,40,60,60]},
         "policy":{
             "tariff":      "30% CBU. CKD JV partnerships permitted; Renault Rouiba JV as template.",
             "certification":"IANOR; Euro 3 minimum (Euro 4 upgrade underway).",
@@ -778,13 +859,14 @@ TIER1 = {
             "ICE_Energy_Cost_per_km":  0.07,
             "EV_Energy_Cost_per_km":   0.06,
             "Monthly_km":              6500,
+            "Interest_Rate":           0.09,   # 9% — Banque d'Algérie environment
             "source_name": "Ministère de l'Energie — Subsidised Diesel Schedule 2026",
             "source_url":  "https://www.energy.gov.dz",
         },
-        "segment_data": {
-            "LCV":         {"volume": 5200, "ev_readiness": 2.0},
-            "MCV_Rigid":   {"volume": 4800, "ev_readiness": 1.0},
-            "EHCV_Tractor":{"volume": 2600, "ev_readiness": 0.4},
+        "segment_apps": {
+            "Urban FMCG (城市快消)":      {"volume": 4200, "ev_readiness": 2.2},
+            "Port Drayage (港口倒短)":    {"volume": 3600, "ev_readiness": 1.5},
+            "Long-Haul Mining (长途矿业)":{"volume": 4800, "ev_readiness": 0.3},
         },
         "risk_radar": {
             "FX_Liquidity":        2.5,
@@ -793,6 +875,12 @@ TIER1 = {
             "Grid_Stability":      6.5,
             "Policy_Consistency":  3.5,
         },
+        "action": (
+            "Subsidised diesel and FX controls make this a long-game market only. Do not pursue CBU "
+            "export — pursue a <b>state-endorsed JV</b> modelled on Renault's Rouiba plant, with a "
+            "3-4 year horizon to first production. Defer EV positioning entirely until charging "
+            "infrastructure and FX liquidity improve."
+        ),
     },
 
     "Tunisia": {
@@ -804,7 +892,6 @@ TIER1 = {
             "ANME EV Subsidy":   ("TND 10,000","direct subsidy/vehicle","ANME 2026 programme","https://www.anme.tn"),
         },
         "brand_share":{"brands":["Mercedes-Benz","Renault Trucks","MAN","Volvo","Sinotruk"],"sales":[2100,1800,1500,1200,900]},
-        "trend":{"years":[2021,2022,2023,2024,2025,2026],"ice":[6800,7100,7400,7800,8000,8000],"ev":[0,20,40,70,100,100]},
         "policy":{
             "tariff":      "Diesel CV (≥12t): 10% customs + 19% TVA + 25% taxe de consommation. BEV: 0% customs + 0% excise + 7% TVA + TND 10,000 ANME subsidy (Loi de Finances 2026).",
             "certification":"INNORPI; ATTT road transport authority; UN-ECE mutual recognition with EU.",
@@ -825,13 +912,14 @@ TIER1 = {
             "ICE_Energy_Cost_per_km":  0.32,
             "EV_Energy_Cost_per_km":   0.08,
             "Monthly_km":              6000,
+            "Interest_Rate":           0.08,   # 8% — BCT policy rate environment
             "source_name": "Loi de Finances 2026 / ANME e-Mobility Programme",
             "source_url":  "https://www.finances.gov.tn",
         },
-        "segment_data": {
-            "LCV":         {"volume": 3600, "ev_readiness": 7.8},
-            "MCV_Rigid":   {"volume": 3000, "ev_readiness": 3.5},
-            "EHCV_Tractor":{"volume": 1500, "ev_readiness": 1.0},
+        "segment_apps": {
+            "Urban FMCG (城市快消)":      {"volume": 2800, "ev_readiness": 8.0},
+            "Port Drayage (港口倒短)":    {"volume": 2400, "ev_readiness": 5.5},
+            "Long-Haul Mining (长途矿业)":{"volume": 2900, "ev_readiness": 1.0},
         },
         "risk_radar": {
             "FX_Liquidity":        4.0,
@@ -840,10 +928,16 @@ TIER1 = {
             "Grid_Stability":      6.5,
             "Policy_Consistency":  6.5,
         },
+        "action": (
+            "The TND 151,000 per-unit tax delta is the single strongest B2B argument in North Africa — "
+            "lead every sales conversation with this number. Target <b>Délice Danone</b> and <b>Aramex "
+            "Tunisia</b> for urban depot fleets first; defer phosphate corridor (Gafsa) pitches until "
+            "STEG confirms charging infrastructure beyond the Tunis–Sousse corridor."
+        ),
     },
 
     "Rwanda": {
-        "flag":"🇷🇼","iso":"RWA","region":"East Africa (EAC)",  "tier":1,
+        "flag":"🇷🇼","iso":"RWA","region":"East Africa (EAC)","tier":1,
         "kpi":{
             "Annual CV Sales":       ("~3,200","units/yr","+12.5% YoY","https://www.rdb.rw"),
             "EV Penetration (CVs)":  ("~6.2%","of new CV registrations","+3.1pp YoY","https://www.rura.rw"),
@@ -853,11 +947,6 @@ TIER1 = {
         "brand_share":{
             "brands":["Toyota","Isuzu","Foton","BYD EV","Yutong EV"],
             "sales": [980, 720, 480, 310, 220],
-        },
-        "trend":{
-            "years":[2021,2022,2023,2024,2025,2026],
-            "ice":  [2600,2700,2750,2800,2820,2800],
-            "ev":   [20,   60,  120,  250,  380,  500],
         },
         "policy":{
             "tariff":      "EAC Pioneer: 0% import duty + 0% VAT on all EV commercial vehicles (RDB Investment Code 2024). ICE CVs: 25% EAC CET + 18% VAT. Corporate income tax for qualifying EV enterprises: 15% (vs standard 30%).",
@@ -879,13 +968,14 @@ TIER1 = {
             "ICE_Energy_Cost_per_km":  0.40,
             "EV_Energy_Cost_per_km":   0.0099,
             "Monthly_km":              6700,
+            "Interest_Rate":           0.13,   # 13% — NBR policy rate environment
             "source_name": "RURA e-Mobility Tariff Order 2023 / RDB Investment Incentives 2024",
             "source_url":  "https://www.rura.rw",
         },
-        "segment_data": {
-            "LCV":         {"volume": 1600, "ev_readiness": 9.2},
-            "MCV_Rigid":   {"volume": 1100, "ev_readiness": 5.5},
-            "EHCV_Tractor":{"volume": 500,  "ev_readiness": 1.5},
+        "segment_apps": {
+            "Urban FMCG (城市快消)":      {"volume": 1300, "ev_readiness": 9.0},
+            "Port Drayage (港口倒短)":    {"volume": 700,  "ev_readiness": 6.5},
+            "Long-Haul Mining (长途矿业)":{"volume": 1200, "ev_readiness": 1.8},
         },
         "risk_radar": {
             "FX_Liquidity":        5.0,
@@ -894,6 +984,12 @@ TIER1 = {
             "Grid_Stability":      9.5,
             "Policy_Consistency":  9.0,
         },
+        "action": (
+            "Do not chase volume here — chase <b>proof-of-concept</b>. Propose a 20-50 unit G2G electric "
+            "bus pilot with <b>Kigali Bus Services</b>, fully financed against the 0% duty + 15% CIT "
+            "stack, and use the resulting performance data as the reference case for EAC-wide tenders "
+            "in Kenya and Tanzania within 18 months."
+        ),
     },
 }
 # ══════════════════════════════════════════════════════════════════════════════
@@ -971,7 +1067,8 @@ for iso, name in ALL_AFRICA.items():
 ALL_ISO_LIST = list(dict.fromkeys(ISO_TO_NAME.keys()))
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 7. NEWS FETCHER — Wide net, smart filter, guaranteed no blank
+# 7. NEWS FETCHER — wide net, smart filter, guaranteed no blank
+#    (logic unchanged; rendering destination moves to a bottom-page expander)
 # ══════════════════════════════════════════════════════════════════════════════
 AUTHORITY_DOMAINS = [
     "reuters","bloomberg","ft.com","engineeringnews","businessday",
@@ -1078,6 +1175,11 @@ def _is_auth(item):
     return any(d in (item["link"]+item["source"]).lower() for d in AUTHORITY_DOMAINS)
 
 def render_news_panel(query: str, country: str):
+    """
+    Renders the news list. This function itself is unchanged from prior
+    versions — what changes (Task 3) is WHERE it gets called: now always
+    inside a collapsed st.expander at the very bottom of the page.
+    """
     with st.spinner(f"Fetching intelligence for {country}..."):
         result = fetch_news(query, country=country)
     items, is_auth, is_fb = result["items"], result["is_authority"], result["is_fallback"]
@@ -1119,26 +1221,18 @@ def gen_brand_df(country):
         "Share_pct": [round(s/total*100,1) for s in cd["sales"]],
     })
 
+# ── South Africa exclusive data ───────────────────────────────────────────────
 @st.cache_data
-def gen_trend_df(country):
-    t = TIER1[country]["trend"]
-    df = pd.DataFrame({"Year":t["years"],"ICE":t["ice"],"EV":t["ev"]})
-    df["Total"]    = df["ICE"] + df["EV"]
-    df["EV_Share"] = (df["EV"]/df["Total"]*100).round(2)
-    return df
-
-# ── South Africa ──────────────────────────────────────────────────────────────
-@st.cache_data
-def gen_za_nev_mix():
+def gen_za_rail_road():
     return pd.DataFrame({
-        "Technology": ["HEV\n(Conventional Hybrid)","BEV\n(Battery Electric)","PHEV\n(Plug-in Hybrid)"],
-        "Units":      [9820, 4980, 1916],
-        "Share_pct":  [58.7, 29.8, 11.5],
-        "Color":      ["#295BA5","#D04A02","#EB6C2D"],
+        "Year":      [2018,2019,2020,2021,2022,2023,2024,2025,2026],
+        "Rail_Mt":   [228,218,204,189,171,158,142,131,122],
+        "HCV_Units": [27500,28200,29800,30400,31200,32500,31800,30900,30900],
     })
 
 @st.cache_data
 def gen_za_freight_category():
+    """Stats SA P7162 Road Freight Survey — revenue by commodity category."""
     return pd.DataFrame({
         "Category":       ["Mining & Quarrying","Manufactured Food & Beverages",
                            "Agriculture & Forestry","Retail & Wholesale Trade",
@@ -1151,6 +1245,7 @@ def gen_za_freight_category():
 
 @st.cache_data
 def gen_za_payload_income():
+    """Stats SA P7162 — Payload volume vs Freight income, the cost-squeeze story."""
     np.random.seed(10)
     q = pd.date_range("2020-01-01","2026-04-01",freq="QS"); n=len(q)
     return pd.DataFrame({
@@ -1161,6 +1256,7 @@ def gen_za_payload_income():
 
 @st.cache_data
 def gen_za_channel():
+    """NAAMSA HCV sales channel split."""
     return pd.DataFrame({
         "Channel":   ["Dealer Retail","Corporate Fleets","Government","Rental & Leasing"],
         "Share_pct": [79.5,10.8,5.2,4.5],
@@ -1169,6 +1265,7 @@ def gen_za_channel():
 
 @st.cache_data
 def gen_za_province():
+    """NAAMSA HCV sales by province."""
     return pd.DataFrame({
         "Province":  ["Gauteng","KwaZulu-Natal","Western Cape","Eastern Cape",
                       "Limpopo","Mpumalanga","North West","Free State","Northern Cape"],
@@ -1176,15 +1273,7 @@ def gen_za_province():
         "Share_pct": [45.1,18.4,14.6,7.6,5.1,3.8,2.5,1.9,1.0],
     })
 
-@st.cache_data
-def gen_za_rail_road():
-    return pd.DataFrame({
-        "Year":      [2018,2019,2020,2021,2022,2023,2024,2025,2026],
-        "Rail_Mt":   [228,218,204,189,171,158,142,131,122],
-        "HCV_Units": [27500,28200,29800,30400,31200,32500,31800,30900,30900],
-    })
-
-# ── Nigeria ───────────────────────────────────────────────────────────────────
+# ── Nigeria exclusive data ────────────────────────────────────────────────────
 @st.cache_data
 def gen_ng_waterfall():
     return pd.DataFrame({
@@ -1196,7 +1285,7 @@ def gen_ng_waterfall():
                     "absolute","relative","relative","total"],
     })
 
-# ── Morocco ───────────────────────────────────────────────────────────────────
+# ── Morocco exclusive data ────────────────────────────────────────────────────
 @st.cache_data
 def gen_ma_modal():
     return pd.DataFrame({
@@ -1209,16 +1298,7 @@ def gen_ma_modal():
                            "Road: contractor logistics, finished fertiliser, reagent supply"],
     })
 
-@st.cache_data
-def gen_ocp_throughput():
-    np.random.seed(3)
-    months = pd.date_range("2023-01-01","2026-05-01",freq="MS"); n=len(months)
-    return pd.DataFrame({
-        "Month":         months,
-        "Throughput_kt": (np.linspace(820,1380,n)+90*np.sin(np.linspace(0,6.5*np.pi,n))+np.random.normal(0,35,n)).clip(500).round(1),
-    })
-
-# ── Ethiopia ──────────────────────────────────────────────────────────────────
+# ── Ethiopia exclusive data ───────────────────────────────────────────────────
 @st.cache_data
 def gen_eth_ev():
     np.random.seed(4)
@@ -1227,7 +1307,7 @@ def gen_eth_ev():
                          np.linspace(3.0,92.0,n-ban)+np.random.normal(0,2,n-ban)]).clip(0,100)
     return pd.DataFrame({"Month":months,"EV_Share_pct":ev.round(1)})
 
-# ── Tunisia ───────────────────────────────────────────────────────────────────
+# ── Tunisia exclusive data ────────────────────────────────────────────────────
 @st.cache_data
 def gen_tn_tco_waterfall():
     return pd.DataFrame({
@@ -1252,20 +1332,13 @@ def gen_tn_b2b_targets():
                          "CPG — Cie des Phosphates de Gafsa","CICO (Ciment d'Oum El Kélil)"],
         "Fleet Size Est.":["120–160 units","80–110 units","60–90 units","40–60 units",
                             "80–120 units","50–70 units","100–150 units","60–80 units"],
-        "EV Readiness": ["Medium — depot base in Tunis metro","Medium — Tunis–Sousse corridor",
-                         "High — urban last-mile dominant","High — urban hubs only",
-                         "Low — port 24hr ops need reliability","Low — heavy lift, range critical",
-                         "Low — Gafsa intercity corridor","Medium — Oum El Kélil regional"],
         "Decision Maker":["Fleet & Logistics Director","Supply Chain VP",
                           "Country Operations Manager","Fleet Manager MENA",
                           "Port Authority Procurement","General Manager",
                           "Direction des Achats","Directeur Technique"],
-        "Tender Portal": ["Private RFQ","Private RFQ","Private RFQ","Private tender",
-                          "marchespublics.gov.tn","marchespublics.gov.tn",
-                          "marchespublics.gov.tn","marchespublics.gov.tn"],
     })
 
-# ── Rwanda ────────────────────────────────────────────────────────────────────
+# ── Rwanda exclusive data ─────────────────────────────────────────────────────
 @st.cache_data
 def gen_rw_tariff_comparison():
     return pd.DataFrame({
@@ -1291,33 +1364,59 @@ def gen_rw_ev_adoption():
     })
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 8B. NEW v10.0 GENERATORS — TCO Break-even, Segment Heatmap, Risk Radar
+# 8B. CORE v11.0 GENERATORS — TCO w/ Interest, Segment Apps, Risk Radar, Gate Index
 # ══════════════════════════════════════════════════════════════════════════════
 @st.cache_data
 def gen_tco_36month_df(country: str) -> pd.DataFrame:
     """
-    36-month cumulative TCO comparison: ICE vs EV.
-    Uses TIER1[country]["tco_params"]: ICE_Capex, EV_Capex,
-    ICE_Energy_Cost_per_km, EV_Energy_Cost_per_km, Monthly_km.
-    Future: replace with pd.read_csv(f'{country}_tco_actuals.csv')
+    36-month cumulative TCO comparison: ICE vs EV, now including the
+    financing/interest cost on the capital outlay (Task 2 requirement).
+
+    Methodology: the capex is financed at the country's Interest_Rate
+    (annual, simple monthly accrual on the *outstanding* capital balance,
+    assumed straight-line amortised over 36 months). This produces a
+    materially different — and more realistic — break-even point than
+    a pure cash-purchase model, especially in high-rate markets like
+    Nigeria (24%) and Egypt (20%).
     """
     p = TIER1[country]["tco_params"]
-    months = np.arange(0, 37)  # month 0 to 36
+    months = np.arange(0, 37)
     ice_capex = p["ICE_Capex"]
     ev_capex  = p["EV_Capex"]
     ice_per_km = p["ICE_Energy_Cost_per_km"]
     ev_per_km  = p["EV_Energy_Cost_per_km"]
     km_per_month = p["Monthly_km"]
+    annual_rate = p.get("Interest_Rate", 0.0)
+    monthly_rate = annual_rate / 12
 
-    ice_cumulative = ice_capex + (ice_per_km * km_per_month * months)
-    ev_cumulative  = ev_capex  + (ev_per_km  * km_per_month * months)
+    def financed_cumulative(capex, per_km_cost):
+        # Straight-line amortisation: capital balance declines linearly to 0 by month 36
+        amort_per_month = capex / 36
+        balance = capex
+        cum_interest = 0.0
+        cum_energy = 0.0
+        interest_series = [0.0]
+        for m in range(1, 37):
+            interest_this_month = balance * monthly_rate
+            cum_interest += interest_this_month
+            balance -= amort_per_month
+            cum_energy = per_km_cost * km_per_month * m
+            interest_series.append(cum_interest)
+        # cumulative cost = capex (financed, fully recognised upfront as the asset cost)
+        #                   + cumulative interest paid so far
+        #                   + cumulative energy cost so far
+        energy_series = per_km_cost * km_per_month * months
+        return capex + np.array(interest_series) + energy_series
 
-    df = pd.DataFrame({
-        "Month":  months,
+    ice_cumulative = financed_cumulative(ice_capex, ice_per_km)
+    ev_cumulative  = financed_cumulative(ev_capex, ev_per_km)
+
+    return pd.DataFrame({
+        "Month": months,
         "ICE_Cumulative_Cost": ice_cumulative,
         "EV_Cumulative_Cost":  ev_cumulative,
     })
-    return df
+
 
 def calc_tco_breakeven(country: str):
     """
@@ -1325,25 +1424,19 @@ def calc_tco_breakeven(country: str):
     reaches cost parity with ICE within the 36-month horizon.
 
     Handles three cases:
-      1. EV starts more expensive and crosses below ICE within 36mo
-         -> standard crossing detection via linear interpolation.
-      2. EV starts at or BELOW ICE cost from Month 0 (e.g. equal/lower
-         capex + cheaper energy, as in Rwanda's zero-duty EV policy)
-         -> breakeven is Month 0 (EV is TCO-superior from day one).
-      3. EV never catches up within 36 months -> returns (None, None).
+      1. EV starts more expensive and crosses below ICE within 36mo.
+      2. EV starts at or below ICE cost from Month 0.
+      3. EV never catches up within 36 months -> (None, None).
     """
     df = gen_tco_36month_df(country)
     diff = df["EV_Cumulative_Cost"] - df["ICE_Cumulative_Cost"]
 
-    # Case 2: EV already at or below ICE cost at Month 0
     if diff.iloc[0] <= 0:
         return 0.0, df["ICE_Cumulative_Cost"].iloc[0]
 
-    # Case 1: find first month where EV crosses from above to at/below ICE
     crossing = None
     for i in range(1, len(diff)):
         if diff.iloc[i-1] > 0 and diff.iloc[i] <= 0:
-            # Linear interpolation for a more precise month estimate
             x0, x1 = df["Month"].iloc[i-1], df["Month"].iloc[i]
             y0, y1 = diff.iloc[i-1], diff.iloc[i]
             if y1 != y0:
@@ -1354,60 +1447,27 @@ def calc_tco_breakeven(country: str):
             break
     if crossing is None:
         return None, None
-    # Cost at crossing point (interpolated from ICE line)
+
     cost_at_crossing = np.interp(crossing, df["Month"], df["ICE_Cumulative_Cost"])
     return crossing, cost_at_crossing
 
-@st.cache_data
-def gen_segment_df(country: str) -> pd.DataFrame:
-    """
-    Segment breakdown: LCV / MCV_Rigid / EHCV_Tractor with volume and EV readiness.
-    Future: replace with pd.read_csv(f'{country}_segments.csv')
-    """
-    seg = TIER1[country]["segment_data"]
-    labels_map = {
-        "LCV": "LCV (Light Urban)",
-        "MCV_Rigid": "MCV / Rigid (Construction)",
-        "EHCV_Tractor": "EHCV / Tractor (Long-Haul)",
-    }
-    rows = []
-    for key, label in labels_map.items():
-        d = seg[key]
-        rows.append({
-            "Segment": label,
-            "Volume": d["volume"],
-            "EV_Readiness": d["ev_readiness"],
-        })
-    return pd.DataFrame(rows)
 
 @st.cache_data
-def gen_all_countries_segment_df() -> pd.DataFrame:
-    """Combined segment data across all Tier 1 countries for the continental heatmap."""
-    labels_map = {
-        "LCV": "LCV (Light Urban)",
-        "MCV_Rigid": "MCV / Rigid (Construction)",
-        "EHCV_Tractor": "EHCV / Tractor (Long-Haul)",
-    }
+def gen_segment_apps_df(country: str) -> pd.DataFrame:
+    """
+    The three application scenarios requested in Task 2 Level 2:
+    Urban FMCG (城市快消) / Port Drayage (港口倒短) / Long-Haul Mining (长途矿业).
+    """
+    seg = TIER1[country]["segment_apps"]
     rows = []
-    for country, cdata in TIER1.items():
-        seg = cdata.get("segment_data", {})
-        for key, label in labels_map.items():
-            if key in seg:
-                d = seg[key]
-                rows.append({
-                    "Country": country,
-                    "Segment": label,
-                    "Volume": d["volume"],
-                    "EV_Readiness": d["ev_readiness"],
-                })
+    for label, d in seg.items():
+        rows.append({"Application": label, "Volume": d["volume"], "EV_Readiness": d["ev_readiness"]})
     return pd.DataFrame(rows)
+
 
 @st.cache_data
 def gen_risk_radar_df(country: str) -> pd.DataFrame:
-    """
-    Operational risk radar: 5 dimensions, 0-10 scale.
-    Future: replace with pd.read_csv(f'{country}_risk.csv')
-    """
+    """Operational risk radar — 5 dimensions, 0-10 scale."""
     r = TIER1[country]["risk_radar"]
     labels_map = {
         "FX_Liquidity":       "FX Liquidity",
@@ -1416,10 +1476,28 @@ def gen_risk_radar_df(country: str) -> pd.DataFrame:
         "Grid_Stability":     "Grid Stability",
         "Policy_Consistency": "Policy Consistency",
     }
-    rows = []
-    for key, label in labels_map.items():
-        rows.append({"Dimension": label, "Score": r[key]})
+    rows = [{"Dimension": labels_map[k], "Score": r[k]} for k in labels_map]
     return pd.DataFrame(rows)
+
+
+def calc_gate_index(country: str) -> float:
+    """
+    Converts the 5-dimension risk radar into a single 0-100 'Market Access
+    Gate Index' (Task 2 Level 1 requirement). Weights reflect what actually
+    kills deals in practice: FX liquidity and policy consistency are
+    weighted heaviest, since a tariff advantage is worthless if profits
+    cannot be repatriated or the regime reverses policy overnight.
+    """
+    r = TIER1[country]["risk_radar"]
+    weights = {
+        "FX_Liquidity":        0.30,
+        "Policy_Consistency":  0.25,
+        "Tariff_Advantage":    0.20,
+        "Port_Efficiency":     0.15,
+        "Grid_Stability":      0.10,
+    }
+    score_0_10 = sum(r[k] * w for k, w in weights.items())
+    return round(score_0_10 * 10, 1)  # scale to 0-100
 # ══════════════════════════════════════════════════════════════════════════════
 # 9. CHART BUILDERS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1434,92 +1512,136 @@ def chart_brand(df, country):
     return _apply(fig,{"yaxis":{**CHART_BASE["yaxis"],"title":"Units","range":[0,df["Units"].max()*1.22]},
                         "xaxis":{**CHART_BASE["xaxis"],"title":"Brand"},"showlegend":False,"bargap":.38})
 
-def chart_trend(df):
+
+def chart_segment_apps_heatmap(df: pd.DataFrame) -> go.Figure:
+    """
+    Application Segment Heatmap (Task 2 Level 2, left chart).
+    Single-country view: 3 rows (applications) x 1 column, color = EV
+    readiness, cell text = volume. This replaces the earlier bubble chart
+    with a cleaner, narrative-honest heatmap: "city fast-moves electrify,
+    mining haul stays diesel."
+    """
+    df_sorted = df.copy()
+    z_vals = [[row["EV_Readiness"]] for _, row in df_sorted.iterrows()]
+    text_vals = [[f"{row['Volume']:,} units/yr<br>EV Readiness: {row['EV_Readiness']:.1f}/10"]
+                 for _, row in df_sorted.iterrows()]
+
+    fig = go.Figure(go.Heatmap(
+        z=z_vals,
+        x=["EV Readiness"],
+        y=df_sorted["Application"].tolist(),
+        text=text_vals,
+        texttemplate="%{text}",
+        textfont=dict(size=11, family="Inter", color="#2D3142"),
+        colorscale=[
+            [0.0, "#F4F5F7"], [0.15, "#E8ECF4"], [0.35, "#C0C8D8"],
+            [0.55, "#8BA7C4"], [0.75, "#EB6C2D"], [1.0, "#D04A02"],
+        ],
+        zmin=0, zmax=10,
+        showscale=True,
+        colorbar=dict(
+            title=dict(text="Readiness", font=dict(size=9, family="Inter", color="#5A6070")),
+            tickfont=dict(size=9, family="Inter", color="#9BA3B2"),
+            thickness=10, len=0.8,
+        ),
+        hovertemplate="<b>%{y}</b><br>%{text}<extra></extra>",
+    ))
+    return _apply(fig, {
+        "xaxis": {**CHART_BASE["xaxis"], "title": "", "showticklabels": False},
+        "yaxis": {**CHART_BASE["yaxis"], "title": "", "automargin": True},
+        "height": 320,
+        "margin": dict(l=170, r=20, t=10, b=10),
+    })
+
+
+def chart_tco_breakeven(country: str) -> go.Figure:
+    """
+    36-month cumulative TCO comparison with financing cost included, and
+    the break-even crossing marked with a dotted vertical line + star
+    marker (Task 2 Level 2, right chart, mandatory dotted crossing line).
+    """
+    df = gen_tco_36month_df(country)
+    breakeven_month, breakeven_cost = calc_tco_breakeven(country)
+
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=df["Year"],y=df["ICE"],name="ICE (Conventional)",mode="lines+markers",
-        line=dict(color="#21325B",width=2.5),marker=dict(size=6,color="#21325B"),
-        fill="tozeroy",fillcolor="rgba(33,50,91,0.08)",
-        hovertemplate="<b>%{x}</b><br>ICE: <b>%{y:,}</b><extra></extra>"))
+        x=df["Month"], y=df["ICE_Cumulative_Cost"],
+        name="ICE — Cumulative TCO (incl. financing)",
+        mode="lines", line=dict(color="#21325B", width=2.5),
+        hovertemplate="<b>Month %{x}</b><br>ICE Cumulative: <b>$%{y:,.0f}</b><extra></extra>",
+    ))
     fig.add_trace(go.Scatter(
-        x=df["Year"],y=df["EV"],name="EV / New Energy",mode="lines+markers",
-        line=dict(color="#D04A02",width=2.5),marker=dict(size=7,color="#D04A02",symbol="diamond"),
-        fill="tozeroy",fillcolor="rgba(208,74,2,0.10)",
-        hovertemplate="<b>%{x}</b><br>EV: <b>%{y:,}</b><extra></extra>"))
-    fig.add_vline(x=2025.5,line_dash="dash",line_color="#9BA3B2",line_width=1)
-    fig.add_annotation(x=2025.7,y=df["ICE"].max()*.9,text="← Actual | Forecast →",
-        showarrow=False,font=dict(size=9,color="#9BA3B2",family="Inter"))
-    return _apply(fig,{"xaxis":{**CHART_BASE["xaxis"],"title":"Year","tickmode":"array","tickvals":df["Year"].tolist()},
-                        "yaxis":{**CHART_BASE["yaxis"],"title":"Units"}})
+        x=df["Month"], y=df["EV_Cumulative_Cost"],
+        name="EV — Cumulative TCO (incl. financing)",
+        mode="lines", line=dict(color="#D04A02", width=2.5),
+        hovertemplate="<b>Month %{x}</b><br>EV Cumulative: <b>$%{y:,.0f}</b><extra></extra>",
+    ))
 
-def chart_za_nev_donut(df):
-    fig = go.Figure(go.Pie(
-        labels=df["Technology"],values=df["Units"],hole=0.58,
-        marker=dict(colors=df["Color"].tolist(),line=dict(color="white",width=2)),
-        textinfo="label+percent",textfont=dict(size=11,family="Inter",color="#2D3142"),
-        hovertemplate="<b>%{label}</b><br>Units: <b>%{value:,}</b><br>Share: <b>%{percent}</b><extra></extra>"))
-    fig.add_annotation(text="NEV Mix\n2025",x=.5,y=.5,
-        font=dict(size=12,family="Inter",color="#5A6070"),showarrow=False)
-    return _apply(fig,{"showlegend":True,
-        "legend":dict(orientation="v",x=1.02,y=.5,font=dict(size=11),bgcolor="rgba(0,0,0,0)"),
-        "margin":dict(l=20,r=130,t=20,b=20),"height":300})
+    if breakeven_month is not None:
+        fig.add_vline(x=breakeven_month, line_dash="dot", line_color="#1A8C5B", line_width=2)
+        fig.add_trace(go.Scatter(
+            x=[breakeven_month], y=[breakeven_cost],
+            mode="markers", marker=dict(size=14, color="#1A8C5B", symbol="star",
+                                        line=dict(color="white", width=2)),
+            name="Break-even Point", showlegend=False,
+            hovertemplate=f"<b>TCO Parity</b><br>Month {breakeven_month:.1f}<br>${breakeven_cost:,.0f}<extra></extra>",
+        ))
+        fig.add_annotation(
+            x=breakeven_month, y=df["EV_Cumulative_Cost"].max()*0.12,
+            text=f"🟢 Break-even: Month {breakeven_month:.1f}",
+            showarrow=False, bgcolor="rgba(26,140,91,0.1)", bordercolor="#1A8C5B",
+            font=dict(size=10, color="#1A8C5B", family="Inter"),
+        )
+    else:
+        fig.add_annotation(
+            x=18, y=df["EV_Cumulative_Cost"].max()*0.88,
+            text="⚠ No TCO parity within 36 months\nat current financing & energy rates",
+            showarrow=False, bgcolor="rgba(208,74,2,0.1)", bordercolor="#D04A02",
+            font=dict(size=10, color="#D04A02", family="Inter"),
+        )
 
-def chart_za_freight_cat(df):
-    ds=df.sort_values("Revenue_ZAR_bn")
-    fig=go.Figure(go.Bar(x=ds["Revenue_ZAR_bn"],y=ds["Category"],orientation="h",
-        text=[f"R{v:.1f}bn ({p:.1f}%)" for v,p in zip(ds["Revenue_ZAR_bn"],ds["Pct"])],
-        textposition="outside",textfont=dict(size=10,family="Inter",color="#2D3142"),
-        marker=dict(color=ds["Color"],line=dict(color="white",width=1)),
-        hovertemplate="<b>%{y}</b><br>R%{x:.1f}bn<extra></extra>"))
-    return _apply(fig,{"xaxis":{**CHART_BASE["xaxis"],"title":"Freight Revenue (ZAR bn)",
-                                 "range":[0,df["Revenue_ZAR_bn"].max()*1.3]},
-                        "yaxis":{**CHART_BASE["yaxis"],"title":"","automargin":True},
-                        "showlegend":False,"margin":dict(l=170,r=20,t=20,b=50),"height":340})
+    return _apply(fig, {
+        "xaxis": {**CHART_BASE["xaxis"], "title": "Month of Operation"},
+        "yaxis": {**CHART_BASE["yaxis"], "title": "Cumulative Cost (USD, incl. financing)"},
+        "legend": {**CHART_BASE["legend"], "y": -0.25},
+        "height": 380,
+    })
 
-def chart_za_payload_income(df):
-    fig=go.Figure()
-    fig.add_trace(go.Scatter(x=df["Quarter"],y=df["Payload_Mt"],name="Payload (Mt) ←",
-        mode="lines+markers",yaxis="y1",line=dict(color="#D04A02",width=2.5),marker=dict(size=4,color="#D04A02"),
-        fill="tozeroy",fillcolor="rgba(208,74,2,0.07)",
-        hovertemplate="<b>%{x|Q%q %Y}</b><br>%{y:.0f} Mt<extra></extra>"))
-    fig.add_trace(go.Scatter(x=df["Quarter"],y=df["Income_ZAR_bn"],name="Freight Income (Rbn) →",
-        mode="lines+markers",yaxis="y2",line=dict(color="#21325B",width=2.5),marker=dict(size=4,color="#21325B"),
-        hovertemplate="<b>%{x|Q%q %Y}</b><br>R%{y:.1f}bn<extra></extra>"))
-    fig.add_annotation(x=df["Quarter"].iloc[-4],y=df["Payload_Mt"].iloc[-4],
-        text="▼ Volume falling\n▲ Revenue rising\n= Cost squeeze",
-        showarrow=True,arrowhead=2,arrowcolor="#D04A02",
-        bgcolor="rgba(208,74,2,0.08)",bordercolor="#D04A02",
-        font=dict(size=9,color="#D04A02",family="Inter"),ax=-80,ay=-50)
-    return _apply(fig,{"yaxis":{**CHART_BASE["yaxis"],"title":"Payload (Mt)","side":"left"},
-                        "yaxis2":{**CHART_BASE["yaxis"],"title":"Income (R bn)","side":"right","overlaying":"y","showgrid":False},
-                        "xaxis":{**CHART_BASE["xaxis"],"title":"Quarter"}})
 
-def chart_za_channel(df):
-    fig=go.Figure(go.Pie(labels=df["Channel"],values=df["Share_pct"],hole=.58,
-        marker=dict(colors=df["Color"].tolist(),line=dict(color="white",width=2)),
-        textinfo="label+percent",textfont=dict(size=11,family="Inter"),
-        hovertemplate="<b>%{label}</b><br>%{value:.1f}%<extra></extra>"))
-    fig.add_annotation(text="Sales\nChannel",x=.5,y=.5,
-        font=dict(size=12,family="Inter",color="#5A6070"),showarrow=False)
-    return _apply(fig,{"showlegend":True,
-        "legend":dict(orientation="v",x=1.02,y=.5,font=dict(size=11),bgcolor="rgba(0,0,0,0)"),
-        "margin":dict(l=20,r=120,t=20,b=20),"height":300})
+def chart_risk_radar(df: pd.DataFrame, country: str) -> go.Figure:
+    """Operational risk radar chart — 5 dimensions on 0-10 scale."""
+    categories = df["Dimension"].tolist()
+    values = df["Score"].tolist()
+    categories_closed = categories + [categories[0]]
+    values_closed = values + [values[0]]
 
-def chart_za_province(df):
-    colors=["#D04A02" if i==0 else "#21325B" if i==1 else "#295BA5" if i==2
-            else "#8BA7C4" for i in range(len(df))]
-    fig=go.Figure(go.Bar(x=df["Province"],y=df["Units"],
-        text=[f"{v:,}\n({s}%)" for v,s in zip(df["Units"],df["Share_pct"])],
-        textposition="outside",textfont=dict(size=10,family="Inter"),
-        marker=dict(color=colors,line=dict(color="white",width=1.5)),
-        hovertemplate="<b>%{x}</b><br>%{y:,} units<extra></extra>"))
-    return _apply(fig,{"yaxis":{**CHART_BASE["yaxis"],"title":"Units","range":[0,df["Units"].max()*1.25]},
-                        "xaxis":{**CHART_BASE["xaxis"],"title":"Province"},
-                        "showlegend":False,"bargap":.35,"height":320})
+    fig = go.Figure()
+    fig.add_trace(go.Scatterpolar(
+        r=values_closed, theta=categories_closed, fill="toself",
+        fillcolor="rgba(208,74,2,0.15)", line=dict(color="#D04A02", width=2.5),
+        marker=dict(size=7, color="#D04A02"), name=country,
+        hovertemplate="<b>%{theta}</b><br>Score: %{r:.1f}/10<extra></extra>",
+    ))
+    fig.update_layout(
+        polar=dict(
+            bgcolor="rgba(0,0,0,0)",
+            radialaxis=dict(visible=True, range=[0, 10],
+                           tickfont=dict(size=9, color="#9BA3B2", family="Inter"),
+                           gridcolor="#E2E5EB", linecolor="#E2E5EB"),
+            angularaxis=dict(tickfont=dict(size=10, color="#2D3142", family="Inter"),
+                            gridcolor="#E2E5EB", linecolor="#E2E5EB"),
+        ),
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, sans-serif", color="#2D3142", size=12),
+        showlegend=False, margin=dict(l=40, r=40, t=30, b=30), height=360,
+    )
+    return fig
 
+
+# ── South Africa exclusive chart ──────────────────────────────────────────────
 def chart_za_scissors():
-    df=gen_za_rail_road()
-    fig=go.Figure()
+    df = gen_za_rail_road()
+    fig = go.Figure()
     fig.add_trace(go.Scatter(x=df["Year"],y=df["Rail_Mt"],name="Transnet Rail (Mt) ←",
         mode="lines+markers",yaxis="y1",line=dict(color="#D04A02",width=2.5),marker=dict(size=6,color="#D04A02"),
         fill="tozeroy",fillcolor="rgba(208,74,2,0.07)",
@@ -1532,8 +1654,88 @@ def chart_za_scissors():
         font=dict(size=9,color="#D04A02",family="Inter"),ax=60,ay=-35)
     return _apply(fig,{"yaxis":{**CHART_BASE["yaxis"],"title":"Rail Volume (Mt)","side":"left"},
                         "yaxis2":{**CHART_BASE["yaxis"],"title":"HCV Sales (units)","side":"right","overlaying":"y","showgrid":False},
-                        "xaxis":{**CHART_BASE["xaxis"],"title":"Year","tickmode":"array","tickvals":df["Year"].tolist()}})
+                        "xaxis":{**CHART_BASE["xaxis"],"title":"Year","tickmode":"array","tickvals":df["Year"].tolist()},
+                        "height":380})
 
+
+def chart_za_freight_cat(df):
+    """Stats SA P7162 — horizontal bar of freight revenue by commodity category."""
+    ds = df.sort_values("Revenue_ZAR_bn")
+    fig = go.Figure(go.Bar(
+        x=ds["Revenue_ZAR_bn"], y=ds["Category"], orientation="h",
+        text=[f"R{v:.1f}bn ({p:.1f}%)" for v, p in zip(ds["Revenue_ZAR_bn"], ds["Pct"])],
+        textposition="outside", textfont=dict(size=10, family="Inter", color="#2D3142"),
+        marker=dict(color=ds["Color"], line=dict(color="white", width=1)),
+        hovertemplate="<b>%{y}</b><br>R%{x:.1f}bn<extra></extra>"))
+    return _apply(fig, {
+        "xaxis": {**CHART_BASE["xaxis"], "title": "Freight Revenue (ZAR bn)",
+                  "range": [0, df["Revenue_ZAR_bn"].max()*1.3]},
+        "yaxis": {**CHART_BASE["yaxis"], "title": "", "automargin": True},
+        "showlegend": False, "margin": dict(l=170, r=20, t=20, b=50), "height": 320,
+    })
+
+
+def chart_za_payload_income(df):
+    """Stats SA P7162 — Payload vs Income dual-axis, the cost-squeeze story."""
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df["Quarter"], y=df["Payload_Mt"], name="Payload (Mt) ←",
+        mode="lines+markers", yaxis="y1", line=dict(color="#D04A02", width=2.5),
+        marker=dict(size=4, color="#D04A02"), fill="tozeroy", fillcolor="rgba(208,74,2,0.07)",
+        hovertemplate="<b>%{x|Q%q %Y}</b><br>%{y:.0f} Mt<extra></extra>"))
+    fig.add_trace(go.Scatter(
+        x=df["Quarter"], y=df["Income_ZAR_bn"], name="Freight Income (Rbn) →",
+        mode="lines+markers", yaxis="y2", line=dict(color="#21325B", width=2.5),
+        marker=dict(size=4, color="#21325B"),
+        hovertemplate="<b>%{x|Q%q %Y}</b><br>R%{y:.1f}bn<extra></extra>"))
+    fig.add_annotation(
+        x=df["Quarter"].iloc[-4], y=df["Payload_Mt"].iloc[-4],
+        text="▼ Volume falling\n▲ Revenue rising\n= Cost squeeze",
+        showarrow=True, arrowhead=2, arrowcolor="#D04A02",
+        bgcolor="rgba(208,74,2,0.08)", bordercolor="#D04A02",
+        font=dict(size=9, color="#D04A02", family="Inter"), ax=-80, ay=-50)
+    return _apply(fig, {
+        "yaxis": {**CHART_BASE["yaxis"], "title": "Payload (Mt)", "side": "left"},
+        "yaxis2": {**CHART_BASE["yaxis"], "title": "Income (R bn)", "side": "right",
+                   "overlaying": "y", "showgrid": False},
+        "xaxis": {**CHART_BASE["xaxis"], "title": "Quarter"}, "height": 320,
+    })
+
+
+def chart_za_channel(df):
+    """NAAMSA — HCV sales channel donut."""
+    fig = go.Figure(go.Pie(
+        labels=df["Channel"], values=df["Share_pct"], hole=.58,
+        marker=dict(colors=df["Color"].tolist(), line=dict(color="white", width=2)),
+        textinfo="label+percent", textfont=dict(size=11, family="Inter"),
+        hovertemplate="<b>%{label}</b><br>%{value:.1f}%<extra></extra>"))
+    fig.add_annotation(text="Sales\nChannel", x=.5, y=.5,
+        font=dict(size=12, family="Inter", color="#5A6070"), showarrow=False)
+    return _apply(fig, {
+        "showlegend": True,
+        "legend": dict(orientation="v", x=1.02, y=.5, font=dict(size=11), bgcolor="rgba(0,0,0,0)"),
+        "margin": dict(l=20, r=120, t=20, b=20), "height": 290,
+    })
+
+
+def chart_za_province(df):
+    """NAAMSA — HCV sales by province bar chart."""
+    colors = ["#D04A02" if i==0 else "#21325B" if i==1 else "#295BA5" if i==2
+              else "#8BA7C4" for i in range(len(df))]
+    fig = go.Figure(go.Bar(
+        x=df["Province"], y=df["Units"],
+        text=[f"{v:,}\n({s}%)" for v, s in zip(df["Units"], df["Share_pct"])],
+        textposition="outside", textfont=dict(size=10, family="Inter"),
+        marker=dict(color=colors, line=dict(color="white", width=1.5)),
+        hovertemplate="<b>%{x}</b><br>%{y:,} units<extra></extra>"))
+    return _apply(fig, {
+        "yaxis": {**CHART_BASE["yaxis"], "title": "Units", "range": [0, df["Units"].max()*1.25]},
+        "xaxis": {**CHART_BASE["xaxis"], "title": "Province"},
+        "showlegend": False, "bargap": .35, "height": 300,
+    })
+
+
+# ── Nigeria exclusive chart ───────────────────────────────────────────────────
 def chart_ng_waterfall(df):
     fig=go.Figure(go.Waterfall(orientation="v",measure=df["Measure"].tolist(),
         x=df["Label"].tolist(),y=df["Value"].tolist(),
@@ -1548,8 +1750,10 @@ def chart_ng_waterfall(df):
         bordercolor="#1A8C5B",font=dict(size=10,color="#1A8C5B",family="Inter"),ax=-90,ay=-50)
     return _apply(fig,{"yaxis":{**CHART_BASE["yaxis"],"title":"Cost (USD)"},
                         "xaxis":{**CHART_BASE["xaxis"],"title":""},"showlegend":False,
-                        "margin":dict(l=60,r=20,t=30,b=70)})
+                        "margin":dict(l=60,r=20,t=30,b=70),"height":420})
 
+
+# ── Morocco exclusive chart ───────────────────────────────────────────────────
 def chart_ma_modal(df):
     colors=["#C0C8D8" if not r else "#D04A02" for r in df["Road_Accessible"]]
     fig=go.Figure(go.Bar(x=df["Volume_Mt_yr"],y=df["Modal"],orientation="h",
@@ -1564,24 +1768,10 @@ def chart_ma_modal(df):
     return _apply(fig,{"xaxis":{**CHART_BASE["xaxis"],"title":"Estimated Volume (Mt/year)",
                                  "range":[0,df["Volume_Mt_yr"].max()*1.35]},
                         "yaxis":{**CHART_BASE["yaxis"],"title":"","automargin":True},
-                        "showlegend":False,"margin":dict(l=200,r=20,t=20,b=50),"height":280})
+                        "showlegend":False,"margin":dict(l=200,r=20,t=20,b=50),"height":300})
 
-def chart_ocp_throughput(df):
-    x_num=np.arange(len(df)); trend=np.poly1d(np.polyfit(x_num,df["Throughput_kt"],1))(x_num)
-    growth=(df["Throughput_kt"].iloc[-1]/df["Throughput_kt"].iloc[0]-1)*100
-    fig=go.Figure()
-    fig.add_trace(go.Scatter(x=df["Month"],y=df["Throughput_kt"],name="Monthly Throughput (kt)",
-        mode="lines",line=dict(color="#D04A02",width=2),fill="tozeroy",fillcolor="rgba(208,74,2,0.10)",
-        hovertemplate="<b>%{x|%b %Y}</b><br>%{y:.0f} kt<extra></extra>"))
-    fig.add_trace(go.Scatter(x=df["Month"],y=trend,name="Growth Trend",mode="lines",
-        line=dict(color="#21325B",width=1.5,dash="dot"),
-        hovertemplate="Trend: %{y:.0f} kt<extra></extra>"))
-    fig.add_annotation(x=df["Month"].iloc[-1],y=df["Throughput_kt"].iloc[-1],
-        text=f"▲ +{growth:.1f}% since Jan 2023",showarrow=True,arrowhead=2,
-        arrowcolor="#D04A02",font=dict(size=10,color="#D04A02",family="Inter"),ax=-110,ay=-40)
-    return _apply(fig,{"xaxis":{**CHART_BASE["xaxis"],"title":"Month"},
-                        "yaxis":{**CHART_BASE["yaxis"],"title":"Throughput (thousand tonnes)"}})
 
+# ── Ethiopia exclusive chart ──────────────────────────────────────────────────
 def chart_eth_ev(df):
     fig=go.Figure()
     fig.add_trace(go.Scatter(x=df["Month"],y=df["EV_Share_pct"],name="EV Market Share (%)",
@@ -1593,8 +1783,10 @@ def chart_eth_ev(df):
         font=dict(size=9,color="#21325B",family="Inter"))
     return _apply(fig,{"xaxis":{**CHART_BASE["xaxis"],"title":"Month"},
                         "yaxis":{**CHART_BASE["yaxis"],"title":"EV Market Share (%)","range":[0,105]},
-                        "showlegend":False})
+                        "showlegend":False,"height":380})
 
+
+# ── Tunisia exclusive chart ───────────────────────────────────────────────────
 def chart_tn_tco_waterfall(df):
     fig=go.Figure(go.Waterfall(orientation="v",measure=df["Measure"].tolist(),
         x=df["Label"].tolist(),y=df["Value"].tolist(),
@@ -1611,277 +1803,60 @@ def chart_tn_tco_waterfall(df):
         arrowcolor="#1A8C5B",bgcolor="rgba(26,140,91,0.1)",bordercolor="#1A8C5B",
         font=dict(size=10,color="#1A8C5B",family="Inter"),ax=-90,ay=-60)
     fig.add_vline(x=4.5,line_dash="dash",line_color="#9BA3B2",line_width=1)
-    fig.add_annotation(x=2.2,y=490000,text="🚛 Diesel Truck",showarrow=False,
-        font=dict(size=11,color="#D04A02",family="Inter"))
-    fig.add_annotation(x=7.5,y=490000,text="⚡ BEV Truck",showarrow=False,
-        font=dict(size=11,color="#21325B",family="Inter"))
     return _apply(fig,{"yaxis":{**CHART_BASE["yaxis"],"title":"Cost (TND)","range":[-30000,530000]},
                         "xaxis":{**CHART_BASE["xaxis"],"title":"","tickangle":-15},
-                        "showlegend":False,"margin":dict(l=60,r=20,t=50,b=90),"height":520})
+                        "showlegend":False,"margin":dict(l=60,r=20,t=50,b=90),"height":460})
 
+
+# ── Rwanda exclusive charts ───────────────────────────────────────────────────
 def chart_rw_tariff_comparison(df):
     fig = go.Figure(go.Waterfall(
-        orientation="v",
-        measure=df["Measure"].tolist(),
-        x=df["Label"].tolist(),
-        y=df["Value_USD"].tolist(),
-        text=[
-            "FREE ✓" if v==0 else
-            f"${v:,.0f}" if m=="total" else
-            f"+${v:,.0f}"
-            for v, m in zip(df["Value_USD"], df["Measure"])
-        ],
-        textposition="outside",
-        textfont=dict(size=10, family="Inter", color="#2D3142"),
+        orientation="v", measure=df["Measure"].tolist(),
+        x=df["Label"].tolist(), y=df["Value_USD"].tolist(),
+        text=["FREE ✓" if v==0 else f"${v:,.0f}" if m=="total" else f"+${v:,.0f}"
+              for v, m in zip(df["Value_USD"], df["Measure"])],
+        textposition="outside", textfont=dict(size=10, family="Inter", color="#2D3142"),
         connector=dict(line=dict(color="#E2E5EB", width=1, dash="dot")),
-        increasing=dict(marker_color="#D04A02"),
-        decreasing=dict(marker_color="#1A8C5B"),
+        increasing=dict(marker_color="#D04A02"), decreasing=dict(marker_color="#1A8C5B"),
         totals=dict(marker_color="#21325B"),
         hovertemplate="<b>%{x}</b><br>$%{y:,.0f}<extra></extra>",
     ))
     fig.add_annotation(
         x="EV Total\nLanded Cost", y=80000,
-        text="✅ EV saves $34,400\nper unit vs ICE\n(43% cost reduction)",
+        text="✅ EV saves $34,400\nper unit vs ICE (43%)",
         showarrow=True, arrowhead=2, arrowcolor="#1A8C5B",
         bgcolor="rgba(26,140,91,0.1)", bordercolor="#1A8C5B",
-        font=dict(size=10, color="#1A8C5B", family="Inter"),
-        ax=-100, ay=-50,
+        font=dict(size=10, color="#1A8C5B", family="Inter"), ax=-100, ay=-50,
     )
-    fig.add_vline(x=3.5, line_dash="dash", line_color="#9BA3B2", line_width=1)
-    fig.add_annotation(x=1.5, y=125000, text="🚛 ICE Truck (EAC Standard)",
-        showarrow=False, font=dict(size=11, color="#D04A02", family="Inter"))
-    fig.add_annotation(x=5.5, y=125000, text="⚡ EV Truck (Rwanda Zero-Tax)",
-        showarrow=False, font=dict(size=11, color="#21325B", family="Inter"))
     return _apply(fig, {
         "yaxis":{**CHART_BASE["yaxis"],"title":"All-in Landed Cost (USD)","range":[-5000,135000]},
         "xaxis":{**CHART_BASE["xaxis"],"title":"","tickangle":-10},
-        "showlegend":False,
-        "margin":dict(l=60, r=20, t=50, b=90),
-        "height":480,
+        "showlegend":False,"margin":dict(l=60, r=20, t=50, b=90),"height":420,
     })
 
 def chart_rw_ev_adoption(df):
     fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=df["Year"], y=df["Bus_ICE"], name="Public Buses — ICE",
-        mode="lines", stackgroup="buses",
-        line=dict(color="#9BA3B2", width=0), fillcolor="rgba(155,163,178,0.35)",
+    fig.add_trace(go.Scatter(x=df["Year"], y=df["Bus_ICE"], name="Public Buses — ICE",
+        mode="lines", stackgroup="buses", line=dict(color="#9BA3B2", width=0),
+        fillcolor="rgba(155,163,178,0.35)",
         hovertemplate="<b>%{x}</b><br>Bus ICE: <b>%{y}</b> units<extra></extra>"))
-    fig.add_trace(go.Scatter(
-        x=df["Year"], y=df["Bus_EV"], name="Public Buses — EV",
-        mode="lines", stackgroup="buses",
-        line=dict(color="#21325B", width=0), fillcolor="rgba(33,50,91,0.55)",
+    fig.add_trace(go.Scatter(x=df["Year"], y=df["Bus_EV"], name="Public Buses — EV",
+        mode="lines", stackgroup="buses", line=dict(color="#21325B", width=0),
+        fillcolor="rgba(33,50,91,0.55)",
         hovertemplate="<b>%{x}</b><br>Bus EV: <b>%{y}</b> units<extra></extra>"))
-    fig.add_trace(go.Scatter(
-        x=df["Year"], y=df["eLCV_ICE"], name="Urban LCV — ICE",
-        mode="lines", stackgroup="lcv",
-        line=dict(color="#C0C8D8", width=0), fillcolor="rgba(192,200,216,0.30)",
+    fig.add_trace(go.Scatter(x=df["Year"], y=df["eLCV_ICE"], name="Urban LCV — ICE",
+        mode="lines", stackgroup="lcv", line=dict(color="#C0C8D8", width=0),
+        fillcolor="rgba(192,200,216,0.30)",
         hovertemplate="<b>%{x}</b><br>LCV ICE: <b>%{y}</b> units<extra></extra>"))
-    fig.add_trace(go.Scatter(
-        x=df["Year"], y=df["eLCV_EV"], name="Urban LCV — EV",
-        mode="lines", stackgroup="lcv",
-        line=dict(color="#D04A02", width=0), fillcolor="rgba(208,74,2,0.45)",
+    fig.add_trace(go.Scatter(x=df["Year"], y=df["eLCV_EV"], name="Urban LCV — EV",
+        mode="lines", stackgroup="lcv", line=dict(color="#D04A02", width=0),
+        fillcolor="rgba(208,74,2,0.45)",
         hovertemplate="<b>%{x}</b><br>LCV EV: <b>%{y}</b> units<extra></extra>"))
-    fig.add_vline(x=2025.5, line_dash="dash", line_color="#9BA3B2", line_width=1.2)
-    fig.add_annotation(x=2025.7, y=550, text="← Actual | Forecast →",
-        showarrow=False, font=dict(size=9, color="#9BA3B2", family="Inter"))
     return _apply(fig, {
         "xaxis":{**CHART_BASE["xaxis"],"title":"Year","tickmode":"array","tickvals":df["Year"].tolist()},
         "yaxis":{**CHART_BASE["yaxis"],"title":"Units in Fleet / Registered"},
-        "legend":{**CHART_BASE["legend"],"y":-0.25},
-        "height":420,
+        "legend":{**CHART_BASE["legend"],"y":-0.25}, "height":380,
     })
-
-# ══════════════════════════════════════════════════════════════════════════════
-# 9B. NEW v10.0 CHARTS — TCO Break-even, Segment Bubble, Risk Radar
-# ══════════════════════════════════════════════════════════════════════════════
-def chart_tco_breakeven(country: str) -> go.Figure:
-    """
-    36-month cumulative TCO comparison line chart with break-even point highlighted.
-    """
-    df = gen_tco_36month_df(country)
-    breakeven_month, breakeven_cost = calc_tco_breakeven(country)
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=df["Month"], y=df["ICE_Cumulative_Cost"],
-        name="ICE — Cumulative TCO",
-        mode="lines",
-        line=dict(color="#21325B", width=2.5),
-        hovertemplate="<b>Month %{x}</b><br>ICE Cumulative: <b>$%{y:,.0f}</b><extra></extra>",
-    ))
-    fig.add_trace(go.Scatter(
-        x=df["Month"], y=df["EV_Cumulative_Cost"],
-        name="EV — Cumulative TCO",
-        mode="lines",
-        line=dict(color="#D04A02", width=2.5),
-        hovertemplate="<b>Month %{x}</b><br>EV Cumulative: <b>$%{y:,.0f}</b><extra></extra>",
-    ))
-
-    if breakeven_month is not None:
-        fig.add_trace(go.Scatter(
-            x=[breakeven_month], y=[breakeven_cost],
-            mode="markers+text",
-            marker=dict(size=14, color="#1A8C5B", symbol="star",
-                       line=dict(color="white", width=2)),
-            text=[f"  Break-even: Month {breakeven_month:.1f}"],
-            textposition="middle right",
-            textfont=dict(size=11, color="#1A8C5B", family="Inter"),
-            name="Break-even Point",
-            hovertemplate=f"<b>TCO Parity</b><br>Month: {breakeven_month:.1f}<br>Cost: ${breakeven_cost:,.0f}<extra></extra>",
-            showlegend=False,
-        ))
-        fig.add_vline(x=breakeven_month, line_dash="dot", line_color="#1A8C5B", line_width=1.5)
-        fig.add_annotation(
-            x=breakeven_month, y=df["EV_Cumulative_Cost"].max()*0.15,
-            text=f"🟢 TCO Parity reached<br>at Month {breakeven_month:.1f}",
-            showarrow=False,
-            bgcolor="rgba(26,140,91,0.1)", bordercolor="#1A8C5B",
-            font=dict(size=10, color="#1A8C5B", family="Inter"),
-        )
-    else:
-        # No breakeven within 36 months — show warning annotation
-        final_diff = df["EV_Cumulative_Cost"].iloc[-1] - df["ICE_Cumulative_Cost"].iloc[-1]
-        if final_diff > 0:
-            fig.add_annotation(
-                x=18, y=df["EV_Cumulative_Cost"].max()*0.9,
-                text="⚠ No TCO parity within 36 months<br>at current energy price differential",
-                showarrow=False,
-                bgcolor="rgba(208,74,2,0.1)", bordercolor="#D04A02",
-                font=dict(size=10, color="#D04A02", family="Inter"),
-            )
-
-    return _apply(fig, {
-        "xaxis": {**CHART_BASE["xaxis"], "title": "Month of Operation"},
-        "yaxis": {**CHART_BASE["yaxis"], "title": "Cumulative Cost (USD)"},
-        "legend": {**CHART_BASE["legend"], "y": -0.2},
-        "height": 440,
-    })
-
-
-def chart_segment_bubble(df: pd.DataFrame, title_suffix: str = "") -> go.Figure:
-    """
-    Bubble chart: x=Segment, y=EV_Readiness, bubble size=Volume.
-    Used for single-country segment view.
-    """
-    colors = ["#D04A02", "#295BA5", "#9BA3B2"]
-    fig = go.Figure()
-    for i, row in df.iterrows():
-        fig.add_trace(go.Scatter(
-            x=[row["Segment"]], y=[row["EV_Readiness"]],
-            mode="markers+text",
-            marker=dict(
-                size=np.sqrt(row["Volume"]) * 1.6,
-                color=colors[i % len(colors)],
-                opacity=0.75,
-                line=dict(color="white", width=2),
-            ),
-            text=[f"{row['Volume']:,}"],
-            textposition="middle center",
-            textfont=dict(size=10, color="white", family="Inter"),
-            hovertemplate=(f"<b>{row['Segment']}</b><br>"
-                          f"Volume: {row['Volume']:,} units/yr<br>"
-                          f"EV Readiness: {row['EV_Readiness']}/10<extra></extra>"),
-            showlegend=False,
-        ))
-    return _apply(fig, {
-        "xaxis": {**CHART_BASE["xaxis"], "title": "Commercial Vehicle Segment"},
-        "yaxis": {**CHART_BASE["yaxis"], "title": "EV Readiness Score (0–10)", "range": [-0.5, 10.5]},
-        "height": 420,
-        "showlegend": False,
-    })
-
-
-def chart_segment_heatmap_continental(df: pd.DataFrame) -> go.Figure:
-    """
-    Continental heatmap: rows = countries, columns = segments, color = EV readiness,
-    cell text = volume. Reveals the "LCV electrifies fast, EHCV stays diesel" pattern.
-    """
-    pivot_readiness = df.pivot(index="Country", columns="Segment", values="EV_Readiness")
-    pivot_volume = df.pivot(index="Country", columns="Segment", values="Volume")
-
-    seg_order = ["LCV (Light Urban)", "MCV / Rigid (Construction)", "EHCV / Tractor (Long-Haul)"]
-    pivot_readiness = pivot_readiness[seg_order]
-    pivot_volume = pivot_volume[seg_order]
-
-    text_matrix = [
-        [f"{pivot_readiness.iloc[i,j]:.1f}<br>({pivot_volume.iloc[i,j]:,.0f} u)"
-         for j in range(len(seg_order))]
-        for i in range(len(pivot_readiness))
-    ]
-
-    fig = go.Figure(go.Heatmap(
-        z=pivot_readiness.values,
-        x=seg_order,
-        y=pivot_readiness.index.tolist(),
-        text=text_matrix,
-        texttemplate="%{text}",
-        textfont=dict(size=10, family="Inter", color="#2D3142"),
-        colorscale=[
-            [0.0, "#F4F5F7"],
-            [0.15, "#E8ECF4"],
-            [0.35, "#C0C8D8"],
-            [0.55, "#8BA7C4"],
-            [0.75, "#EB6C2D"],
-            [1.0, "#D04A02"],
-        ],
-        zmin=0, zmax=10,
-        colorbar=dict(
-            title=dict(text="EV Readiness", font=dict(size=10, family="Inter", color="#5A6070")),
-            tickfont=dict(size=9, family="Inter", color="#9BA3B2"),
-            thickness=12, len=0.7,
-        ),
-        hovertemplate="<b>%{y} — %{x}</b><br>EV Readiness: %{z:.1f}/10<extra></extra>",
-    ))
-    return _apply(fig, {
-        "xaxis": {**CHART_BASE["xaxis"], "title": "", "side": "top"},
-        "yaxis": {**CHART_BASE["yaxis"], "title": "", "automargin": True},
-        "height": 460,
-        "margin": dict(l=110, r=20, t=60, b=20),
-    })
-
-
-def chart_risk_radar(df: pd.DataFrame, country: str) -> go.Figure:
-    """
-    Operational risk radar chart — 5 dimensions on 0-10 scale.
-    """
-    categories = df["Dimension"].tolist()
-    values = df["Score"].tolist()
-    categories_closed = categories + [categories[0]]
-    values_closed = values + [values[0]]
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatterpolar(
-        r=values_closed,
-        theta=categories_closed,
-        fill="toself",
-        fillcolor="rgba(208,74,2,0.15)",
-        line=dict(color="#D04A02", width=2.5),
-        marker=dict(size=7, color="#D04A02"),
-        name=country,
-        hovertemplate="<b>%{theta}</b><br>Score: %{r:.1f}/10<extra></extra>",
-    ))
-    fig.update_layout(
-        polar=dict(
-            bgcolor="rgba(0,0,0,0)",
-            radialaxis=dict(
-                visible=True, range=[0, 10],
-                tickfont=dict(size=9, color="#9BA3B2", family="Inter"),
-                gridcolor="#E2E5EB", linecolor="#E2E5EB",
-            ),
-            angularaxis=dict(
-                tickfont=dict(size=11, color="#2D3142", family="Inter"),
-                gridcolor="#E2E5EB", linecolor="#E2E5EB",
-            ),
-        ),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Inter, sans-serif", color="#2D3142", size=12),
-        showlegend=False,
-        margin=dict(l=60, r=60, t=40, b=40),
-        height=440,
-    )
-    return fig
 # ══════════════════════════════════════════════════════════════════════════════
 # 10. UI HELPER FUNCTIONS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1895,9 +1870,19 @@ def _chdr(label, title, sub, src_name, src_url):
 </div>
 """, unsafe_allow_html=True)
 
+def _level_hdr(level_num: int, title: str, sub: str = ""):
+    st.markdown(f"""
+<div class="section-hdr">
+    <div class="section-bar"></div>
+    <span class="level-badge">Level {level_num}</span>
+    <div class="section-title">{title}</div>
+    {"<div class='section-sub'>"+sub+"</div>" if sub else ""}
+</div>
+""", unsafe_allow_html=True)
+
 def _sdiv(title, sub=""):
     st.markdown(f"""
-<div class="section-hdr" style="margin-top:26px;">
+<div class="section-hdr">
     <div class="section-bar"></div>
     <div class="section-title">{title}</div>
     {"<div class='section-sub'>"+sub+"</div>" if sub else ""}
@@ -1912,633 +1897,273 @@ def _kpi_row(cdata):
             st.metric(key, val, delta, delta_color=dc, help=lbl)
     src = list(cdata["sources"].values())[0]
     st.caption(f"Source: [{src[0]}]({src[1]}) · Simulated data unless otherwise stated.")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# 11. MASTER NARRATIVE-FLOW RENDERER (Task 2)
+#     One function drives all 9 countries top-to-bottom:
+#       Level 1 → KPIs + Risk Radar + Gate Index + FX Alert
+#       Level 2 → Segment Heatmap (L) + TCO Break-even (R)
+#       Level 3 → Brand Share (L) + Country-Exclusive Chart (R)
+#       Level 4 → Due Diligence (single column) + Strategic Action box
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Registry mapping each country to its Level-3-right exclusive chart renderer.
+# Note: South Africa is intentionally absent from this registry — it has its
+# own dedicated 4-chart Level 3 layout (see render_country_dashboard), kept
+# in full per explicit user request rather than collapsed to one chart.
+def _exclusive_chart_nigeria():
+    CUSTOMS = "https://customs.gov.ng"
+    NADDC = "https://naddc.gov.ng"
+    _chdr("Exclusive · Nigeria Customs / NADDC",
+          "CBU vs. CKD/SKD Import Cost Waterfall",
+          "Per-unit landed cost (30t HCV, base $100k). CKD route saves ~$46k under 2023 EV/assembly tariff.",
+          "Nigeria Customs Service", CUSTOMS)
+    st.plotly_chart(chart_ng_waterfall(gen_ng_waterfall()), use_container_width=True, config=PLOTLY_CFG, key="ng_excl")
+    st.caption(f"Source: [Nigeria Customs]({CUSTOMS}) · [NADDC]({NADDC}) · Figures illustrative.")
+
+def _exclusive_chart_morocco():
+    OCP = "https://www.ocpgroup.ma/investor-relations"
+    AIVAM = "http://www.aivam.ma"
+    _chdr("Exclusive · OCP Group",
+          "Phosphate Transport Modal Split — Pipeline vs Rail vs Road",
+          "Orange = road-accessible segment only. Pipeline/rail serve the primary ore trunk and are structurally closed to HCVs.",
+          "OCP Group Investor Relations", OCP)
+    st.plotly_chart(chart_ma_modal(gen_ma_modal()), use_container_width=True, config=PLOTLY_CFG, key="ma_excl")
+    st.caption(f"Source: [OCP Group IR]({OCP}) · [AIVAM]({AIVAM}) · Estimated volumes.")
+
+def _exclusive_chart_egypt():
+    src = TIER1["Egypt"]["sources"]["trade"]
+    _chdr("Market Context · EOS",
+          "Subsidised Diesel Erodes EV Cost Case",
+          "At EGP 9.75/L subsidised diesel, the ICE energy cost floor is structurally low — "
+          "the KD tariff route (5% vs 40% CBU) is the only realistic lever, not EV TCO.",
+          src[0], src[1])
+    st.info(
+        "**No standalone chart for this slot.** Egypt's commercial story is the **KD tariff "
+        "waterfall**, already quantified in Level 2's TCO panel — energy subsidy keeps ICE "
+        "structurally cheap to run, so the differentiator is assembly tariff, not fuel cost.",
+        icon="ℹ️"
+    )
+
+def _exclusive_chart_kenya():
+    src = TIER1["Kenya"]["sources"]["trade"]
+    _chdr("Market Context · KEBS / Kenya Railways",
+          "SGR Is a Complement, Not a Competitor, to Road HCV",
+          "SGR volumes grew 1.2→5.8 Mt (2018-23) but operate Mombasa–Nairobi only (472 km). "
+          "Last-mile to Kampala, Kigali, and Juba remains structurally road-dependent.",
+          src[0], src[1])
+    st.success(
+        "**Net read:** EAC cross-border freight — the majority of Kenyan HCV demand — is "
+        "untouched by SGR. Port drayage at Mombasa is the best near-term EV pilot route.",
+        icon="✅"
+    )
+
+def _exclusive_chart_ethiopia():
+    ERCA = "https://www.erca.gov.et"
+    MOTI = "https://www.moti.gov.et"
+    _chdr("Exclusive · MoTI / ERCA",
+          "EV Market Share Trajectory — Post Petroleum Import Ban",
+          "From <3% to >85% EV share in 30 months following the July 2022 petroleum import ban.",
+          "Ministry of Trade & Industry Ethiopia", MOTI)
+    st.plotly_chart(chart_eth_ev(gen_eth_ev()), use_container_width=True, config=PLOTLY_CFG, key="eth_excl")
+    st.caption(f"Source: [MoTI Ethiopia]({MOTI}) · [ERCA]({ERCA}) · Simulated data.")
+
+def _exclusive_chart_tunisia():
+    FIN = "https://www.finances.gov.tn"
+    ANME = "https://www.anme.tn"
+    _chdr("Exclusive · Loi de Finances 2026 / ANME",
+          "All-in Landed Cost Waterfall: Diesel HCV vs. BEV",
+          "CIF base TND 300,000. BEV: 0% customs + 0% excise + 7% TVA + TND 10,000 ANME subsidy.",
+          "Ministère des Finances Tunisie", FIN)
+    st.plotly_chart(chart_tn_tco_waterfall(gen_tn_tco_waterfall()), use_container_width=True, config=PLOTLY_CFG, key="tn_excl")
+    st.caption(f"Source: [Loi de Finances 2026]({FIN}) · [ANME]({ANME}) · Exchange rate TND/USD 3.14 (BCT Q1 2026).")
+
+def _exclusive_chart_algeria():
+    src = TIER1["Algeria"]["sources"]["trade"]
+    _chdr("Market Context · Ministère du Commerce",
+          "Renault Rouiba JV — The Only Proven Entry Template",
+          "30% CBU tariff + import licence quotas make direct CV import commercially unviable. "
+          "Renault's JV assembly plant in Rouiba is the only durable precedent.",
+          src[0], src[1])
+    st.warning(
+        "**Net read:** This is a JV-or-nothing market. Budget 3-4 years from MOU to first "
+        "unit production; do not pursue CBU export here.",
+        icon="⚠️"
+    )
+
+def _exclusive_chart_rwanda():
+    RDB = "https://www.rdb.rw"
+    RURA = "https://www.rura.rw"
+    _chdr("Exclusive · RURA / MINICOM",
+          "Kigali EV Fleet Adoption — Buses & Urban LCV (Stacked Area)",
+          "2022–2025 actuals; 2026–2027 RURA Green Mobility forecast. Orange = EV, Grey = ICE.",
+          "RURA — Green Mobility Annual Report 2024", RURA)
+    st.plotly_chart(chart_rw_ev_adoption(gen_rw_ev_adoption()), use_container_width=True, config=PLOTLY_CFG, key="rw_excl")
+    st.caption(f"Source: [RURA]({RURA}) · [RDB]({RDB}) · 2026-27 figures are policy targets, not confirmed actuals.")
+
+
+EXCLUSIVE_CHART_REGISTRY = {
+    "Nigeria":       _exclusive_chart_nigeria,
+    "Morocco":       _exclusive_chart_morocco,
+    "Egypt":         _exclusive_chart_egypt,
+    "Kenya":         _exclusive_chart_kenya,
+    "Ethiopia":      _exclusive_chart_ethiopia,
+    "Tunisia":       _exclusive_chart_tunisia,
+    "Algeria":       _exclusive_chart_algeria,
+    "Rwanda":        _exclusive_chart_rwanda,
+}
+
+
+def render_country_dashboard(country: str, cdata: dict):
+    """
+    The single master renderer (Task 2). Every Tier 1 country flows through
+    this exact same Level 1 -> 2 -> 3 -> 4 sequence — no country gets a
+    bespoke page structure anymore, only a bespoke Level-3-right chart via
+    EXCLUSIVE_CHART_REGISTRY and a bespoke 'action' sentence in its dict.
+    """
+
+    # ── LEVEL 1 — Decision Overview ───────────────────────────────────────────
+    _level_hdr(1, "Decision Overview · 决策全景", "KPIs, market access gate, and FX risk screen")
+    _kpi_row(cdata)
     st.markdown("<br>", unsafe_allow_html=True)
 
-def _standard_2col(country, cdata, key_prefix):
-    c1, c2 = st.columns(2, gap="large")
-    src = cdata["sources"]["trade"]
-    with c1:
-        _chdr("Market Share", f"Brand Rankings — {country}",
-              "Top 5 brands by annual HCV/CV unit sales", src[0], src[1])
-        st.plotly_chart(chart_brand(gen_brand_df(country), country),
-                        use_container_width=True, config={"displayModeBar":False},
-                        key=f"{key_prefix}_brand")
-    with c2:
-        _chdr("Sales Trend 2021–2026", f"ICE vs. EV — {country}",
-              "Historical actuals + 2026 forecast", src[0], src[1])
-        st.plotly_chart(chart_trend(gen_trend_df(country)),
-                        use_container_width=True, config={"displayModeBar":False},
-                        key=f"{key_prefix}_trend")
+    gate_index = calc_gate_index(country)
+    fx_score = cdata["risk_radar"]["FX_Liquidity"]
+    gate_color = "#1A8C5B" if gate_index >= 65 else "#B45309" if gate_index >= 45 else "#B91C1C"
 
-def _tri_section(cdata):
-    tri_keys = cdata.get("tri_keys", [])
-    if not tri_keys:
-        return
-    _sdiv("Analyst Due Diligence — Intelligence Triangulation",
-          "Critical thinking · Cross-validation · Confidence ratings")
-    for tk in tri_keys:
+    radar_col, gate_col = st.columns([3, 1], gap="large")
+    with radar_col:
+        _chdr("Market Access Radar", f"5-Dimension Operational Risk Profile — {country}",
+              "FX Liquidity · Tariff Advantage · Port Efficiency · Grid Stability · Policy Consistency (0-10 scale)",
+              cdata["sources"]["trade"][0], cdata["sources"]["trade"][1])
+        st.plotly_chart(chart_risk_radar(gen_risk_radar_df(country), country),
+                        use_container_width=True, config=PLOTLY_CFG, key=f"{country}_radar")
+    with gate_col:
+        st.markdown(f"""
+<div class="gate-index-card">
+    <div class="gate-index-label">Market Access Gate Index</div>
+    <div class="gate-index-value" style="color:{gate_color};">{gate_index:.0f}<span style="font-size:1rem;color:#9BA3B2;">/100</span></div>
+    <div class="gate-index-label" style="margin-top:6px;color:{gate_color};">
+        {"LOW RISK" if gate_index>=65 else "MODERATE RISK" if gate_index>=45 else "HIGH RISK"}
+    </div>
+</div>
+""", unsafe_allow_html=True)
+        st.caption("Weighted: FX 30% · Policy 25% · Tariff 20% · Port 15% · Grid 10%")
+
+    if fx_score <= 3:
+        st.error(
+            f"🚨 **FATAL RISK ALERT — FX Liquidity Score: {fx_score:.1f}/10**\n\n"
+            f"USD/hard-currency access in **{country}** is severely constrained. Any deal structure "
+            f"that assumes smooth profit repatriation or stable local-currency pricing carries "
+            f"material risk of capital trapping or margin erosion. Structure contracts in "
+            f"USD-indexed terms with FX hedging clauses before proceeding.",
+            icon="🚨"
+        )
+
+    # ── LEVEL 2 — Commercial Monetisation ─────────────────────────────────────
+    _level_hdr(2, "Commercial Monetisation · 商业变现", "Where EV wins by application, and when it pays for itself")
+    seg_col, tco_col = st.columns(2, gap="large")
+    with seg_col:
+        _chdr("Application Segment Heatmap", "EV Readiness by Use Case",
+              "Urban FMCG · Port Drayage · Long-Haul Mining — volume and electrification readiness",
+              cdata["sources"]["trade"][0], cdata["sources"]["trade"][1])
+        st.plotly_chart(chart_segment_apps_heatmap(gen_segment_apps_df(country)),
+                        use_container_width=True, config=PLOTLY_CFG, key=f"{country}_segheat")
+        seg_df = gen_segment_apps_df(country)
+        st.caption(
+            "Volumes: " + " · ".join(f"{r['Application'].split('(')[0].strip()}: {r['Volume']:,}/yr"
+                                     for _, r in seg_df.iterrows())
+        )
+    with tco_col:
+        p = cdata["tco_params"]
+        _chdr("36-Month TCO Break-even", "ICE vs. EV Cumulative Cost (incl. financing)",
+              f"Capex ICE ${p['ICE_Capex']:,.0f} vs EV ${p['EV_Capex']:,.0f} · "
+              f"financed at {p['Interest_Rate']*100:.0f}% p.a. · {p['Monthly_km']:,} km/month",
+              p["source_name"], p["source_url"])
+        st.plotly_chart(chart_tco_breakeven(country), use_container_width=True,
+                        config=PLOTLY_CFG, key=f"{country}_tco")
+        breakeven_month, _ = calc_tco_breakeven(country)
+        be_text = f"Month {breakeven_month:.1f} ({breakeven_month/12:.1f} yrs)" if breakeven_month is not None else "Not reached within 36 months"
+        st.caption(f"Break-even: **{be_text}** · Financing rate: {p['Interest_Rate']*100:.0f}% p.a.")
+
+    # ── LEVEL 3 — Market Depth ─────────────────────────────────────────────────
+    _level_hdr(3, "Market Depth · 市场深度", "Brand competitive set and country-specific structural story")
+
+    if country == "South Africa":
+        # South Africa keeps its full 4-chart Stats SA / NAAMSA depth panel —
+        # explicitly preserved at the user's request rather than collapsed
+        # into a single exclusive chart like the other 8 markets.
+        src = cdata["sources"]["trade"]
+        STATSSA = "https://www.statssa.gov.za/publications/P7162/P7162.html"
+        NAAMSA  = "https://naamsa.co.za"
+
+        row1_l, row1_r = st.columns(2, gap="large")
+        with row1_l:
+            _chdr("Competitive Set", f"Brand Market Share — {country}",
+                  "Top 5 brands by annual CV unit sales", src[0], src[1])
+            st.plotly_chart(chart_brand(gen_brand_df(country), country),
+                            use_container_width=True, config=PLOTLY_CFG, key=f"{country}_brand")
+        with row1_r:
+            _chdr("Exclusive · Transnet / NAAMSA",
+                  "Rail Collapse → Road HCV Demand Transfer",
+                  "Rail freight down 46% from 2018 peak; HCV road sales absorb displaced demand",
+                  "Transnet Annual Report",
+                  "https://www.transnet.net/InvestorCentre/Pages/AnnualReports.aspx")
+            st.plotly_chart(chart_za_scissors(), use_container_width=True, config=PLOTLY_CFG, key="za_scissors")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        row2_l, row2_r = st.columns(2, gap="large")
+        with row2_l:
+            _chdr("Exclusive · Stats SA P7162", "Road Freight Revenue by Commodity Category",
+                  "Mining & Quarrying dominates at 35.4% of total freight revenue", "Stats SA — P7162", STATSSA)
+            st.plotly_chart(chart_za_freight_cat(gen_za_freight_category()),
+                            use_container_width=True, config=PLOTLY_CFG, key="za_freight_cat")
+        with row2_r:
+            _chdr("Exclusive · Stats SA P7162", "Payload Volume vs. Freight Income — The Cost Squeeze",
+                  "Diverging trends illustrate per-km cost inflation burden on fleet operators",
+                  "Stats SA — P7162", STATSSA)
+            st.plotly_chart(chart_za_payload_income(gen_za_payload_income()),
+                            use_container_width=True, config=PLOTLY_CFG, key="za_payload_income")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        row3_l, row3_r = st.columns(2, gap="large")
+        with row3_l:
+            _chdr("Exclusive · NAAMSA", "HCV Sales by Channel",
+                  "Dealer retail dominates; corporate fleet growing", "NAAMSA", NAAMSA)
+            st.plotly_chart(chart_za_channel(gen_za_channel()),
+                            use_container_width=True, config=PLOTLY_CFG, key="za_channel")
+        with row3_r:
+            _chdr("Exclusive · NAAMSA", "HCV Sales by Province",
+                  "Gauteng accounts for 45.1% — industrial heartland concentration", "NAAMSA", NAAMSA)
+            st.plotly_chart(chart_za_province(gen_za_province()),
+                            use_container_width=True, config=PLOTLY_CFG, key="za_province")
+        st.caption(f"Sources: [Stats SA P7162]({STATSSA}) · [NAAMSA]({NAAMSA}) · Simulated data modelled on actual report structures.")
+
+    else:
+        brand_col, excl_col = st.columns(2, gap="large")
+        with brand_col:
+            src = cdata["sources"]["trade"]
+            _chdr("Competitive Set", f"Brand Market Share — {country}",
+                  "Top 5 brands by annual CV unit sales", src[0], src[1])
+            st.plotly_chart(chart_brand(gen_brand_df(country), country),
+                            use_container_width=True, config=PLOTLY_CFG, key=f"{country}_brand")
+        with excl_col:
+            renderer = EXCLUSIVE_CHART_REGISTRY.get(country)
+            if renderer:
+                renderer()
+
+    # ── LEVEL 4 — Due Diligence & Action ──────────────────────────────────────
+    _level_hdr(4, "Due Diligence & Action · 尽调研判与行动",
+               "Single-column verdict — converted directly into a sales instruction")
+    for tk in cdata.get("tri_keys", []):
         t = TRIANGULATION.get(tk, {})
         if not t:
             continue
         with st.expander(f"🔍  {t['title']}", expanded=False):
             render_triangulation(tk)
 
-def _render_tco_module(country: str, cdata: dict, key_prefix: str):
-    """
-    VP-level financial module: 36-month TCO break-even analysis.
-    Renders for any Tier 1 country that has tco_params defined.
-    """
-    if "tco_params" not in cdata:
-        return
-    p = cdata["tco_params"]
-    breakeven_month, breakeven_cost = calc_tco_breakeven(country)
-
-    _sdiv("TCO Break-even Analysis — 36-Month Horizon",
-          "VP Commercial Finance Module · ICE vs EV cumulative cost crossover")
-
-    _chdr(
-        f"Exclusive Financial Module · {country}",
-        "36-Month Cumulative TCO: ICE vs. EV Commercial Vehicle",
-        f"Capex: ICE ${p['ICE_Capex']:,.0f} vs EV ${p['EV_Capex']:,.0f}. "
-        f"Energy cost: ICE ${p['ICE_Energy_Cost_per_km']:.3f}/km vs EV ${p['EV_Energy_Cost_per_km']:.3f}/km "
-        f"at {p['Monthly_km']:,} km/month utilisation.",
-        p["source_name"], p["source_url"],
-    )
-    st.plotly_chart(chart_tco_breakeven(country), use_container_width=True,
-                    config={"displayModeBar": False}, key=f"{key_prefix}_tco")
-
-    t1, t2, t3, t4 = st.columns(4)
-    with t1:
-        st.metric("ICE Capex", f"${p['ICE_Capex']:,.0f}", help="Upfront purchase price, ICE vehicle")
-    with t2:
-        st.metric("EV Capex", f"${p['EV_Capex']:,.0f}",
-                  f"+${p['EV_Capex']-p['ICE_Capex']:,.0f} premium", delta_color="inverse")
-    with t3:
-        if breakeven_month is not None:
-            st.metric("TCO Break-even", f"Month {breakeven_month:.1f}",
-                     f"≈ {breakeven_month/12:.1f} years", delta_color="normal")
-        else:
-            st.metric("TCO Break-even", "Not reached", "Beyond 36 months", delta_color="inverse")
-    with t4:
-        energy_saving_per_km = p["ICE_Energy_Cost_per_km"] - p["EV_Energy_Cost_per_km"]
-        monthly_saving = energy_saving_per_km * p["Monthly_km"]
-        st.metric("Monthly Energy Saving", f"${monthly_saving:,.0f}",
-                 f"${energy_saving_per_km:.3f}/km delta")
-    st.caption(
-        f"Source: [{p['source_name']}]({p['source_url']}) · "
-        "Simulated TCO model. Capex figures are illustrative landed costs; "
-        "excludes maintenance, residual value, and financing cost differentials."
-    )
-
-
-def _render_segment_module(country: str, cdata: dict, key_prefix: str):
-    """
-    Segment opportunity bubble chart: LCV / MCV-Rigid / EHCV-Tractor.
-    """
-    if "segment_data" not in cdata:
-        return
-    _sdiv("Segment Opportunity Map — Where EV Wins, Where Diesel Still Rules",
-          "VP Commercial Strategy Module · Volume vs EV Readiness by sub-segment")
-
-    src = cdata["sources"]["trade"]
-    _chdr(
-        f"Exclusive Segment Module · {country}",
-        "LCV vs MCV/Rigid vs EHCV/Tractor — Volume & EV Readiness",
-        "Bubble size = annual volume. Y-axis = EV readiness score (0–10). "
-        "Pattern: light urban segments electrify fastest; long-haul tractors remain diesel-dependent.",
-        src[0], src[1],
-    )
-    df_seg = gen_segment_df(country)
-    st.plotly_chart(chart_segment_bubble(df_seg), use_container_width=True,
-                    config={"displayModeBar": False}, key=f"{key_prefix}_segment")
-
-    s1, s2, s3 = st.columns(3)
-    for col, (_, row) in zip([s1, s2, s3], df_seg.iterrows()):
-        with col:
-            color_label = "🟢" if row["EV_Readiness"] >= 6 else "🟡" if row["EV_Readiness"] >= 3 else "🔴"
-            st.metric(row["Segment"], f"{row['Volume']:,} units/yr",
-                     f"{color_label} EV Readiness: {row['EV_Readiness']:.1f}/10")
-    st.caption(f"Source: [{src[0]}]({src[1]}) · Segment volumes and EV readiness scores are simulated estimates.")
-
-
-def _render_risk_radar_module(country: str, cdata: dict, key_prefix: str):
-    """
-    Operational risk radar — rendered in the Policy & Market Access tab.
-    """
-    if "risk_radar" not in cdata:
-        return
-    _sdiv("Operational Risk Radar — Beyond Tariffs",
-          "VP Risk & Compliance Module · 5-dimension quantified market risk profile")
-
-    src = cdata["sources"]["trade"]
-    _chdr(
-        f"Exclusive Risk Module · {country}",
-        "5-Dimension Operational Risk Profile",
-        "FX Liquidity · Tariff Advantage · Port Efficiency · Grid Stability · Policy Consistency. "
-        "Each dimension scored 0 (severe risk) to 10 (best-in-class).",
-        src[0], src[1],
-    )
-    df_risk = gen_risk_radar_df(country)
-    rc1, rc2 = st.columns([2, 1], gap="large")
-    with rc1:
-        st.plotly_chart(chart_risk_radar(df_risk, country), use_container_width=True,
-                        config={"displayModeBar": False}, key=f"{key_prefix}_radar")
-    with rc2:
-        st.markdown("#### Risk Dimension Scores")
-        for _, row in df_risk.iterrows():
-            color = "#1A8C5B" if row["Score"] >= 7 else "#B45309" if row["Score"] >= 4 else "#B91C1C"
-            risk_label = "Low Risk" if row["Score"] >= 7 else "Moderate Risk" if row["Score"] >= 4 else "High Risk"
-            st.markdown(f"""
-<div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #F0F2F5;">
-    <div style="font-family:'Inter';font-size:.7rem;color:#9BA3B2;text-transform:uppercase;letter-spacing:.5px;">{row['Dimension']}</div>
-    <div style="font-family:'Inter';font-size:1.1rem;font-weight:700;color:{color};">{row['Score']:.1f}/10</div>
-    <div style="font-family:'Inter';font-size:.68rem;color:{color};font-weight:500;">{risk_label}</div>
-</div>
-""", unsafe_allow_html=True)
-    st.caption(f"Source: [{src[0]}]({src[1]}) · Risk scores are analyst-assessed estimates based on simulated and publicly available indicators.")
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# 11. COUNTRY MARKET TAB RENDERERS
-# ══════════════════════════════════════════════════════════════════════════════
-def render_south_africa(cdata):
-    NAAMSA   = "https://naamsa.co.za"
-    STATSSA  = "https://www.statssa.gov.za/publications/P7162/P7162.html"
-    TRANSNET = "https://www.transnet.net/InvestorCentre/Pages/AnnualReports.aspx"
-    TREASURY = "https://www.treasury.gov.za/documents/national%20budget/2026/review/FullBR.pdf"
-
-    _kpi_row(cdata)
-    st.info(
-        "**🇿🇦 NAAMSA Full Year 2025 — Key Headline Numbers**\n\n"
-        "- **Total new vehicle sales:** 596,818 units (+15.7% YoY) — strongest year since 2019\n"
-        "- **NEV (BEV + PHEV + HEV) total:** 16,716 units (+7.1% YoY)\n"
-        "- **BEV only:** 4,980 units (29.8% of NEV mix) — commercial BEV segment nascent but accelerating\n"
-        "- **HCV (Heavy Commercial >8t):** ~31,500 units — segment resilient despite Transnet headwinds",
-        icon="📊"
-    )
-    st.caption(f"Source: [NAAMSA — Automotive Business Council]({NAAMSA}) · Full Year 2025 Statistical Release")
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    _standard_2col("South Africa", cdata, "za")
-
-    _sdiv("NAAMSA 2025 — NEV Technology Mix", "Real 2025 data · BEV + PHEV + HEV breakdown")
-    c_donut, c_donut_txt = st.columns([2,3], gap="large")
-    with c_donut:
-        _chdr("NAAMSA 2025 · Real Data","NEV Technology Split — South Africa 2025",
-              "16,716 NEV units sold. HEV dominates; BEV commercial segment nascent.",
-              "NAAMSA — Automotive Business Council", NAAMSA)
-        st.plotly_chart(chart_za_nev_donut(gen_za_nev_mix()),
-                        use_container_width=True, config={"displayModeBar":False}, key="za_nev_donut")
-        st.caption(f"Source: [NAAMSA Full Year 2025]({NAAMSA}) · Real data.")
-    with c_donut_txt:
-        st.markdown("#### NEV Mix Analysis — 2025")
-        st.markdown(
-            "**HEV (58.7%, 9,820 units):** Conventional hybrids dominate. "
-            "Toyota Corolla Cross and RAV4 hybrids lead volume. Commercial HEV penetration minimal.\n\n"
-            "**BEV (29.8%, 4,980 units):** BEV share growing rapidly but from low base. "
-            "BMW, Volvo, BYD lead passenger BEV. Commercial BEV (trucks, buses) <200 units — "
-            "constrained by charging infrastructure. **Primary opportunity horizon: 2027+**.\n\n"
-            "**PHEV (11.5%, 1,916 units):** Niche segment. Relevant for urban commercial delivery van segment."
-        )
-        st.caption(f"Analysis based on [NAAMSA 2025 Statistical Release]({NAAMSA})")
-
-    _sdiv("Stats SA P7162 — Road Freight Survey", "Exclusive Tier 1 analytics")
-    _chdr("Module 1 · Stats SA P7162","Road Freight Revenue by Commodity Category",
-          "Annual freight revenue (ZAR bn) — Mining dominates at 35.4%",
-          "Stats SA — Road Freight Survey P7162", STATSSA)
-    st.plotly_chart(chart_za_freight_cat(gen_za_freight_category()),
-                    use_container_width=True, config={"displayModeBar":False}, key="za_fc")
-    st.caption(f"Source: [Stats SA P7162]({STATSSA}) · Simulated data modelled on P7162 structure.")
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    _chdr("Module 2 · Stats SA P7162","Payload Volume vs. Freight Income — The Cost Squeeze",
-          "Diverging trends illustrate per-km cost inflation burden on fleet operators",
-          "Stats SA — Road Freight Survey P7162", STATSSA)
-    st.plotly_chart(chart_za_payload_income(gen_za_payload_income()),
-                    use_container_width=True, config={"displayModeBar":False}, key="za_pi")
-    st.caption(f"Source: [Stats SA P7162]({STATSSA}) · Simulated quarterly data.")
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    _sdiv("NAAMSA — Sales Channel & Provincial Distribution", "Exclusive Tier 1 analytics")
-    ch_l, ch_r = st.columns([2,3], gap="large")
-    with ch_l:
-        _chdr("Module 3a · NAAMSA","HCV Sales by Channel","Dealer retail dominates; corporate fleet growing",NAAMSA,NAAMSA)
-        st.plotly_chart(chart_za_channel(gen_za_channel()),
-                        use_container_width=True, config={"displayModeBar":False}, key="za_ch")
-        st.caption(f"Source: [NAAMSA]({NAAMSA}) · Simulated distribution.")
-    with ch_r:
-        _chdr("Module 3b · NAAMSA","HCV Sales by Province",
-              "Gauteng accounts for 45.1% — industrial heartland concentration",NAAMSA,NAAMSA)
-        st.plotly_chart(chart_za_province(gen_za_province()),
-                        use_container_width=True, config={"displayModeBar":False}, key="za_pv")
-        st.caption(f"Source: [NAAMSA]({NAAMSA}) · Simulated provincial distribution.")
-
-    _sdiv("Transnet Rail Crisis — Road Transport Demand Driver", "Structural shift analysis")
-    _chdr("Module 4 · Transnet / NAAMSA",
-          "Transnet Rail Volume Collapse vs. HCV Road Sales Surge",
-          "Rail freight down 46% from 2018 peak; road HCV absorbs displaced demand",
-          "Transnet Annual Report", TRANSNET)
-    st.plotly_chart(chart_za_scissors(),
-                    use_container_width=True, config={"displayModeBar":False}, key="za_sc")
-    st.caption(f"Source: [Transnet IR]({TRANSNET}) · [NAAMSA]({NAAMSA}) · Simulated data.")
-
-    # ── v10.0 new modules ──────────────────────────────────────────────────────
-    _render_tco_module("South Africa", cdata, "za")
-    _render_segment_module("South Africa", cdata, "za")
-
-    _sdiv("2026 Policy Alert — 150% NEV Manufacturing Tax Deduction", "Strategic pivot · From 1 March 2026")
-    st.warning(
-        "**⚡ STRATEGIC PIVOT ALERT — South Africa 2026 Budget**\n\n"
-        "Effective **1 March 2026**, Section 12V expanded to provide a **150% first-year accelerated "
-        "tax deduction** on qualifying NEV manufacturing capital investment (cap: **R500 million/entity/year**).\n\n"
-        "**Financial mechanics on a R500m qualifying investment:**\n"
-        "- Standard 100% deduction: ~R140m tax saving\n"
-        "- New 150% deduction: ~R210m tax saving → **Net incremental benefit: ~R70m per cycle**\n\n"
-        "**Stackable with APDP Phase 2 PRCs:** Entities enrolled in APDP earn Production Rebate "
-        "Certificates offsetting import duties — creating a **dual-incentive stack** unavailable to CBU importers.\n\n"
-        "**🟢 Strategic Verdict:** CKD/local assembly + APDP enrolment is the only long-term "
-        "competitive moat in South Africa. Pure CBU import will structurally lose out.",
-        icon="⚠️"
-    )
-    st.caption(
-        f"Sources: [National Treasury — Budget Review 2026]({TREASURY}) · "
-        "[dti — APDP Phase 2 Guidelines](https://www.dti.gov.za) · "
-        "[SARS — Draft Taxation Laws Amendment Bill 2026](https://www.sars.gov.za)"
-    )
-    _tri_section(cdata)
-
-
-def render_nigeria(cdata):
-    NADDC   = "https://naddc.gov.ng"
-    CUSTOMS = "https://customs.gov.ng"
-    _kpi_row(cdata)
-    _standard_2col("Nigeria", cdata, "ng")
-    _sdiv("Tariff Structure Analysis — The Zero-Duty Dividend",
-          "Exclusive Tier 1 · Per-unit landed cost comparison")
-    _chdr("Exclusive Module · Nigeria Customs / NADDC",
-          "CBU vs. CKD/SKD Import Cost Waterfall",
-          "Per-unit landed cost (30t HCV, base $100k). CKD route: ~$46k saving under 2023 EV/assembly tariff.",
-          "Nigeria Customs Service", CUSTOMS)
-    st.plotly_chart(chart_ng_waterfall(gen_ng_waterfall()),
-                    use_container_width=True, config={"displayModeBar":False}, key="ng_wf")
-    st.caption(f"Source: [Nigeria Customs]({CUSTOMS}) · [NADDC]({NADDC}) · Figures illustrative.")
-
-    # ── v10.0 new modules ──────────────────────────────────────────────────────
-    _render_tco_module("Nigeria", cdata, "ng")
-    _render_segment_module("Nigeria", cdata, "ng")
-
-    _tri_section(cdata)
-
-
-def render_morocco(cdata):
-    OCP   = "https://www.ocpgroup.ma/investor-relations"
-    AIVAM = "http://www.aivam.ma"
-    _kpi_row(cdata)
-    _standard_2col("Morocco", cdata, "ma")
-    _sdiv("OCP Group Transport Modal Assessment", "Exclusive Tier 1 · Phosphate logistics structure")
-    _chdr("Module 1 · OCP Group",
-          "OCP Phosphate Transport Modal Split — Pipeline vs Rail vs Road",
-          "Estimated annual volume by transport mode. Orange = road-accessible segment.",
-          "OCP Group Investor Relations", OCP)
-    st.plotly_chart(chart_ma_modal(gen_ma_modal()),
-                    use_container_width=True, config={"displayModeBar":False}, key="ma_modal")
-    st.caption(f"Source: [OCP Group IR]({OCP}) · [AIVAM]({AIVAM}) · Estimated volumes.")
-    st.markdown("<br>", unsafe_allow_html=True)
-    _chdr("Module 2 · OCP Group",
-          "OCP Road Freight Throughput — Contractor & Finished Goods Corridor",
-          "Monthly road freight throughput (kt) 2023–2026",
-          "OCP Group Investor Relations", OCP)
-    st.plotly_chart(chart_ocp_throughput(gen_ocp_throughput()),
-                    use_container_width=True, config={"displayModeBar":False}, key="ma_ocp")
-    st.caption(f"Source: [OCP Group IR]({OCP}) · Simulated data.")
-
-    # ── v10.0 new modules ──────────────────────────────────────────────────────
-    _render_tco_module("Morocco", cdata, "ma")
-    _render_segment_module("Morocco", cdata, "ma")
-
-    _tri_section(cdata)
-
-
-def render_ethiopia(cdata):
-    MOTI = "https://www.moti.gov.et"
-    ERCA = "https://www.erca.gov.et"
-    _kpi_row(cdata)
-    _standard_2col("Ethiopia", cdata, "eth")
-    _sdiv("EV Penetration Surge — Post Petroleum Import Ban",
-          "Exclusive Tier 1 · Fastest EV transition on the continent")
-    _chdr("Exclusive Module · MoTI Ethiopia / ERCA",
-          "EV Market Share Trajectory — Monthly 2021–2026",
-          "From <3% to >85% EV share in 30 months following July 2022 petroleum import ban.",
-          "Ministry of Trade & Industry Ethiopia", MOTI)
-    st.plotly_chart(chart_eth_ev(gen_eth_ev()),
-                    use_container_width=True, config={"displayModeBar":False}, key="eth_ev")
-    st.caption(f"Source: [MoTI Ethiopia]({MOTI}) · [ERCA]({ERCA}) · Simulated data.")
-
-    # ── v10.0 new modules ──────────────────────────────────────────────────────
-    _render_tco_module("Ethiopia", cdata, "eth")
-    _render_segment_module("Ethiopia", cdata, "eth")
-
-    _tri_section(cdata)
-
-
-def render_tunisia(cdata):
-    FINANCES = "https://www.finances.gov.tn"
-    ANME     = "https://www.anme.tn"
-    DOUANE   = "https://www.douane.gov.tn"
-
-    _kpi_row(cdata)
-    _standard_2col("Tunisia", cdata, "tn")
-
-    st.success(
-        "**⚡ Tunisia 2026 EV Policy Arbitrage — B2B Negotiation Arsenal**\n\n"
-        "| Tax/Duty | Diesel HCV (≥12t) | BEV Commercial |\n"
-        "|---|---|---|\n"
-        "| Customs Duty | 10% | **0%** |\n"
-        "| Taxe de Consommation | 25% | **0%** |\n"
-        "| TVA (VAT) | 19% | **7%** |\n"
-        "| ANME Direct Subsidy | — | **−TND 10,000** |\n\n"
-        "On a CIF base price of TND 300,000, the net tax/duty delta is **~TND 151,000 per unit** "
-        "in favour of BEV. This is the primary B2B commercial argument for fleet operators.",
-        icon="✅"
-    )
-    st.caption(
-        f"Sources: [Loi de Finances 2026 — Ministère des Finances]({FINANCES}) · "
-        f"[ANME — Programme d'Efficacité Energétique 2026]({ANME}) · "
-        f"[Direction Générale des Douanes]({DOUANE})"
-    )
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    _sdiv("TCO & Policy Arbitrage Analysis", "B2B Negotiation Weapon · Loi de Finances 2026")
-    _chdr("Exclusive Module 1 · Loi de Finances 2026 / ANME",
-          "All-in Landed Cost Waterfall: Diesel HCV vs. BEV — Tunisia 2026",
-          "CIF base price TND 300,000 (≈ USD 95k). Includes customs duty, taxe de consommation, TVA, ANME subsidy.",
-          "Ministère des Finances Tunisie — Loi de Finances 2026", FINANCES)
-    st.plotly_chart(chart_tn_tco_waterfall(gen_tn_tco_waterfall()),
-                    use_container_width=True, config={"displayModeBar":False}, key="tn_tco_wf")
-
-    m1, m2, m3, m4 = st.columns(4)
-    with m1: st.metric("Diesel All-in Taxes", "TND 162,000", "on TND 300k CIF base", delta_color="inverse")
-    with m2: st.metric("BEV All-in Taxes",    "TND 11,000",  "after ANME subsidy",    delta_color="normal")
-    with m3: st.metric("Per-Unit Tax Delta",   "TND 151,000", "BEV advantage vs Diesel")
-    with m4: st.metric("USD Equivalent",       "≈ $48,000",   "saving per unit (3.14 TND/USD)")
-    st.caption(
-        f"Sources: [Loi de Finances 2026]({FINANCES}) · [ANME 2026]({ANME}) · "
-        f"[DGD Tariff Schedule]({DOUANE}) · Exchange rate TND/USD 3.14 (BCT Q1 2026)"
-    )
-
-    _sdiv("B2B Target Ecosystem — Tunisia", "Dealer & Direct Sales Intelligence · Priority Fleet Accounts")
-    st.info(
-        "**🎯 Recommended B2B Target Priority for Commercial EV Sales — Tunisia 2026**\n\n"
-        "Urban distribution and depot-return fleets are the **immediate addressable market** "
-        "given current charging infrastructure constraints (<50 commercial chargers nationwide).",
-        icon="🎯"
-    )
-    st.dataframe(
-        gen_tn_b2b_targets(), use_container_width=True, hide_index=True,
-        column_config={
-            "Sector":          st.column_config.TextColumn("Sector", width="small"),
-            "Company":         st.column_config.TextColumn("Company / Account", width="medium"),
-            "Fleet Size Est.": st.column_config.TextColumn("Est. Fleet Size", width="small"),
-            "EV Readiness":    st.column_config.TextColumn("EV Route Readiness", width="large"),
-            "Decision Maker":  st.column_config.TextColumn("Decision Maker Title", width="medium"),
-            "Tender Portal":   st.column_config.TextColumn("Tender Portal", width="medium"),
-        }
-    )
-    st.caption(
-        "Source: IACE, [marchespublics.gov.tn](https://www.marchespublics.gov.tn), "
-        "[CONECT](https://www.conect.org.tn) · Fleet size estimates indicative only."
-    )
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    c_risk1, c_risk2 = st.columns(2, gap="large")
-    with c_risk1:
-        st.warning(
-            "**⚠ Charging Infrastructure Constraints (2026)**\n\n"
-            "- STEG: <50 commercial EV chargers nationwide\n"
-            "- Almost exclusively in Greater Tunis and Sousse corridor\n"
-            "- Gafsa (CPG mining hub): zero commercial chargers\n"
-            "- Sfax–Tunis intercity (270 km): 3 charging stops, none fast-charge",
-            icon="⚠️"
-        )
-        st.caption("Source: [STEG](https://www.steg.com.tn)")
-    with c_risk2:
-        st.success(
-            "**✅ Recommended Immediate EV-Ready Routes**\n\n"
-            "- Tunis metro urban distribution loops (≤80 km/day): fully viable\n"
-            "- Tunis–Hammamet tourist logistics (≤120 km): viable\n"
-            "- Sousse industrial zone intra-city fleet: viable\n"
-            "- La Charguia FTZ depot-return operations: ideal\n\n"
-            "**Not yet:** Gafsa mining runs, Tunis–Sfax intercity",
-            icon="✅"
-        )
-        st.caption("Assessment: STEG infrastructure data + operator interviews Q1 2026")
-
-    # ── v10.0 new modules ──────────────────────────────────────────────────────
-    _render_tco_module("Tunisia", cdata, "tn")
-    _render_segment_module("Tunisia", cdata, "tn")
-
-    _tri_section(cdata)
-
-
-def render_rwanda(cdata):
-    RDB    = "https://www.rdb.rw"
-    RURA   = "https://www.rura.rw"
-    RRA    = "https://www.rra.gov.rw"
-    REG    = "https://www.reg.rw"
-    KIGALI = "https://www.kigalicity.gov.rw"
-
-    _kpi_row(cdata)
-
-    st.success(
-        "**🇷🇼 Rwanda — EAC Strategic Sandbox & EV Showcase Centre**\n\n"
-        "Rwanda is **not a volume market** — it is the **lowest-risk, highest-visibility** "
-        "entry point into the East African Community for Chinese EV commercial vehicles.\n\n"
-        "| Incentive | Rwanda EV Commercial Vehicle |\n"
-        "|---|---|\n"
-        "| Import Duty | **0%** (EAC Pioneer Package) |\n"
-        "| VAT | **0%** (standard 18% waived) |\n"
-        "| Excise Tax | **0%** |\n"
-        "| Corporate Income Tax | **15%** (vs standard 30%) |\n"
-        "| e-Mobility Electricity | **RWF 115/kWh** (vs RWF 1,600/L diesel equivalent) |\n"
-        "| Grid Reliability | **<2% outage rate** — best-in-class Sub-Sahara |\n\n"
-        "**Strategic entry recommendation:** G2G electric bus programme (KBS) + "
-        "B2B urban e-LCV city logistics. Use Kigali performance data to unlock "
-        "EAC-wide fleet tenders in Kenya, Tanzania, and Uganda.",
-        icon="✅"
-    )
-    st.caption(
-        f"Sources: [RDB — Investment Incentives 2024]({RDB}) · "
-        f"[RURA — Green Mobility Strategy 2023]({RURA}) · "
-        f"[RRA — Customs Tariff Schedule 2024]({RRA}) · "
-        f"[REG — Annual Report 2024]({REG})"
-    )
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    st.info(
-        "**⚡ Energy Economics — The Rwanda EV Advantage**\n\n"
-        "**Diesel truck operating cost (per 100 km):**\n"
-        "- Consumption: ~35 litres/100km (heavy duty)\n"
-        "- Fuel cost: 35 × RWF 1,600 = **RWF 56,000 / 100km** (≈ $40 USD)\n\n"
-        "**Electric truck operating cost (per 100 km at RURA e-mobility tariff):**\n"
-        "- Consumption: ~120 kWh/100km (heavy EV)\n"
-        "- Energy cost: 120 × RWF 115 = **RWF 13,800 / 100km** (≈ $9.90 USD)\n\n"
-        "**Fuel cost saving per 100 km: RWF 42,200 (≈ $30 USD) — 75% reduction.**\n\n"
-        "At 80,000 km/year fleet utilisation: **annual fuel saving ≈ $24,000 per vehicle** "
-        "before maintenance differential.",
-        icon="🔋"
-    )
-    st.caption(
-        f"Sources: [RURA — e-Mobility Tariff Order 2023]({RURA}) · "
-        "Rwanda Ministry of Infrastructure (MININFRA) diesel pump price data Q1 2026. "
-        "Energy consumption figures: indicative for 18t GVW electric truck."
-    )
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    _standard_2col("Rwanda", cdata, "rw")
-
-    _sdiv("Policy Arbitrage — EAC ICE Tariff vs Rwanda EV Zero-Tax",
-          "Exclusive Tier 1 · Per-unit duty & tax comparison · RDB Investment Code 2024")
-    _chdr(
-        "Exclusive Module 1 · RDB / RRA",
-        "EAC Standard Tariff (ICE Trucks) vs Rwanda EV Zero-Tax — All-in Landed Cost",
-        "CIF base: USD 80,000 (medium HCV ≈ 18t GVW). EAC standard: 25% import duty + 18% VAT. "
-        "Rwanda EV: 0% duty + 0% VAT = USD 34,400 saving per unit (43% cost reduction).",
-        "RDB — Rwanda Development Board · Investment Incentives 2024", RDB,
-    )
-    df_tariff = gen_rw_tariff_comparison()
-    st.plotly_chart(chart_rw_tariff_comparison(df_tariff),
-                    use_container_width=True, config={"displayModeBar":False}, key="rw_tariff")
-
-    t1, t2, t3 = st.columns(3)
-    with t1: st.metric("ICE All-in Landed", "$114,400", "+43% over EV", delta_color="inverse")
-    with t2: st.metric("EV All-in Landed",  "$80,000",  "Zero duty / Zero VAT", delta_color="normal")
-    with t3: st.metric("Per-Unit EV Saving","$34,400",  "43% cost reduction per vehicle")
-    st.caption(
-        f"Sources: [RRA Customs Tariff Schedule 2024]({RRA}) · "
-        f"[RDB EV Investment Incentives 2024]({RDB}) · "
-        "EAC CET 25% confirmed (EAC Customs Management Act). "
-        "USD exchange rate: 1 USD = 1,400 RWF (BNR average Q1 2026). Figures illustrative."
-    )
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    _sdiv("Kigali Urban EV Fleet Adoption Trend",
-          "Exclusive Tier 1 · Public Buses + Urban e-LCV · 2022–2027 · RURA data + forecast")
-    _chdr(
-        "Exclusive Module 2 · RURA / MINICOM",
-        "Kigali Public Transport & City Logistics — EV Displacing ICE (Stacked Area)",
-        "EV share of Kigali public buses and urban light commercial vehicles (e-LCV). "
-        "2022–2025 actuals; 2026–2027 RURA Green Mobility forecast.",
-        "RURA — Rwanda Utilities Regulatory Authority · Green Mobility Annual Report 2024", RURA,
-    )
-    df_ev = gen_rw_ev_adoption()
-    st.plotly_chart(chart_rw_ev_adoption(df_ev),
-                    use_container_width=True, config={"displayModeBar":False}, key="rw_ev_adopt")
-
-    ea1, ea2, ea3, ea4 = st.columns(4)
-    with ea1: st.metric("2024 Bus EV Units",    "40",   "+167% vs 2023")
-    with ea2: st.metric("2024 e-LCV Units",     "65",   "+160% vs 2023")
-    with ea3: st.metric("2026F Bus EV Units",   "130",  "+225% vs 2024 (forecast)")
-    with ea4: st.metric("2026F e-LCV Units",    "230",  "+254% vs 2024 (forecast)")
-    st.caption(
-        f"Sources: [RURA Annual Report 2024]({RURA}) · "
-        f"[MINICOM — Vehicle Registration Statistics 2024](https://www.minicom.gov.rw) · "
-        "2026–2027 figures are RURA Green Mobility Strategy targets, not confirmed actuals."
-    )
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # ── v10.0 new modules ──────────────────────────────────────────────────────
-    _render_tco_module("Rwanda", cdata, "rw")
-    _render_segment_module("Rwanda", cdata, "rw")
-
-    _sdiv("B2B Target Ecosystem — Kigali",
-          "Priority Fleet Accounts for EV Commercial Vehicle Introduction")
-    st.info(
-        "**🎯 Recommended B2B & G2G Entry Targets — Rwanda 2026**\n\n"
-        "**Tier A — G2G (Government-to-Government) Programme:**\n"
-        "- **Kigali Bus Services (KBS):** Active RFP for 50 electric buses (metropolitan routes). "
-        "G2G procurement framework preferred. Contact: City of Kigali Transport Directorate.\n"
-        "- **Rwanda Transport Development Agency (RTDA):** National road freight electrification "
-        "pilot — 20 electric 14t trucks for inter-city agricultural logistics (Musanze–Kigali corridor).\n\n"
-        "**Tier B — B2B Corporate Fleet:**\n"
-        "- **RwandAir Cargo:** Ground support and airside logistics fleet renewal (Kigali International).\n"
-        "- **BRALIRWA (Heineken Rwanda):** Kigali distribution fleet — 30–40 units. Depot-based, "
-        "ideal for EV conversion.\n"
-        "- **MTN Rwanda:** Network maintenance vehicles + corporate shuttle fleet — 60+ units.\n"
-        "- **La Colombière / COLAS Rwanda:** Construction logistics for Vision 2050 infrastructure projects.\n\n"
-        "**Tender Portal:** [Rwanda Public Procurement Authority (RPPA)](https://www.rppa.gov.rw)",
-        icon="🎯"
-    )
-    st.caption(
-        f"Sources: [City of Kigali]({KIGALI}) · [RPPA](https://www.rppa.gov.rw) · "
-        f"[RDB Investment Pipeline 2026]({RDB}) · Intelligence compiled from public procurement notices Q1 2026."
-    )
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    _sdiv("Infrastructure & Operational Readiness", "Grid, charging, and logistics context")
-    c_grid1, c_grid2 = st.columns(2, gap="large")
-    with c_grid1:
-        st.success(
-            "**✅ Infrastructure Strengths (Unique in Sub-Sahara)**\n\n"
-            "- **Grid reliability: <2% annual outage rate** (REG 2024) — structurally unlike "
-            "South Africa's load-shedding or Nigeria's grid volatility\n"
-            "- **Electricity mix: ~80% renewable** (hydro + methane + solar)\n"
-            "- **RURA e-mobility tariff: RWF 115/kWh** — dedicated commercial fleet rate\n"
-            "- **Kigali urban grid:** Dedicated 33kV feeder lines for Kigali Special Economic Zone\n"
-            "- **Emerging charging network:** 12 commercial fast-chargers in Kigali (2025), "
-            "RURA target: 80 chargers by end 2026",
-            icon="✅"
-        )
-        st.caption(f"Source: [REG Annual Report 2024]({REG}) · [RURA Charging Infrastructure Plan 2026]({RURA})")
-    with c_grid2:
-        st.warning(
-            "**⚠ Infrastructure Constraints**\n\n"
-            "- **Outside Kigali:** Northern, Southern, Eastern Provinces have zero commercial chargers as of Q1 2026\n"
-            "- **Rwanda–DRC border logistics:** No EV charging on Kigali–Goma corridor (235 km)\n"
-            "- **Rwanda–Tanzania corridor:** Kigali–Rusumo–Mwanza (650 km) has zero chargers "
-            "— long-haul EAC cross-border EV remains 2028+ proposition\n"
-            "- **Absolute market size cap:** ~5,000 CVs/yr through 2030 — not a volume play",
-            icon="⚠️"
-        )
-        st.caption(f"Source: [RURA Infrastructure Audit 2025]({RURA}) · Field intelligence Q1 2026")
-
-    _tri_section(cdata)
-
-
-def render_generic(country, cdata):
-    _kpi_row(cdata)
-    _standard_2col(country, cdata, country[:2].lower())
-    _sdiv("Market Entry Assessment Scorecard")
-    scores_db = {
-        "Egypt":   {"Market Size":7,"EV Readiness":3,"Tariff Advantage":5,"Regulatory Ease":5,"Growth Momentum":8},
-        "Kenya":   {"Market Size":6,"EV Readiness":6,"Tariff Advantage":6,"Regulatory Ease":7,"Growth Momentum":8},
-        "Algeria": {"Market Size":6,"EV Readiness":2,"Tariff Advantage":4,"Regulatory Ease":3,"Growth Momentum":5},
-    }
-    scores = scores_db.get(country, {d:5 for d in ["Market Size","EV Readiness","Tariff Advantage","Regulatory Ease","Growth Momentum"]})
-    for col, (dim, score) in zip(st.columns(5), scores.items()):
-        color = "#D04A02" if score>=8 else "#295BA5" if score>=6 else "#9BA3B2"
-        with col:
-            st.markdown(f"""
-<div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
-            padding:14px 12px;box-shadow:0 1px 4px rgba(0,0,0,.06);text-align:center;">
-    <div style="font-family:'Inter';font-size:.6rem;font-weight:700;text-transform:uppercase;
-                letter-spacing:.6px;color:#9BA3B2;margin-bottom:7px;">{dim}</div>
-    <div style="font-family:'Inter';font-size:1.5rem;font-weight:700;color:{color};">
-        {score}<span style="font-size:.72rem;color:#9BA3B2;">/10</span></div>
-    <div style="background:#F0F2F5;border-radius:3px;height:4px;margin-top:8px;">
-        <div style="background:{color};width:{score*10}%;height:4px;border-radius:3px;"></div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-    src = cdata["sources"]["trade"]
-    st.caption(f"Source: [{src[0]}]({src[1]}) · Assessment based on simulated market intelligence.")
-
-    # ── v10.0 new modules (only render if data present) ───────────────────────
-    if "tco_params" in cdata:
-        _render_tco_module(country, cdata, country[:2].lower())
-    if "segment_data" in cdata:
-        _render_segment_module(country, cdata, country[:2].lower())
-
-    _tri_section(cdata)
+    render_strategic_action(cdata)
 # ══════════════════════════════════════════════════════════════════════════════
 # 12. MAP BUILDER
 # ══════════════════════════════════════════════════════════════════════════════
@@ -2592,7 +2217,7 @@ def build_map(selected_name):
                  showcountries=True, countrycolor="#C8CDD8", countrywidth=0.5,
                  bgcolor="#F4F5F7", projection_type="natural earth"),
         paper_bgcolor="#F4F5F7", plot_bgcolor="#F4F5F7",
-        margin=dict(l=0,r=0,t=0,b=0), height=420,
+        margin=dict(l=0,r=0,t=0,b=0), height=400,
         hoverlabel=dict(bgcolor="white", bordercolor="#E2E5EB",
                         font=dict(family="Inter", size=12, color="#2D3142")),
         dragmode=False)
@@ -2614,7 +2239,7 @@ with st.sidebar:
         Africa CV Intelligence
     </div>
     <div style="font-family:'Inter';font-size:.68rem;color:rgba(255,255,255,.4);margin-top:2px;">
-        VP Commercial Analysis Edition · v10.0
+        McKinsey UX Refactor · v11.0
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -2638,17 +2263,14 @@ with st.sidebar:
     st.markdown('<div class="sb-hdr">Quick Reference</div>', unsafe_allow_html=True)
     for label, url in [
         ("📊 NAAMSA — ZA Auto Stats",    "https://naamsa.co.za"),
-        ("📊 Stats SA — P7162",           "https://www.statssa.gov.za"),
         ("💰 SA Treasury Budget 2026",    "https://www.treasury.gov.za"),
         ("🇷🇼 RDB — Rwanda Invest",       "https://www.rdb.rw"),
-        ("⚡ RURA — Rwanda e-Mobility",   "https://www.rura.rw"),
         ("⚡ ANME Tunisia — EV Subsidy",  "https://www.anme.tn"),
         ("🏛 Loi de Finances TN 2026",    "https://www.finances.gov.tn"),
         ("🌾 OCP Group Morocco",          "https://www.ocpgroup.ma"),
         ("🏛 Nigeria Customs (NCS)",      "https://www.customs.gov.ng"),
         ("🌍 AfDB",                        "https://www.afdb.org"),
         ("📰 The Africa Report",          "https://www.theafricareport.com"),
-        ("📰 The New Times Rwanda",       "https://www.newtimes.co.rw"),
     ]:
         st.markdown(f'<a class="sb-link" href="{url}" target="_blank">{label}</a>', unsafe_allow_html=True)
 
@@ -2658,7 +2280,7 @@ with st.sidebar:
     st.markdown(f"""
 <div style="font-family:'Inter';font-size:.58rem;color:rgba(255,255,255,.22);
             text-align:center;margin-top:16px;line-height:2.1;">
-    Africa CV Intelligence v10.0<br>
+    Africa CV Intelligence v11.0<br>
     {datetime.now().strftime('%Y-%m-%d %H:%M')} · Internal use only
 </div>
 """, unsafe_allow_html=True)
@@ -2673,7 +2295,7 @@ with h1:
         Africa Commercial Vehicle Market Intelligence
     </div>
     <div style="font-family:'Inter';font-size:.78rem;color:#9BA3B2;margin-top:3px;">
-        9 Tier 1 markets · TCO Break-even Modelling · Segment Opportunity Mapping · Operational Risk Radar · Deal-making intelligence
+        9 Tier 1 markets · Decision → Monetisation → Depth → Action narrative flow
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -2689,7 +2311,9 @@ with h2:
 st.markdown('<hr style="margin:0 0 18px 0;border-color:#E2E5EB;">', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 16. MAP SECTION
+# 16. MAP SECTION — single-column-friendly, map only (no side metrics card,
+#     since all KPIs now live inside Level 1 of the dashboard below — this
+#     removes one more source of side-by-side text crowding)
 # ══════════════════════════════════════════════════════════════════════════════
 sel     = st.session_state.selected_country
 is_t1   = sel in TIER1
@@ -2698,10 +2322,7 @@ sel_iso = cdata.get("iso","") if is_t1 else next(
     (iso for iso,name in ALL_AFRICA.items() if name==sel),"")
 macro   = TIER2_MACRO.get(sel_iso, {})
 
-map_col, snap_col = st.columns([5,2], gap="large")
-
-with map_col:
-    st.markdown("""
+st.markdown("""
 <div style="font-family:'Inter';font-size:.7rem;font-weight:700;letter-spacing:.8px;
             text-transform:uppercase;color:#5A6070;margin-bottom:8px;">
     Africa Strategic Market Map
@@ -2710,28 +2331,28 @@ with map_col:
     </span>
 </div>
 """, unsafe_allow_html=True)
-    map_fig   = build_map(sel)
-    map_event = st.plotly_chart(
-        map_fig, use_container_width=True,
-        config={"displayModeBar":False,"scrollZoom":False},
-        on_select="rerun", selection_mode="points", key="africa_map",
-    )
-    if map_event and hasattr(map_event,"selection") and map_event.selection:
-        pts = map_event.selection.get("points",[])
-        if pts:
-            clicked_iso  = pts[0].get("location","")
-            clicked_name = ISO_TO_NAME.get(clicked_iso,"")
-            if clicked_name and clicked_name != st.session_state.selected_country:
-                st.session_state.selected_country = clicked_name
-                st.cache_data.clear(); st.rerun()
+map_fig   = build_map(sel)
+map_event = st.plotly_chart(
+    map_fig, use_container_width=True,
+    config={"displayModeBar":False,"scrollZoom":False},
+    on_select="rerun", selection_mode="points", key="africa_map",
+)
+if map_event and hasattr(map_event,"selection") and map_event.selection:
+    pts = map_event.selection.get("points",[])
+    if pts:
+        clicked_iso  = pts[0].get("location","")
+        clicked_name = ISO_TO_NAME.get(clicked_iso,"")
+        if clicked_name and clicked_name != st.session_state.selected_country:
+            st.session_state.selected_country = clicked_name
+            st.cache_data.clear(); st.rerun()
 
-    leg_cols = st.columns(len(TIER1))
-    for lc, (cname, cd) in zip(leg_cols, TIER1.items()):
-        active = cname == sel
-        color  = "#D04A02" if active else "#295BA5"
-        bg     = "rgba(208,74,2,0.08)" if active else "rgba(41,91,165,0.05)"
-        with lc:
-            st.markdown(f"""
+leg_cols = st.columns(len(TIER1))
+for lc, (cname, cd) in zip(leg_cols, TIER1.items()):
+    active = cname == sel
+    color  = "#D04A02" if active else "#295BA5"
+    bg     = "rgba(208,74,2,0.08)" if active else "rgba(41,91,165,0.05)"
+    with lc:
+        st.markdown(f"""
 <div style="text-align:center;padding:5px 2px;border-radius:6px;
             background:{bg};border:1px solid {'#D04A02' if active else '#E2E5EB'};">
     <div style="font-size:.85rem;">{cd['flag']}</div>
@@ -2740,129 +2361,49 @@ with map_col:
 </div>
 """, unsafe_allow_html=True)
 
-with snap_col:
-    flag   = cdata.get("flag","🌍") if is_t1 else macro.get("flag","🌍")
-    region = cdata.get("region","Africa") if is_t1 else macro.get("region","Africa")
-    sources = cdata.get("sources",{}) if is_t1 else {}
-    main_src = list(sources.values())[0] if sources else ("","")
-
-    st.markdown(f"""
-<div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
-            padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-top:4px solid #D04A02;">
-    <div style="font-family:'Inter';font-size:.68rem;font-weight:700;letter-spacing:.8px;
-                text-transform:uppercase;color:#9BA3B2;margin-bottom:10px;">Currently Viewing</div>
-    <div style="font-size:1.8rem;margin-bottom:3px;">{flag}</div>
-    <div style="font-family:'Inter';font-size:1.05rem;font-weight:700;color:#2D3142;">{sel}</div>
-    <div style="font-family:'Inter';font-size:.72rem;color:#9BA3B2;margin-bottom:12px;">{region}</div>
-    <div style="border-top:1px solid #F0F2F5;padding-top:12px;">
-""", unsafe_allow_html=True)
-
-    if not is_t1:
-        st.markdown('<div class="fallback-badge">⚠ Tier 2 — General Coverage</div>', unsafe_allow_html=True)
-        for label, val in [
-            ("Est. GDP",        "${:,.1f}B".format(macro.get("gdp",0))),
-            ("Road Network",    "{:,}k km".format(macro.get("roads",0))),
-            ("Est. CV Imports", "{:,} units/yr".format(macro.get("cv_imports",0))),
-        ]:
-            st.markdown(f"""
-<div style="margin-bottom:10px;">
-    <div style="font-family:'Inter';font-size:.65rem;color:#9BA3B2;text-transform:uppercase;letter-spacing:.5px;">{label}</div>
-    <div style="font-family:'Inter';font-size:1.1rem;font-weight:700;color:#2D3142;">{val}</div>
-</div>
-""", unsafe_allow_html=True)
-    else:
-        for key, (value, label, delta, _) in cdata["kpi"].items():
-            dc = "#1A8C5B" if "+" in delta else "#D04A02" if "-" in delta else "#5A6070"
-            st.markdown(f"""
-<div style="margin-bottom:11px;padding-bottom:11px;border-bottom:1px solid #F0F2F5;">
-    <div style="font-family:'Inter';font-size:.65rem;color:#9BA3B2;text-transform:uppercase;letter-spacing:.5px;">{label}</div>
-    <div style="font-family:'Inter';font-size:1.1rem;font-weight:700;color:#2D3142;margin:2px 0;">{value}</div>
-    <div style="font-family:'Inter';font-size:.68rem;color:{dc};font-weight:500;">{delta}</div>
-</div>
-""", unsafe_allow_html=True)
-        if main_src[0]:
-            st.markdown(
-                f'<div style="font-family:Inter;font-size:.62rem;color:#295BA5;margin-top:4px;">'
-                f'📌 <a href="{main_src[1]}" target="_blank" style="color:#295BA5;">{main_src[0]}</a></div>',
-                unsafe_allow_html=True)
-    st.markdown("</div></div>", unsafe_allow_html=True)
-
 # ══════════════════════════════════════════════════════════════════════════════
-# 17. COUNTRY DASHBOARD TABS
+# 17. COUNTRY DASHBOARD — single narrative-flow tab (Task 2 + Policy tab)
 # ══════════════════════════════════════════════════════════════════════════════
 flag_display = cdata.get("flag", macro.get("flag","🌍")) if is_t1 else macro.get("flag","🌍")
-tri_count    = len(cdata.get("tri_keys",[])) if is_t1 else 0
-
-subtitles = {
-    "South Africa": "Full Tier 1 · NAAMSA 2025 Real Data · TCO Break-even · Segment Map · 150% Tax Pivot",
-    "Tunisia":      "Full Tier 1 · TCO Waterfall · B2B Ecosystem · EV Policy Arbitrage 2026",
-    "Rwanda":       "★ EAC Sandbox · 0% Duty + 0% VAT · G2G Bus Programme · TCO Break-even · Segment Map",
-}
-sub_default = f"Full Tier 1 analytics · TCO Break-even · Segment Map · {tri_count} Due Diligence module{'s' if tri_count!=1 else ''}" if is_t1 else "General coverage — live news + macro indicators"
 
 st.markdown(f"""
-<div class="section-hdr">
+<div class="section-hdr" style="margin-top:30px;">
     <div class="section-bar"></div>
     <div class="section-title">{flag_display} &nbsp;{sel} — Country Dashboard</div>
-    <div class="section-sub">{subtitles.get(sel, sub_default)}</div>
+    <div class="section-sub">{"Full Tier 1 narrative-flow analysis" if is_t1 else "Tier 2 — general coverage"}</div>
 </div>
 """, unsafe_allow_html=True)
 
-tab_market, tab_policy, tab_news = st.tabs([
-    "📊  Market Analytics",
-    "📋  Policy & Market Access",
-    "📡  Intelligence Feed",
-])
+if not is_t1:
+    st.info(f"**{sel}** is a Tier 2 market. Full narrative-flow analysis available for 9 Tier 1 core markets.", icon="ℹ️")
+    m1, m2, m3 = st.columns(3)
+    with m1: st.metric("Est. GDP",        "${:,.1f}B".format(macro.get("gdp",0)),  help="IMF WEO estimate")
+    with m2: st.metric("Road Network",    "{:,}k km".format(macro.get("roads",0)), help="AfDB infrastructure data")
+    with m3: st.metric("Est. CV Imports", "{:,} units/yr".format(macro.get("cv_imports",0)), help="Regional trade estimate")
+    st.caption("Source: [AfDB](https://www.afdb.org) · [IMF WEO](https://www.imf.org) · Indicative estimates.")
+else:
+    tab_dashboard, tab_policy = st.tabs(["📊  Market Dashboard", "📋  Policy & Market Access"])
 
-# ── TAB 1: Market Analytics ───────────────────────────────────────────────────
-with tab_market:
-    if not is_t1:
-        st.info(f"**{sel}** is a Tier 2 market. Full analytics available for 9 Tier 1 core markets.", icon="ℹ️")
-        m1, m2, m3 = st.columns(3)
-        with m1: st.metric("Est. GDP",        "${:,.1f}B".format(macro.get("gdp",0)),  help="IMF WEO estimate")
-        with m2: st.metric("Road Network",    "{:,}k km".format(macro.get("roads",0)), help="AfDB infrastructure data")
-        with m3: st.metric("Est. CV Imports", "{:,} units/yr".format(macro.get("cv_imports",0)), help="Regional trade estimate")
-        st.caption("Source: [AfDB](https://www.afdb.org) · [IMF WEO](https://www.imf.org) · Indicative estimates.")
-    elif sel == "South Africa": render_south_africa(cdata)
-    elif sel == "Nigeria":      render_nigeria(cdata)
-    elif sel == "Morocco":      render_morocco(cdata)
-    elif sel == "Ethiopia":     render_ethiopia(cdata)
-    elif sel == "Tunisia":      render_tunisia(cdata)
-    elif sel == "Rwanda":       render_rwanda(cdata)
-    else:                       render_generic(sel, cdata)
+    with tab_dashboard:
+        render_country_dashboard(sel, cdata)
 
-# ── TAB 2: Policy & Market Access ─────────────────────────────────────────────
-with tab_policy:
-    if not is_t1:
-        st.info(f"Detailed policy brief for **{sel}** not yet available. Showing AfCFTA general framework.", icon="📋")
-        st.markdown("""
-<div class="pol-card">
-    <div class="pol-card-title">🌍 African Continental Free Trade Area (AfCFTA)</div>
-    <p>Member states are progressively eliminating tariffs on 90% of goods. Commercial vehicles
-    are classified as sensitive goods with 10–15 year phase-out timelines. Check the AfCFTA
-    Secretariat for country-specific schedules.</p>
-</div>
-""", unsafe_allow_html=True)
-        st.caption("Source: [AfCFTA Secretariat](https://au-afcfta.org) · [AfDB](https://www.afdb.org)")
-    else:
+    with tab_policy:
         p     = cdata["policy"]
         src_c = cdata["sources"].get("customs",("",""))
         src_m = cdata["sources"].get("market",("",""))
         src_t = cdata["sources"].get("trade",("",""))
 
-        pl, pr = st.columns(2, gap="large")
-        with pl:
-            st.markdown(f'<div class="pol-card"><div class="pol-card-title">🏷 Tariff & Import Structure</div><p>{p["tariff"]}</p></div>', unsafe_allow_html=True)
-            st.caption(f"Source: [{src_c[0]}]({src_c[1]})")
-            st.markdown(f'<div class="pol-card ok"><div class="pol-card-title">📋 Certification & Homologation</div><p>{p["certification"]}</p></div>', unsafe_allow_html=True)
-            st.caption(f"Source: [{src_m[0]}]({src_m[1]})")
-        with pr:
-            st.markdown(f'<div class="pol-card"><div class="pol-card-title">🏗 Key Buyers & Procurement Bodies</div><p>{p["key_buyers"]}</p></div>', unsafe_allow_html=True)
-            st.caption(f"Source: [{src_t[0]}]({src_t[1]})")
-            st.markdown(f'<div class="pol-card warn"><div class="pol-card-title">⚠ Risk Factors & Operational Considerations</div><p>{p["risk"]}</p></div>', unsafe_allow_html=True)
+        # Single-column policy cards (Task 1: no side-by-side long text)
+        st.markdown(f'<div class="pol-card"><div class="pol-card-title">🏷 Tariff & Import Structure</div><p>{p["tariff"]}</p></div>', unsafe_allow_html=True)
+        st.caption(f"Source: [{src_c[0]}]({src_c[1]})")
 
-        # ── v10.0: Operational Risk Radar (new module) ──────────────────────
-        _render_risk_radar_module(sel, cdata, sel[:2].lower())
+        st.markdown(f'<div class="pol-card ok"><div class="pol-card-title">📋 Certification & Homologation</div><p>{p["certification"]}</p></div>', unsafe_allow_html=True)
+        st.caption(f"Source: [{src_m[0]}]({src_m[1]})")
+
+        st.markdown(f'<div class="pol-card"><div class="pol-card-title">🏗 Key Buyers & Procurement Bodies</div><p>{p["key_buyers"]}</p></div>', unsafe_allow_html=True)
+        st.caption(f"Source: [{src_t[0]}]({src_t[1]})")
+
+        st.markdown(f'<div class="pol-card warn"><div class="pol-card-title">⚠ Risk Factors & Operational Considerations</div><p>{p["risk"]}</p></div>', unsafe_allow_html=True)
 
         _sdiv("Market Entry Assessment Scorecard")
         all_sc = {
@@ -2894,81 +2435,29 @@ with tab_policy:
 """, unsafe_allow_html=True)
         st.caption(f"Source: [{src_t[0]}]({src_t[1]}) · Assessment based on simulated and publicly available market intelligence.")
 
-# ── TAB 3: Intelligence Feed ───────────────────────────────────────────────────
-with tab_news:
-    news_query = cdata.get("news_query","") if is_t1 else f"{sel} transport logistics commercial vehicle"
+# ══════════════════════════════════════════════════════════════════════════════
+# 18. INTELLIGENCE FEED — Task 3: collapsed expander at the very bottom of
+#     the page. No longer a tab, no longer competing for visual attention
+#     with the structured dashboard above.
+# ══════════════════════════════════════════════════════════════════════════════
+st.markdown("<br>", unsafe_allow_html=True)
+news_query = cdata.get("news_query","") if is_t1 else f"{sel} transport logistics commercial vehicle"
+
+with st.expander(f"📡 点击展开：{sel} 近期商业与政策情报流 / Click to expand recent intelligence", expanded=False):
     st.markdown(f"""
 <div style="background:#F8F9FB;border:1px solid #E2E5EB;border-radius:8px;
-            padding:11px 16px;margin-bottom:18px;font-family:'Inter';
-            font-size:.78rem;color:#5A6070;line-height:1.7;">
-    <strong style="color:#2D3142;">Intelligence parameters:</strong>
-    &nbsp;Focus: <strong style="color:#D04A02;">{sel}</strong>
-    &nbsp;·&nbsp; Sources: Reuters · Bloomberg · FT · Engineering News · BusinessDay · Zawya · Africa Report · New Times RW
-    &nbsp;·&nbsp; Window: <strong>30-day primary / 90-day fallback / Curated insights guaranteed</strong>
+            padding:11px 16px;margin-bottom:14px;font-family:'Inter';
+            font-size:.76rem;color:#5A6070;line-height:1.7;">
+    Sources: Reuters · Bloomberg · FT · Engineering News · BusinessDay · Zawya · Africa Report
+    &nbsp;·&nbsp; Window: 30-day primary / 90-day fallback / curated insights guaranteed
     {"&nbsp;·&nbsp; <span style='color:#D04A02;'>⚠ Tier 2 — general coverage</span>" if not is_t1 else ""}
 </div>
 """, unsafe_allow_html=True)
-    nc, pc = st.columns([3,1], gap="large")
-    with nc:
-        render_news_panel(news_query, sel)
-    with pc:
-        st.markdown("""
-<div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
-            padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
-    <div style="font-family:'Inter';font-size:.68rem;font-weight:700;text-transform:uppercase;
-                letter-spacing:.6px;color:#9BA3B2;margin-bottom:12px;">Fetch Strategy</div>
-""", unsafe_allow_html=True)
-        for label, val in [
-            ("Pass 1","Broad query + when:30d"),
-            ("Pass 2","Broad query + when:90d"),
-            ("Pass 3","No time limit (broad)"),
-            ("Pass 4","Curated market insights"),
-            ("Cache TTL","30 minutes"),
-        ]:
-            st.markdown(f"""
-<div style="margin-bottom:9px;">
-    <div style="font-family:'Inter';font-size:.62rem;color:#9BA3B2;">{label}</div>
-    <div style="font-family:'Inter';font-size:.78rem;font-weight:500;color:#2D3142;">{val}</div>
-</div>
-""", unsafe_allow_html=True)
-        st.markdown(f"""
-<div style="margin-top:8px;padding-top:8px;border-top:1px solid #F0F2F5;">
-    <div style="font-family:'Inter';font-size:.62rem;color:#9BA3B2;margin-bottom:4px;">Keywords</div>
-    <div style="font-family:'Inter';font-size:.72rem;color:#5A6070;line-height:1.6;
-                word-break:break-word;background:#F8F9FB;border-radius:5px;padding:7px 9px;">
-        {news_query}
-    </div>
-</div>
-</div>
-""", unsafe_allow_html=True)
-
-        st.markdown("<br>", unsafe_allow_html=True)
-        st.markdown("""
-<div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
-            padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);">
-    <div style="font-family:'Inter';font-size:.68rem;font-weight:700;text-transform:uppercase;
-                letter-spacing:.6px;color:#9BA3B2;margin-bottom:10px;">Authority Domains</div>
-""", unsafe_allow_html=True)
-        for src, url in [
-            ("Reuters","https://reuters.com"),("Bloomberg","https://bloomberg.com"),
-            ("Financial Times","https://ft.com"),("Engineering News ZA","https://engineeringnews.co.za"),
-            ("BusinessDay NG","https://businessday.ng"),("Zawya","https://zawya.com"),
-            ("The Africa Report","https://theafricareport.com"),
-            ("The New Times Rwanda","https://newtimes.co.rw"),
-            ("AfDB","https://afdb.org"),
-        ]:
-            st.markdown(f"""
-<div style="font-family:'Inter';font-size:.72rem;color:#5A6070;
-            padding:4px 0;border-bottom:1px solid #F4F5F7;">
-    <span style="display:inline-block;width:6px;height:6px;border-radius:50%;
-                 background:#1A8C5B;margin-right:6px;"></span>
-    <a href="https://{url}" target="_blank" style="color:#295BA5;text-decoration:none;">{src}</a>
-</div>
-""", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+    render_news_panel(news_query, sel)
+    st.caption(f"Keywords used: `{news_query}` · Cache TTL: 30 minutes")
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 18. FOOTER
+# 19. FOOTER
 # ══════════════════════════════════════════════════════════════════════════════
 st.markdown("<br>", unsafe_allow_html=True)
 st.markdown(f"""
@@ -2976,9 +2465,9 @@ st.markdown(f"""
             font-family:'Inter';font-size:.68rem;color:#9BA3B2;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
         <div>
-            <strong style="color:#5A6070;">Africa CV Market Intelligence Platform v10.0</strong>
+            <strong style="color:#5A6070;">Africa CV Market Intelligence Platform v11.0</strong>
             &nbsp;·&nbsp; Internal strategic use only
-            &nbsp;·&nbsp; VP Commercial Analysis Edition · TCO Break-even · Segment Map · Risk Radar · 9 Tier 1 Markets
+            &nbsp;·&nbsp; McKinsey UX Refactor: Narrative-Flow Layout · Zero Text Overlap
         </div>
         <div style="text-align:right;">
             RDB · RURA · NAAMSA · Stats SA · National Treasury ZA · ANME TN · OCP · Reuters · Bloomberg · AfDB
