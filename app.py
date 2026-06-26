@@ -546,6 +546,8 @@ TIER1 = {
             "EV_Energy_Cost_per_km":   0.11,
             "Monthly_km":              8000,
             "Interest_Rate":           0.24,   # 24% annual — NGN lending rate environment
+            "ICE_Residual_Pct":        0.40,   # 40% residual at 60mo — mature 2nd-hand diesel market
+            "EV_Residual_Pct":         0.15,   # 15% residual at 60mo — nascent 2nd-hand EV/battery market
             "source_name": "NADDC / Nigeria Customs — Tariff & Fuel Price Modelling 2026",
             "source_url":  "https://naddc.gov.ng",
         },
@@ -599,6 +601,8 @@ TIER1 = {
             "EV_Energy_Cost_per_km":   0.09,
             "Monthly_km":              9500,
             "Interest_Rate":           0.11,   # 11% — SA prime lending environment
+            "ICE_Residual_Pct":        0.40,
+            "EV_Residual_Pct":         0.15,
             "source_name": "NAAMSA / Eskom Tariff Schedule 2026",
             "source_url":  "https://naamsa.co.za",
         },
@@ -652,6 +656,8 @@ TIER1 = {
             "EV_Energy_Cost_per_km":   0.10,
             "Monthly_km":              7800,
             "Interest_Rate":           0.06,   # 6% — Morocco's stable, low-cost capital
+            "ICE_Residual_Pct":        0.42,   # slightly higher — strong EU-aligned 2nd-hand export market
+            "EV_Residual_Pct":         0.15,
             "source_name": "AIVAM / ONHYM Energy Price Bulletin 2026",
             "source_url":  "http://www.aivam.ma",
         },
@@ -704,6 +710,8 @@ TIER1 = {
             "EV_Energy_Cost_per_km":   0.07,
             "Monthly_km":              7200,
             "Interest_Rate":           0.20,   # 20% — CBE policy rate environment
+            "ICE_Residual_Pct":        0.38,   # slightly lower — FX-constrained resale liquidity
+            "EV_Residual_Pct":         0.12,
             "source_name": "EOS / Egypt Ministry of Petroleum Subsidised Fuel Schedule 2026",
             "source_url":  "https://www.mop.gov.eg",
         },
@@ -756,6 +764,8 @@ TIER1 = {
             "EV_Energy_Cost_per_km":   0.13,
             "Monthly_km":              6800,
             "Interest_Rate":           0.16,   # 16% — CBK rate environment
+            "ICE_Residual_Pct":        0.40,
+            "EV_Residual_Pct":         0.14,
             "source_name": "EPRA Fuel Price Bulletin / KEBS 2026",
             "source_url":  "https://www.epra.go.ke",
         },
@@ -808,6 +818,8 @@ TIER1 = {
             "EV_Energy_Cost_per_km":   0.02,
             "Monthly_km":              6200,
             "Interest_Rate":           0.18,   # 18% — NBE policy rate environment
+            "ICE_Residual_Pct":        0.35,   # lower — petroleum import ban shrinks the resale pool
+            "EV_Residual_Pct":         0.16,   # slightly higher — EV is the only growing 2nd-hand category
             "source_name": "ERCA Import Ban Notice / EEPCO Tariff Schedule 2026",
             "source_url":  "https://www.erca.gov.et",
         },
@@ -860,6 +872,8 @@ TIER1 = {
             "EV_Energy_Cost_per_km":   0.06,
             "Monthly_km":              6500,
             "Interest_Rate":           0.09,   # 9% — Banque d'Algérie environment
+            "ICE_Residual_Pct":        0.40,
+            "EV_Residual_Pct":         0.12,   # lower — almost no EV 2nd-hand market exists yet
             "source_name": "Ministère de l'Energie — Subsidised Diesel Schedule 2026",
             "source_url":  "https://www.energy.gov.dz",
         },
@@ -913,6 +927,10 @@ TIER1 = {
             "EV_Energy_Cost_per_km":   0.08,
             "Monthly_km":              6000,
             "Interest_Rate":           0.08,   # 8% — BCT policy rate environment
+            "ICE_Residual_Pct":        0.40,
+            "EV_Residual_Pct":         0.16,   # slightly higher — EU-adjacent re-export market for EVs
+            "ANME_Subsidy_TND":        10000,  # direct subsidy per BEV — Loi de Finances 2026
+            "EV_VAT_Pct":              0.07,   # reduced TVA on BEV (vs 19% standard for diesel)
             "source_name": "Loi de Finances 2026 / ANME e-Mobility Programme",
             "source_url":  "https://www.finances.gov.tn",
         },
@@ -969,6 +987,10 @@ TIER1 = {
             "EV_Energy_Cost_per_km":   0.0099,
             "Monthly_km":              6700,
             "Interest_Rate":           0.13,   # 13% — NBR policy rate environment
+            "ICE_Residual_Pct":        0.40,
+            "EV_Residual_Pct":         0.17,   # highest EV residual in the portfolio — RDB-backed buyback schemes
+            "EAC_Import_Duty_Pct":     0.0,    # 0% EAC Pioneer EV duty (vs 25% CET for ICE)
+            "Kigali_Electricity_RWF_per_kWh": 115,  # RURA dedicated e-mobility tariff
             "source_name": "RURA e-Mobility Tariff Order 2023 / RDB Investment Incentives 2024",
             "source_url":  "https://www.rura.rw",
         },
@@ -1364,23 +1386,36 @@ def gen_rw_ev_adoption():
     })
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 8B. CORE v11.0 GENERATORS — TCO w/ Interest, Segment Apps, Risk Radar, Gate Index
+# 8B. CORE v11.1 GENERATORS — TCO w/ Interest + Residual Value, Segment Apps,
+#     Risk Radar, Gate Index
 # ══════════════════════════════════════════════════════════════════════════════
 @st.cache_data
-def gen_tco_36month_df(country: str) -> pd.DataFrame:
+def gen_tco_60month_df(country: str) -> pd.DataFrame:
     """
-    36-month cumulative TCO comparison: ICE vs EV, now including the
-    financing/interest cost on the capital outlay (Task 2 requirement).
+    60-month (5-year) cumulative TCO comparison: ICE vs EV.
 
-    Methodology: the capex is financed at the country's Interest_Rate
-    (annual, simple monthly accrual on the *outstanding* capital balance,
-    assumed straight-line amortised over 36 months). This produces a
-    materially different — and more realistic — break-even point than
-    a pure cash-purchase model, especially in high-rate markets like
-    Nigeria (24%) and Egypt (20%).
+    Three cost layers are modelled, in the order a CFO would actually
+    underwrite this deal:
+      1. Capex, financed at the country's Interest_Rate (straight-line
+         amortisation over 60 months, interest accrued on the declining
+         outstanding balance).
+      2. Cumulative energy cost (diesel litres vs kWh at local pricing).
+      3. Residual value penalty: at month 60, the vehicle is assumed sold
+         into the local 2nd-hand market. ICE_Residual_Pct / EV_Residual_Pct
+         (set per-country in tco_params) determine what fraction of the
+         ORIGINAL CAPEX is recovered as a cash inflow. This inflow is
+         subtracted from cumulative cost at month 60 — modelled as a
+         single step-down, since resale is a discrete liquidity event,
+         not a gradual one.
+
+    This is the CFO-grade refinement requested: financing cost makes EV
+    look worse in high-rate markets; the residual penalty makes EV look
+    worse again at exit, since used EV markets are thinner and battery
+    degradation discounts resale value harder than for diesel. Both
+    effects are real and both are now in the model — no rosy-EV bias.
     """
     p = TIER1[country]["tco_params"]
-    months = np.arange(0, 37)
+    months = np.arange(0, 61)
     ice_capex = p["ICE_Capex"]
     ev_capex  = p["EV_Capex"]
     ice_per_km = p["ICE_Energy_Cost_per_km"]
@@ -1388,47 +1423,62 @@ def gen_tco_36month_df(country: str) -> pd.DataFrame:
     km_per_month = p["Monthly_km"]
     annual_rate = p.get("Interest_Rate", 0.0)
     monthly_rate = annual_rate / 12
+    ice_residual_pct = p.get("ICE_Residual_Pct", 0.40)
+    ev_residual_pct  = p.get("EV_Residual_Pct", 0.15)
 
-    def financed_cumulative(capex, per_km_cost):
-        # Straight-line amortisation: capital balance declines linearly to 0 by month 36
-        amort_per_month = capex / 36
+    def financed_cumulative(capex, per_km_cost, residual_pct):
+        # Straight-line amortisation over the full 60-month horizon
+        amort_per_month = capex / 60
         balance = capex
         cum_interest = 0.0
-        cum_energy = 0.0
         interest_series = [0.0]
-        for m in range(1, 37):
+        for m in range(1, 61):
             interest_this_month = balance * monthly_rate
             cum_interest += interest_this_month
             balance -= amort_per_month
-            cum_energy = per_km_cost * km_per_month * m
             interest_series.append(cum_interest)
-        # cumulative cost = capex (financed, fully recognised upfront as the asset cost)
-        #                   + cumulative interest paid so far
-        #                   + cumulative energy cost so far
+
         energy_series = per_km_cost * km_per_month * months
-        return capex + np.array(interest_series) + energy_series
+        gross_cost = capex + np.array(interest_series) + energy_series
 
-    ice_cumulative = financed_cumulative(ice_capex, ice_per_km)
-    ev_cumulative  = financed_cumulative(ev_capex, ev_per_km)
+        # Residual value penalty: subtract resale proceeds at month 60 only.
+        # Modelled as a step function — before month 60 the asset is still
+        # in service and has no realised cash inflow; at month 60 it is
+        # liquidated and the residual value reduces net cumulative cost.
+        residual_value = capex * residual_pct
+        net_cost = gross_cost.copy()
+        net_cost[-1] = net_cost[-1] - residual_value
+        return net_cost, residual_value
 
-    return pd.DataFrame({
+    ice_cumulative, ice_residual_value = financed_cumulative(ice_capex, ice_per_km, ice_residual_pct)
+    ev_cumulative,  ev_residual_value  = financed_cumulative(ev_capex,  ev_per_km,  ev_residual_pct)
+
+    df = pd.DataFrame({
         "Month": months,
         "ICE_Cumulative_Cost": ice_cumulative,
         "EV_Cumulative_Cost":  ev_cumulative,
     })
+    # Stash residual figures as DataFrame attrs for downstream chart/caption use
+    df.attrs["ice_residual_value"] = ice_residual_value
+    df.attrs["ev_residual_value"]  = ev_residual_value
+    df.attrs["ice_residual_pct"]   = ice_residual_pct
+    df.attrs["ev_residual_pct"]    = ev_residual_pct
+    return df
 
 
 def calc_tco_breakeven(country: str):
     """
     Returns (breakeven_month, breakeven_cost) or (None, None) if EV never
-    reaches cost parity with ICE within the 36-month horizon.
+    reaches cost parity with ICE within the 60-month horizon.
 
     Handles three cases:
-      1. EV starts more expensive and crosses below ICE within 36mo.
+      1. EV starts more expensive and crosses below ICE within 60mo
+         (the crossing may occur either from ongoing energy savings, or
+         as a step-change at month 60 when the residual penalty hits).
       2. EV starts at or below ICE cost from Month 0.
-      3. EV never catches up within 36 months -> (None, None).
+      3. EV never catches up within 60 months -> (None, None).
     """
-    df = gen_tco_36month_df(country)
+    df = gen_tco_60month_df(country)
     diff = df["EV_Cumulative_Cost"] - df["ICE_Cumulative_Cost"]
 
     if diff.iloc[0] <= 0:
@@ -1556,26 +1606,40 @@ def chart_segment_apps_heatmap(df: pd.DataFrame) -> go.Figure:
 
 def chart_tco_breakeven(country: str) -> go.Figure:
     """
-    36-month cumulative TCO comparison with financing cost included, and
-    the break-even crossing marked with a dotted vertical line + star
-    marker (Task 2 Level 2, right chart, mandatory dotted crossing line).
+    60-month (5-year) cumulative TCO comparison with financing cost and
+    residual value penalty included. The break-even crossing is marked
+    with a dotted vertical line + star marker, and the month-60 residual
+    value step-down is separately annotated so the CFO can see exactly
+    where in the curve the resale liquidity event lands.
     """
-    df = gen_tco_36month_df(country)
+    df = gen_tco_60month_df(country)
     breakeven_month, breakeven_cost = calc_tco_breakeven(country)
+    ice_resid = df.attrs.get("ice_residual_value", 0)
+    ev_resid  = df.attrs.get("ev_residual_value", 0)
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=df["Month"], y=df["ICE_Cumulative_Cost"],
-        name="ICE — Cumulative TCO (incl. financing)",
+        name="ICE — Cumulative TCO (incl. financing & residual)",
         mode="lines", line=dict(color="#21325B", width=2.5),
         hovertemplate="<b>Month %{x}</b><br>ICE Cumulative: <b>$%{y:,.0f}</b><extra></extra>",
     ))
     fig.add_trace(go.Scatter(
         x=df["Month"], y=df["EV_Cumulative_Cost"],
-        name="EV — Cumulative TCO (incl. financing)",
+        name="EV — Cumulative TCO (incl. financing & residual)",
         mode="lines", line=dict(color="#D04A02", width=2.5),
         hovertemplate="<b>Month %{x}</b><br>EV Cumulative: <b>$%{y:,.0f}</b><extra></extra>",
     ))
+
+    # Month-60 residual value step-down marker (CFO requirement)
+    fig.add_vline(x=60, line_dash="dash", line_color="#9BA3B2", line_width=1.2)
+    fig.add_annotation(
+        x=60, y=df["ICE_Cumulative_Cost"].max()*1.0,
+        text=f"↓ Residual cashback at exit:<br>ICE −${ice_resid:,.0f} · EV −${ev_resid:,.0f}",
+        showarrow=False, yanchor="top", xanchor="right", xshift=-4,
+        bgcolor="rgba(255,255,255,0.92)", bordercolor="#9BA3B2",
+        font=dict(size=9, color="#5A6070", family="Inter"),
+    )
 
     if breakeven_month is not None:
         fig.add_vline(x=breakeven_month, line_dash="dot", line_color="#1A8C5B", line_width=2)
@@ -1587,21 +1651,21 @@ def chart_tco_breakeven(country: str) -> go.Figure:
             hovertemplate=f"<b>TCO Parity</b><br>Month {breakeven_month:.1f}<br>${breakeven_cost:,.0f}<extra></extra>",
         ))
         fig.add_annotation(
-            x=breakeven_month, y=df["EV_Cumulative_Cost"].max()*0.12,
+            x=breakeven_month, y=df["EV_Cumulative_Cost"].max()*0.10,
             text=f"🟢 Break-even: Month {breakeven_month:.1f}",
             showarrow=False, bgcolor="rgba(26,140,91,0.1)", bordercolor="#1A8C5B",
             font=dict(size=10, color="#1A8C5B", family="Inter"),
         )
     else:
         fig.add_annotation(
-            x=18, y=df["EV_Cumulative_Cost"].max()*0.88,
-            text="⚠ No TCO parity within 36 months\nat current financing & energy rates",
+            x=28, y=df["EV_Cumulative_Cost"].max()*0.82,
+            text="⚠ No TCO parity within 60 months\nat current financing, energy & residual rates",
             showarrow=False, bgcolor="rgba(208,74,2,0.1)", bordercolor="#D04A02",
             font=dict(size=10, color="#D04A02", family="Inter"),
         )
 
     return _apply(fig, {
-        "xaxis": {**CHART_BASE["xaxis"], "title": "Month of Operation"},
+        "xaxis": {**CHART_BASE["xaxis"], "title": "Month of Operation (60mo = 5-year exit)"},
         "yaxis": {**CHART_BASE["yaxis"], "title": "Cumulative Cost (USD, incl. financing)"},
         "legend": {**CHART_BASE["legend"], "y": -0.25},
         "height": 380,
@@ -2077,15 +2141,21 @@ def render_country_dashboard(country: str, cdata: dict):
         )
     with tco_col:
         p = cdata["tco_params"]
-        _chdr("36-Month TCO Break-even", "ICE vs. EV Cumulative Cost (incl. financing)",
+        _chdr("60-Month TCO Break-even", "ICE vs. EV Cumulative Cost (incl. financing & residual)",
               f"Capex ICE ${p['ICE_Capex']:,.0f} vs EV ${p['EV_Capex']:,.0f} · "
-              f"financed at {p['Interest_Rate']*100:.0f}% p.a. · {p['Monthly_km']:,} km/month",
+              f"financed at {p['Interest_Rate']*100:.0f}% p.a. · {p['Monthly_km']:,} km/month · "
+              f"5-yr residual: ICE {p['ICE_Residual_Pct']:.0%} / EV {p['EV_Residual_Pct']:.0%}",
               p["source_name"], p["source_url"])
         st.plotly_chart(chart_tco_breakeven(country), use_container_width=True,
                         config=PLOTLY_CFG, key=f"{country}_tco")
         breakeven_month, _ = calc_tco_breakeven(country)
-        be_text = f"Month {breakeven_month:.1f} ({breakeven_month/12:.1f} yrs)" if breakeven_month is not None else "Not reached within 36 months"
+        be_text = f"Month {breakeven_month:.1f} ({breakeven_month/12:.1f} yrs)" if breakeven_month is not None else "Not reached within 60 months"
         st.caption(f"Break-even: **{be_text}** · Financing rate: {p['Interest_Rate']*100:.0f}% p.a.")
+        st.caption(
+            "📌 TCO 测算已包含当地高息融资成本及二手车残值惩罚 / "
+            "TCO modelling includes local high-interest financing cost and "
+            "second-hand residual value penalty."
+        )
 
     # ── LEVEL 3 — Market Depth ─────────────────────────────────────────────────
     _level_hdr(3, "Market Depth · 市场深度", "Brand competitive set and country-specific structural story")
