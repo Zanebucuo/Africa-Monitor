@@ -138,6 +138,30 @@ button[aria-selected="true"][data-baseweb="tab"]{
 }
 .gate-index-value{font-size:2.2rem;font-weight:700;font-family:'Inter';}
 .gate-index-label{font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;margin-top:4px;}
+
+/* ── GTM Playbook cards (Task 3) ── */
+.gtm-card{
+    background:var(--white);border:1px solid var(--border);border-radius:var(--radius);
+    padding:0;box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px;height:100%;
+}
+.gtm-card-hdr{
+    padding:14px 18px;display:flex;align-items:center;gap:10px;
+}
+.gtm-card-hdr.product{background:linear-gradient(135deg,#FFF3ED 0%,#FFE8DC 100%);border-bottom:2px solid var(--orange);}
+.gtm-card-hdr.supply{background:linear-gradient(135deg,#EEF2FA 0%,#E3EAF7 100%);border-bottom:2px solid var(--navy);}
+.gtm-card-hdr.persona{background:linear-gradient(135deg,#EAF6F0 0%,#DCF0E6 100%);border-bottom:2px solid var(--green);}
+.gtm-card-icon{font-size:1.4rem;flex-shrink:0;}
+.gtm-card-title{font-size:.82rem;font-weight:700;color:var(--txt);letter-spacing:.2px;}
+.gtm-card-subtitle{font-size:.62rem;color:var(--mid);text-transform:uppercase;letter-spacing:.6px;margin-top:1px;}
+.gtm-card-body{padding:16px 18px;font-size:.83rem;line-height:1.75;color:var(--txt);}
+.gtm-card-body b{color:var(--orange);}
+.gtm-mission-banner{
+    background:linear-gradient(135deg,#21325B 0%,#1A2747 100%);
+    border-radius:var(--radius);padding:18px 24px;margin-bottom:20px;
+    box-shadow:0 4px 16px rgba(33,50,91,.25);
+}
+.gtm-mission-title{font-size:.95rem;font-weight:700;color:#fff;letter-spacing:.3px;}
+.gtm-mission-sub{font-size:.72rem;color:#B8C4DC;margin-top:4px;}
 #MainMenu,footer,header{visibility:hidden;}
 [data-testid="stToolbar"]{display:none;}
 .block-container{padding-top:0!important;}
@@ -570,6 +594,30 @@ TIER1 = {
             "value. Target Dangote and BUA Group fleet renewal cycles directly; Apapa port delays make "
             "CKD-Lagos-assembly strictly faster to deliver than CBU import in 2026."
         ),
+        "gtm_playbook": {
+            "product_matrix": (
+                "**Lead SKU: 8t e-LCV** for Lagos/Lagos-Ibadan urban FMCG distribution (Dangote, BUA "
+                "depot runs) — this is the only segment where EV readiness (7.0/10) clears the bar. "
+                "**Secondary SKU: 18t SKD rigid** assembled locally to capture 0% CKD duty, positioned "
+                "against Sinotruk/FAW incumbents on landed cost, not on EV narrative — Nigerian buyers "
+                "are price-led, not ESG-led. **Do not lead with EHCV/tractor** (0.9/10 readiness) — "
+                "diesel tractors remain the only bankable choice for long-haul mining logistics through 2028."
+            ),
+            "supply_chain_mode": (
+                "**CKD assembly via a Lagos-based JV partner, invoiced in USD.** This is non-negotiable "
+                "given NGN's >60% two-year depreciation — any naira-denominated contract erodes margin "
+                "faster than the 0% duty saves it. Structure milestone payments in USD with a 90-day FX "
+                "forward on the naira-denominated local assembly labour component only. Route CBU spares "
+                "and high-value components through Lagos Free Trade Zone to defer duty exposure further."
+            ),
+            "target_persona": (
+                "**Primary:** Group Fleet Director at Dangote Cement / BUA Group — KPI-driven on landed "
+                "cost per tonne-km, controls multi-year framework agreements, immune to EV sentiment "
+                "pitches. **Secondary:** NNPC Logistics Division procurement lead — long sales cycle "
+                "(12-18 months) but framework volumes once won are sticky and FX-insulated via dollar "
+                "crude revenue. Avoid SME logistics owners — their FX access is worse than the corporates'."
+            ),
+        },
     },
 
     "South Africa": {
@@ -625,6 +673,32 @@ TIER1 = {
             "Transnet and Imperial Logistics for the Gauteng-corridor depot fleets where Eskom grid "
             "reliability already supports overnight EV charging."
         ),
+        "gtm_playbook": {
+            "product_matrix": (
+                "**Lead SKU: 12t SKD rigid for Gauteng depot distribution** — Eskom grid reliability in "
+                "the metro corridor and APDP-qualifying local content make this the most defensible "
+                "near-term play. **Secondary SKU: 8t e-LCV for urban FMCG** (Shoprite/Tiger Brands depot "
+                "loops, 6.2/10 readiness) — overnight charging fits existing depot operating hours. "
+                "**Do not lead with long-haul EHCV/tractor** (1.2/10 readiness) — Transnet's rail "
+                "collapse is creating road HCV demand, but that demand is diesel demand, not EV demand, "
+                "given inter-provincial charging infrastructure gaps."
+            ),
+            "supply_chain_mode": (
+                "<b>2026年3月后全面转向本地SKD以获取150%抵税与APDP退税</b> — from 1 March 2026, structure "
+                "100% of new South African volume as locally-assembled SKD to simultaneously capture the "
+                "150% Section 12V tax deduction (R500m annual cap) and APDP Phase 2 Production Rebate "
+                "Certificates. Pure CBU import after this date forfeits both incentives and concedes "
+                "structural cost advantage to any competitor who localises. Pricing should be quoted "
+                "ZAR-denominated with quarterly FX reset clauses tied to ZAR/USD ~18.5 reference."
+            ),
+            "target_persona": (
+                "**Primary:** Transnet Freight Rail / Imperial Logistics Fleet Procurement Director — "
+                "actively seeking road HCV capacity to offset the 46% rail volume collapse since 2018, "
+                "decision authority sits at GM level for multi-year framework deals. **Secondary:** "
+                "Shoprite/Tiger Brands Supply Chain VP — depot-based urban fleets, EV-receptive given "
+                "ESG reporting pressure from JSE-listed parent, but price-sensitive on TCO payback period."
+            ),
+        },
     },
 
     "Morocco": {
@@ -679,6 +753,33 @@ TIER1 = {
             "2.5% rate via local content rules, and target OCP Group's contractor fleet (road-accessible "
             "segment only — not the slurry pipeline trunk) as the anchor reference customer."
         ),
+        "gtm_playbook": {
+            "product_matrix": (
+                "**Lead SKU: 18t SKD rigid for OCP contractor logistics** — targets the road-accessible "
+                "segment of phosphate logistics (finished fertiliser, reagent supply, equipment "
+                "mobilisation) explicitly excluded from OCP's slurry pipeline and rail trunk. "
+                "**Secondary SKU: 8t e-LCV for Casablanca urban distribution** (5.8/10 readiness) — "
+                "best positioned against incumbent Renault Trucks/Mercedes on landed cost once local "
+                "content qualifies for the 2.5% EU-equivalent rate. **EHCV/tractor remains a European "
+                "brand stronghold** (>65% share) — do not contest this segment head-on; win share "
+                "through OCP contractor relationships instead."
+            ),
+            "supply_chain_mode": (
+                "CKD assembly JV co-located in the Casablanca-Tangier industrial corridor, structured to "
+                "meet Rules of Origin thresholds under the EU Association Agreement — this is the only "
+                "path to the 2.5% tariff for a Chinese-brand vehicle, since direct CBU import faces the "
+                "~25% MFN rate with no local content offset. Price in MAD with EUR-indexed input cost "
+                "pass-through, since the EU AA Agreement anchors Morocco's trade pricing norms to euro "
+                "benchmarks even though the local currency is MAD."
+            ),
+            "target_persona": (
+                "**Primary:** OCP Group Procurement & Logistics Director — controls the largest single "
+                "fleet decision in the market (~800 units/yr estimated, unverified against tender data), "
+                "values supplier relationships measured in decades, not quarters. **Secondary:** "
+                "Tier-1 OCP contractor GMs (CBI, Snef, Cofely) — faster sales cycle than OCP direct, "
+                "serve as the practical entry point while building the OCP direct relationship."
+            ),
+        },
     },
 
     "Egypt": {
@@ -733,6 +834,32 @@ TIER1 = {
             "contracts, and insist on EGP-indexed pricing with quarterly FX reset clauses — do not "
             "accept fixed EGP pricing given 45-90 day payment delays under current FX controls."
         ),
+        "gtm_playbook": {
+            "product_matrix": (
+                "**Lead SKU: 18t KD rigid for SCZone construction logistics** — this is a tariff-arbitrage "
+                "play, not an EV play, given EGP 9.75/L subsidised diesel makes ICE structurally cheap to "
+                "run. **Secondary SKU: 8t e-LCV for Cairo urban FMCG** (3.2/10 readiness — the best "
+                "available segment, still thin) — only viable for depot-return operators with captive "
+                "charging, not as a broad market push. **Avoid EHCV/tractor entirely** (0.5/10 readiness) "
+                "— subsidised diesel plus FX constraints make this the least defensible segment in the "
+                "entire 9-market portfolio."
+            ),
+            "supply_chain_mode": (
+                "KD assembly inside the Suez Canal Economic Zone (SCZone) to access the 0% production "
+                "tariff, modelled on the GB Auto / MAN Trucks Egypt precedent — local content must exceed "
+                "40% to qualify, which requires sourcing tyres, glass, and wiring harnesses domestically "
+                "since Egypt's CV component supply chain cannot support deeper localisation yet. Price in "
+                "USD with quarterly EGP conversion at spot rate, and build a 60-90 day payment delay "
+                "buffer into cash flow planning given FX controls — do not extend open credit terms."
+            ),
+            "target_persona": (
+                "**Primary:** EGPC Logistics Division Procurement Manager — state-owned, FX-insulated via "
+                "dollar oil revenue, slower decision cycle but contracts are durable once signed. "
+                "**Secondary:** SCZone-based construction contractor Operations Director — actively "
+                "seeking KD-assembled fleet to support Suez Canal economic zone build-out, more "
+                "commercially agile than EGPC but exposed to the same EGP payment delay risk."
+            ),
+        },
     },
 
     "Kenya": {
@@ -952,6 +1079,31 @@ TIER1 = {
             "Tunisia</b> for urban depot fleets first; defer phosphate corridor (Gafsa) pitches until "
             "STEG confirms charging infrastructure beyond the Tunis–Sousse corridor."
         ),
+        "gtm_playbook": {
+            "product_matrix": (
+                "**Lead SKU: 8t e-LCV for Tunis urban FMCG** (Délice Danone, SOTUMAG depot routes — "
+                "8.0/10 readiness, the best score in the entire 9-market portfolio) — the TND 151,000 "
+                "tax delta makes this nearly impossible to lose on price alone. **Secondary SKU: 12t "
+                "rigid for Tunis–Sousse port drayage** (5.5/10 readiness) — short predictable routes "
+                "suit current charging infrastructure. **Defer EHCV/tractor for Gafsa phosphate corridor** "
+                "(1.0/10 readiness) until STEG's 200-charger 2026 rollout plan is confirmed beyond "
+                "announcement stage — do not commit inventory against an unconfirmed infrastructure timeline."
+            ),
+            "supply_chain_mode": (
+                "<b>0% 关税 + 0% 消费税 + 7% 增值税 + TND 10,000 ANME 政府补贴</b> 全套组合是北非地区最强的政策套利窗口 — "
+                "import as BEV CBU directly (no CKD assembly needed here, unlike ZA/NG/MA) to capture the "
+                "full Loi de Finances 2026 exemption stack immediately. Quote in TND with the ANME subsidy "
+                "deducted at point of sale to maximise the visible price advantage in the customer's eyes "
+                "rather than as a rebate — this materially changes how the deal feels to a price-anchored buyer."
+            ),
+            "target_persona": (
+                "**Primary:** Délice Danone Tunisie Fleet & Logistics Director — FMCG depot fleet, EU "
+                "parent company under ESG pressure to electrify, Tunis-based with full charging "
+                "infrastructure access. **Secondary:** Aramex Tunisia Country Operations Manager — "
+                "urban last-mile parcels, fast decision cycle, MENA regional fleet standards mean a Tunisia "
+                "win can become a regional reference case."
+            ),
+        },
     },
 
     "Rwanda": {
@@ -1012,6 +1164,33 @@ TIER1 = {
             "stack, and use the resulting performance data as the reference case for EAC-wide tenders "
             "in Kenya and Tanzania within 18 months."
         ),
+        "gtm_playbook": {
+            "product_matrix": (
+                "**Lead SKU: Electric bus for Kigali Bus Services G2G pilot** (9.0/10 readiness, the "
+                "highest EV readiness score across all 9 markets and all 3 segments) — Rwanda's grid "
+                "reliability (<2% outage) and RURA's RWF 115/kWh e-mobility tariff make this the single "
+                "most de-risked EV deployment in the entire portfolio. **Secondary SKU: 8t e-LCV for "
+                "BRALIRWA/MTN Rwanda urban distribution** (6.5/10 readiness) — depot-based, fits within "
+                "Kigali's emerging charging network. **Long-haul mining/construction remains diesel** "
+                "(1.8/10 readiness) — La Colombière and similar contractors should be quoted ICE, not EV."
+            ),
+            "supply_chain_mode": (
+                "<b>0% EAC关税 + 0% 增值税 + 15%企业所得税(较标准30%大幅优惠)</b> 构成全非洲最激进的EV财政组合 — "
+                "import as CBU directly through the EAC Pioneer EV exemption (no local assembly needed to "
+                "access the incentive, unlike Nigeria/South Africa/Morocco). Structure the deal as a "
+                "leasing or G2G financing arrangement rather than an outright municipal purchase, since "
+                "Kigali Bus Services' budget cycle favours opex-style financing — this also lets the 15% "
+                "CIT rate apply if the financing vehicle is structured as a qualifying Rwandan EV enterprise."
+            ),
+            "target_persona": (
+                "**Primary:** City of Kigali / Kigali Bus Services Transport Directorate — G2G "
+                "procurement framework, RDB-endorsed pilots receive expedited approval, low absolute "
+                "deal size but outsized reference value across the EAC. **Secondary:** BRALIRWA "
+                "(Heineken Rwanda) Supply Chain Director — multinational parent under group-level ESG "
+                "mandate, Kigali depot operations are the most charging-infrastructure-ready fleet "
+                "segment outside the G2G bus programme."
+            ),
+        },
     },
 }
 # ══════════════════════════════════════════════════════════════════════════════
@@ -2079,15 +2258,12 @@ EXCLUSIVE_CHART_REGISTRY = {
 }
 
 
-def render_country_dashboard(country: str, cdata: dict):
+def _render_market_risk_tab(country: str, cdata: dict):
     """
-    The single master renderer (Task 2). Every Tier 1 country flows through
-    this exact same Level 1 -> 2 -> 3 -> 4 sequence — no country gets a
-    bespoke page structure anymore, only a bespoke Level-3-right chart via
-    EXCLUSIVE_CHART_REGISTRY and a bespoke 'action' sentence in its dict.
+    Tab 1 content: 市场与风控全景.
+    This is the former Level 1 + Level 2 + Level 3 content, unchanged in
+    substance — only the wrapping (tabs vs. flat page) has changed.
     """
-
-    # ── LEVEL 1 — Decision Overview ───────────────────────────────────────────
     _level_hdr(1, "Decision Overview · 决策全景", "KPIs, market access gate, and FX risk screen")
     _kpi_row(cdata)
     st.markdown("<br>", unsafe_allow_html=True)
@@ -2125,7 +2301,6 @@ def render_country_dashboard(country: str, cdata: dict):
             icon="🚨"
         )
 
-    # ── LEVEL 2 — Commercial Monetisation ─────────────────────────────────────
     _level_hdr(2, "Commercial Monetisation · 商业变现", "Where EV wins by application, and when it pays for itself")
     seg_col, tco_col = st.columns(2, gap="large")
     with seg_col:
@@ -2157,7 +2332,6 @@ def render_country_dashboard(country: str, cdata: dict):
             "second-hand residual value penalty."
         )
 
-    # ── LEVEL 3 — Market Depth ─────────────────────────────────────────────────
     _level_hdr(3, "Market Depth · 市场深度", "Brand competitive set and country-specific structural story")
 
     if country == "South Africa":
@@ -2223,10 +2397,19 @@ def render_country_dashboard(country: str, cdata: dict):
             if renderer:
                 renderer()
 
-    # ── LEVEL 4 — Due Diligence & Action ──────────────────────────────────────
+
+def _render_due_diligence_tab(country: str, cdata: dict):
+    """
+    Tab 2 content: 尽调交叉验证.
+    This is the former Level 4 content — single-column Triangulation
+    expanders followed by the Strategic Action box.
+    """
     _level_hdr(4, "Due Diligence & Action · 尽调研判与行动",
                "Single-column verdict — converted directly into a sales instruction")
-    for tk in cdata.get("tri_keys", []):
+    tri_keys = cdata.get("tri_keys", [])
+    if not tri_keys:
+        st.info("No Due Diligence triangulation modules registered for this market yet.", icon="ℹ️")
+    for tk in tri_keys:
         t = TRIANGULATION.get(tk, {})
         if not t:
             continue
@@ -2234,6 +2417,111 @@ def render_country_dashboard(country: str, cdata: dict):
             render_triangulation(tk)
 
     render_strategic_action(cdata)
+
+
+def _render_gtm_playbook_tab(country: str, cdata: dict):
+    """
+    Tab 3 content: 🚀 GTM Playbook (一国一策战术板).
+    Renders cdata['gtm_playbook'] (product_matrix / supply_chain_mode /
+    target_persona) as three mission-card columns. For the 3 Tier 1
+    markets that do not yet have a playbook authored (Kenya, Ethiopia,
+    Algeria), this renders a clear "not yet available" notice instead
+    of crashing — the dashboard must never break on missing data.
+    """
+    gtm = cdata.get("gtm_playbook")
+
+    st.markdown(f"""
+<div class="gtm-mission-banner">
+    <div class="gtm-mission-title">🚀 {country} — GTM Tactical Playbook</div>
+    <div class="gtm-mission-sub">一国一策战术板 · Mission brief for frontline sales &amp; channel teams</div>
+</div>
+""", unsafe_allow_html=True)
+
+    if not gtm:
+        st.warning(
+            f"**Playbook not yet authored for {country}.**\n\n"
+            "This market currently has full Market & Risk Analytics and Due Diligence coverage, "
+            "but a GTM tactical playbook has not yet been written by the strategy team. "
+            "Request authoring via the GTM Strategy Director before committing sales resources "
+            "to this market without a tactical brief.",
+            icon="⚠️"
+        )
+        return
+
+    pm_col, sc_col, tp_col = st.columns(3, gap="medium")
+    with pm_col:
+        st.markdown(f"""
+<div class="gtm-card">
+    <div class="gtm-card-hdr product">
+        <div class="gtm-card-icon">🎯</div>
+        <div>
+            <div class="gtm-card-title">Product Matrix</div>
+            <div class="gtm-card-subtitle">产品阵型与应用场景</div>
+        </div>
+    </div>
+    <div class="gtm-card-body">{gtm['product_matrix']}</div>
+</div>
+""", unsafe_allow_html=True)
+    with sc_col:
+        st.markdown(f"""
+<div class="gtm-card">
+    <div class="gtm-card-hdr supply">
+        <div class="gtm-card-icon">⚙️</div>
+        <div>
+            <div class="gtm-card-title">Supply Chain & Pricing</div>
+            <div class="gtm-card-subtitle">供应链与定价打法</div>
+        </div>
+    </div>
+    <div class="gtm-card-body">{gtm['supply_chain_mode']}</div>
+</div>
+""", unsafe_allow_html=True)
+    with tp_col:
+        st.markdown(f"""
+<div class="gtm-card">
+    <div class="gtm-card-hdr persona">
+        <div class="gtm-card-icon">🧭</div>
+        <div>
+            <div class="gtm-card-title">Target Persona</div>
+            <div class="gtm-card-subtitle">靶向客户画像</div>
+        </div>
+    </div>
+    <div class="gtm-card-body">{gtm['target_persona']}</div>
+</div>
+""", unsafe_allow_html=True)
+
+    st.caption(
+        "📌 战术板基于尽职调查模块的交叉验证结论制定，应配合 Tab 2 的研判结果协同使用 / "
+        "Playbook tactics are derived from the Due Diligence cross-validation conclusions in Tab 2 "
+        "— review both before committing account resources."
+    )
+
+
+def render_country_dashboard(country: str, cdata: dict):
+    """
+    Master renderer (v12). Every Tier 1 country now flows through the same
+    3-tab structure:
+        Tab 1 → 📊 Market & Risk Analytics  (former Level 1+2+3)
+        Tab 2 → 🕵️ Analyst Due Diligence    (former Level 4)
+        Tab 3 → 🚀 GTM Playbook              (new — execution tactics)
+    No country gets a bespoke page structure; only a bespoke Level-3-right
+    chart via EXCLUSIVE_CHART_REGISTRY, a bespoke 'action' sentence, and
+    (for 6 markets) a bespoke 'gtm_playbook' dict.
+    """
+    tab_market, tab_dd, tab_gtm = st.tabs([
+        "📊 Market & Risk Analytics",
+        "🕵️ Analyst Due Diligence",
+        "🚀 GTM Playbook",
+    ])
+
+    with tab_market:
+        _render_market_risk_tab(country, cdata)
+
+    with tab_dd:
+        _render_due_diligence_tab(country, cdata)
+
+    with tab_gtm:
+        _render_gtm_playbook_tab(country, cdata)
+
 # ══════════════════════════════════════════════════════════════════════════════
 # 12. MAP BUILDER
 # ══════════════════════════════════════════════════════════════════════════════
