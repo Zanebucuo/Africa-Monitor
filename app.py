@@ -529,6 +529,214 @@ def render_strategic_action(cdata: dict):
 </div>
 """, unsafe_allow_html=True)
 # ══════════════════════════════════════════════════════════════════════════════
+# 4B. KEY ACCOUNT INTELLIGENCE DATABASE
+#     Replaces the deprecated checkbox qualification funnel. Each entry is
+#     a deep commercial dossier on a named African corporate group, keyed
+#     by company name. Search is case-insensitive substring match against
+#     both the dict key and the "aliases" list (so "Dangote", "dangote
+#     group", and "dangote cement" all resolve to the same record).
+#
+#     Five required dimensions per the brief:
+#       - Overview            : who they are, HQ country, scale
+#       - Business_Footprint  : core operating geography / logistics corridors
+#       - Fleet_Size_Est      : estimated commercial vehicle fleet size
+#       - Green_Initiatives   : stated ESG targets or operational pain points
+#                                that create an opening for an EV/CKD pitch
+#       - Strategic_Pitch_Angle: the specific opening line / hook a sales
+#                                rep should lead with on first contact
+# ══════════════════════════════════════════════════════════════════════════════
+COMPANY_INTELLIGENCE_DB = {
+    "Dangote Group": {
+        "aliases": ["dangote", "dangote cement", "dangote industries", "dangote refinery"],
+        "country": "Nigeria",
+        "flag": "🇳🇬",
+        "Overview": (
+            "Africa's largest industrial conglomerate by market capitalisation, founded by Aliko "
+            "Dangote. Core divisions: Dangote Cement (Africa's largest cement producer, 11 countries), "
+            "Dangote Refinery (650,000 bpd, world's largest single-train refinery, commissioned 2024), "
+            "and Dangote Sugar. Headquartered in Lagos, with the single largest private logistics "
+            "operation in West Africa supporting its own raw material and finished goods movement."
+        ),
+        "Business_Footprint": (
+            "Cement clinker and finished product corridors run from Obajana, Ibese, and Gboko plants "
+            "to distribution depots across all 36 Nigerian states, plus cross-border haulage into "
+            "Niger, Cameroon, and Ghana. The Dangote Refinery in Lekki Free Trade Zone adds a new "
+            "petrochemical logistics vertical — diesel, PMS, and polypropylene distribution to "
+            "domestic and export markets via Apapa and Lekki ports."
+        ),
+        "Fleet_Size_Est": (
+            "8,000–12,000 heavy commercial vehicles group-wide (cement bulk carriers, flatbeds, "
+            "tankers), making Dangote Group Nigeria's single largest private HCV fleet owner. "
+            "Internal fleet renewal cycles run on a rolling 5–7 year basis."
+        ),
+        "Green_Initiatives": (
+            "No public carbon-neutrality target disclosed, but Dangote has a well-documented and "
+            "acute logistics cost pain point: cement transport cost is cited internally as one of "
+            "the largest controllable line items in delivered product cost, given Nigeria's poor "
+            "road infrastructure and high diesel/FX volatility. Group leadership has publicly "
+            "discussed fleet modernisation as a margin-protection lever, not an ESG one — this is "
+            "a cost story, not a sustainability story."
+        ),
+        "Strategic_Pitch_Angle": (
+            "Lead with landed cost per tonne-km, not carbon. Dangote's FX exposure on diesel "
+            "(Nigeria's NGN depreciation >60% over 18 months) makes a USD-denominated CKD assembly "
+            "deal with a fixed energy-cost-per-km profile structurally attractive as a hedge against "
+            "further naira depreciation — frame the EV/CKD pitch as 'FX risk insulation for your "
+            "single largest controllable opex line,' addressed to the Group Fleet Director, not "
+            "as an environmental upgrade."
+        ),
+    },
+
+    "OCP Group": {
+        "aliases": ["ocp", "ocp group", "office cherifien des phosphates", "groupe ocp"],
+        "country": "Morocco",
+        "flag": "🇲🇦",
+        "Overview": (
+            "State-controlled (Moroccan government majority shareholder) global leader in phosphate "
+            "and phosphate-derivative production — the world's largest exporter of phosphate rock and "
+            "phosphoric acid, and a top-3 global fertiliser producer. Headquartered in Casablanca, "
+            "with core mining operations in Khouribga and Youssoufia, and processing/export "
+            "infrastructure at Jorf Lasfar and Safi."
+        ),
+        "Business_Footprint": (
+            "Primary ore movement runs via a dedicated 187 km slurry pipeline (Khouribga → Jorf "
+            "Lasfar) and a parallel rail corridor (Benguerir → Jorf Lasfar) for concentrate — both "
+            "structurally closed to road HCVs. The road-accessible logistics layer sits around this "
+            "core: contractor fleet movements for equipment mobilisation, reagent supply, finished "
+            "fertiliser distribution, and Jorf Lasfar / Casablanca port drayage."
+        ),
+        "Fleet_Size_Est": (
+            "OCP does not operate a large owned HCV fleet directly — logistics for the road-accessible "
+            "segment is outsourced to ~60 contractor companies (e.g. CBI, Snef, Cofely), whose "
+            "combined fleet is estimated at 800–1,000 heavy vehicles serving OCP contracts, based on "
+            "bottom-up contractor fleet modelling rather than a verified OCP tender disclosure."
+        ),
+        "Green_Initiatives": (
+            "OCP has published a formal carbon-neutrality target for 2027 (ahead of Morocco's "
+            "national 2050 target), anchored by its 'OCP Green' programme covering renewable energy "
+            "self-generation (solar at Jorf Lasfar, wind at Boujdour) and a stated ambition to "
+            "decarbonise its full value chain including logistics. This is one of the few African "
+            "industrial majors with a genuine, board-level ESG mandate that extends to supplier "
+            "selection criteria, not just internal operations."
+        ),
+        "Strategic_Pitch_Angle": (
+            "Lead with the 2027 carbon-neutrality target and ask directly whether OCP's supplier ESG "
+            "scorecard extends to contracted logistics providers — if it does, contractor fleets "
+            "(CBI, Snef, Cofely) electrifying their OCP-dedicated trucks becomes a procurement "
+            "evaluation advantage for THEM, which gives you a second sales motion: sell EVs to the "
+            "contractors as a way to win/retain OCP's logistics tenders, not just sell to OCP directly."
+        ),
+    },
+
+    "Imperial Logistics": {
+        "aliases": ["imperial", "imperial logistics", "imperial group"],
+        "country": "South Africa",
+        "flag": "🇿🇦",
+        "Overview": (
+            "Pan-African and international logistics and supply chain group, JSE-listed until its "
+            "2022 acquisition by DP World (Dubai-based global ports and logistics operator). "
+            "Headquartered in Johannesburg, with operations spanning road freight, warehousing, "
+            "consumer products distribution, and specialised chemicals/healthcare logistics across "
+            "Southern and East Africa."
+        ),
+        "Business_Footprint": (
+            "Core South African corridors run Gauteng (Johannesburg/Pretoria industrial heartland) "
+            "to coastal ports (Durban, Cape Town, Port Elizabeth) and cross-border into Zambia, "
+            "Zimbabwe, Mozambique, and Botswana via the North-South and Maputo corridors. Strong "
+            "depot-based distribution network for FMCG and consumer goods clients, which structurally "
+            "favours predictable, return-to-base routing — the operating profile best suited to "
+            "depot EV charging."
+        ),
+        "Fleet_Size_Est": (
+            "Estimated 4,000–6,000 commercial vehicles across the Southern African operation "
+            "(owned + managed fleet), spanning light delivery vans through to long-haul cross-border "
+            "tractor-trailers. DP World ownership brings group-level capital access for fleet "
+            "modernisation programmes that a standalone JSE-listed entity might not have had."
+        ),
+        "Green_Initiatives": (
+            "DP World (parent) has a public Group sustainability strategy targeting net-zero "
+            "operations, which is increasingly cascading expectations to subsidiaries including "
+            "Imperial Logistics. South Africa's own structural tailwind — Transnet's rail freight "
+            "volume collapse from 228 Mt (2018) to ~122 Mt (2026) — is independently pushing more "
+            "freight onto Imperial's road fleet, creating capacity pressure that a fleet expansion "
+            "decision will have to address regardless of EV positioning."
+        ),
+        "Strategic_Pitch_Angle": (
+            "Two-track pitch: (1) DP World's net-zero mandate gives Group Sustainability a seat at "
+            "the procurement table — find that stakeholder, not just Fleet Procurement. (2) "
+            "Independently, the Transnet rail collapse means Imperial needs incremental road capacity "
+            "regardless of fuel type — position the EV pitch as 'capacity expansion that also ticks "
+            "the DP World net-zero box,' targeting the Gauteng depot-distribution fleet first, where "
+            "overnight charging fits existing operating hours."
+        ),
+    },
+
+    "SNTL": {
+        "aliases": ["sntl", "société nationale de transport", "societe nationale de transport et de logistique"],
+        "country": "Tunisia",
+        "flag": "🇹🇳",
+        "Overview": (
+            "Société Nationale de Transport et de Logistique — Tunisia's state-owned national "
+            "freight transport and logistics operator, historically the dominant player in "
+            "domestic heavy goods transport, particularly for phosphate, agricultural commodities, "
+            "and industrial freight under government and state-enterprise contracts."
+        ),
+        "Business_Footprint": (
+            "Core corridors run Gafsa (phosphate mining basin, CPG operations) to Sfax and Gabès "
+            "ports, plus Tunis–Sousse–Sfax industrial corridor freight. As a state operator, SNTL "
+            "also carries a portion of government and parastatal logistics tenders that private "
+            "carriers like Aramex or DHL do not compete for, giving it a distinct, less contested "
+            "customer base."
+        ),
+        "Fleet_Size_Est": (
+            "Estimated 600–900 heavy commercial vehicles, skewed toward older-generation diesel "
+            "tractors and tippers suited to phosphate and bulk commodity haulage — this is an ageing "
+            "fleet profile with a near-term renewal need, not a recently modernised one."
+        ),
+        "Green_Initiatives": (
+            "No independently disclosed corporate ESG target, but as a state-owned enterprise, SNTL "
+            "is directly exposed to Tunisia's Loi de Finances 2026 EV incentive stack (0% customs + "
+            "0% excise + 7% VAT + TND 10,000 ANME subsidy) — government procurement policy can simply "
+            "mandate SNTL fleet electrification as a matter of state industrial policy, independent "
+            "of any bottom-up ESG motivation. This makes SNTL a policy-driven prospect, not a "
+            "voluntary-ESG-driven one."
+        ),
+        "Strategic_Pitch_Angle": (
+            "Because SNTL is state-owned, the most effective entry point is not the SNTL fleet "
+            "manager directly but the Ministry of Transport / Ministry of Finance policy linkage — "
+            "frame the pitch as 'help SNTL become the flagship demonstration case for the Loi de "
+            "Finances 2026 EV incentive programme,' which gives government sponsors a visible, "
+            "state-enterprise success story to point to, and gives SNTL itself a politically "
+            "low-risk reason to commit to a fleet pilot ahead of full LF2026 budget cycles."
+        ),
+    },
+}
+
+
+def search_company_intelligence(query: str):
+    """
+    Case-insensitive substring search against COMPANY_INTELLIGENCE_DB keys
+    and aliases. Returns the matched record (with 'name' injected) or None
+    if no match is found — callers must handle the None case gracefully
+    and show the 'Target not in Tier-1 DB' fallback message rather than
+    raising or rendering an empty card.
+
+    Return type is dict | None, expressed without the 3.10+ union syntax
+    in the signature for compatibility with older Python deployments.
+    """
+    if not query or not query.strip():
+        return None
+    q = query.strip().lower()
+    for name, record in COMPANY_INTELLIGENCE_DB.items():
+        if q in name.lower():
+            return {**record, "name": name}
+        for alias in record.get("aliases", []):
+            if q in alias.lower():
+                return {**record, "name": name}
+    return None
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # 5. TIER-1 COUNTRY DATABASE
 #    v11.0 schema additions:
 #      - risk_radar:  unchanged 5-dim 0-10 scores (FX_Liquidity is the gate trigger)
@@ -566,8 +774,12 @@ TIER1 = {
         "tco_params": {
             "ICE_Capex":               95000,
             "EV_Capex":                145000,
-            "ICE_Energy_Cost_per_km":  0.42,
-            "EV_Energy_Cost_per_km":   0.11,
+            "ICE_Energy_Cost_per_km":  0.42,   # derived: Diesel_Price_per_L * ICE_Consumption_L_per_100km / 100
+            "EV_Energy_Cost_per_km":   0.11,   # derived: Charging_Tariff_per_kWh * EV_Consumption_kWh_per_100km / 100
+            "Diesel_Price_per_L":          0.74,   # NNPC/PPPRA pump price, USD-equivalent
+            "ICE_Consumption_L_per_100km": 56.8,    # 18-30t HCV class, urban/mixed cycle
+            "Charging_Tariff_per_kWh":     0.12,    # NERC industrial/commercial tariff band, USD-equivalent
+            "EV_Consumption_kWh_per_100km":91.7,    # equivalent-class electric HCV
             "Monthly_km":              8000,
             "Interest_Rate":           0.24,   # 24% annual — NGN lending rate environment
             "ICE_Residual_Pct":        0.40,   # 40% residual at 60mo — mature 2nd-hand diesel market
@@ -647,6 +859,10 @@ TIER1 = {
             "EV_Capex":                168000,
             "ICE_Energy_Cost_per_km":  0.46,
             "EV_Energy_Cost_per_km":   0.09,
+            "Diesel_Price_per_L":          1.18,
+            "ICE_Consumption_L_per_100km": 39.0,
+            "Charging_Tariff_per_kWh":     0.10,    # Eskom Megaflex commercial tariff band, USD-equivalent
+            "EV_Consumption_kWh_per_100km":90.0,
             "Monthly_km":              9500,
             "Interest_Rate":           0.11,   # 11% — SA prime lending environment
             "ICE_Residual_Pct":        0.40,
@@ -728,6 +944,10 @@ TIER1 = {
             "EV_Capex":                139000,
             "ICE_Energy_Cost_per_km":  0.38,
             "EV_Energy_Cost_per_km":   0.10,
+            "Diesel_Price_per_L":          1.34,
+            "ICE_Consumption_L_per_100km": 28.4,
+            "Charging_Tariff_per_kWh":     0.11,    # ONEE moyenne tension commercial band, USD-equivalent
+            "EV_Consumption_kWh_per_100km":90.9,
             "Monthly_km":              7800,
             "Interest_Rate":           0.06,   # 6% — Morocco's stable, low-cost capital
             "ICE_Residual_Pct":        0.42,   # slightly higher — strong EU-aligned 2nd-hand export market
@@ -809,6 +1029,10 @@ TIER1 = {
             "EV_Capex":                132000,
             "ICE_Energy_Cost_per_km":  0.10,
             "EV_Energy_Cost_per_km":   0.07,
+            "Diesel_Price_per_L":          0.20,    # subsidised pump price
+            "ICE_Consumption_L_per_100km": 50.0,
+            "Charging_Tariff_per_kWh":     0.06,    # subsidised commercial/industrial tariff, USD-equivalent
+            "EV_Consumption_kWh_per_100km":116.7,
             "Monthly_km":              7200,
             "Interest_Rate":           0.20,   # 20% — CBE policy rate environment
             "ICE_Residual_Pct":        0.38,   # slightly lower — FX-constrained resale liquidity
@@ -889,6 +1113,10 @@ TIER1 = {
             "EV_Capex":                118000,
             "ICE_Energy_Cost_per_km":  0.39,
             "EV_Energy_Cost_per_km":   0.13,
+            "Diesel_Price_per_L":          1.42,
+            "ICE_Consumption_L_per_100km": 27.5,
+            "Charging_Tariff_per_kWh":     0.14,    # Kenya Power commercial tariff band, USD-equivalent
+            "EV_Consumption_kWh_per_100km":92.9,
             "Monthly_km":              6800,
             "Interest_Rate":           0.16,   # 16% — CBK rate environment
             "ICE_Residual_Pct":        0.40,
@@ -943,6 +1171,10 @@ TIER1 = {
             "EV_Capex":                102000,
             "ICE_Energy_Cost_per_km":  0.0,    # ICE imports banned: no fuel market reference
             "EV_Energy_Cost_per_km":   0.02,
+            "Diesel_Price_per_L":          0.83,    # last available international reference price pre-ban
+            "ICE_Consumption_L_per_100km": 0.0,      # zeroed out — no active diesel CV fuel market to model
+            "Charging_Tariff_per_kWh":     0.025,    # EEPCO industrial tariff, USD-equivalent
+            "EV_Consumption_kWh_per_100km":80.0,
             "Monthly_km":              6200,
             "Interest_Rate":           0.18,   # 18% — NBE policy rate environment
             "ICE_Residual_Pct":        0.35,   # lower — petroleum import ban shrinks the resale pool
@@ -997,6 +1229,10 @@ TIER1 = {
             "EV_Capex":                136000,
             "ICE_Energy_Cost_per_km":  0.07,
             "EV_Energy_Cost_per_km":   0.06,
+            "Diesel_Price_per_L":          0.33,    # subsidised pump price
+            "ICE_Consumption_L_per_100km": 21.2,
+            "Charging_Tariff_per_kWh":     0.065,   # Sonelgaz commercial tariff band, USD-equivalent
+            "EV_Consumption_kWh_per_100km":92.3,
             "Monthly_km":              6500,
             "Interest_Rate":           0.09,   # 9% — Banque d'Algérie environment
             "ICE_Residual_Pct":        0.40,
@@ -1052,6 +1288,10 @@ TIER1 = {
             "EV_Capex":                99000,
             "ICE_Energy_Cost_per_km":  0.32,
             "EV_Energy_Cost_per_km":   0.08,
+            "Diesel_Price_per_L":          0.92,
+            "ICE_Consumption_L_per_100km": 34.8,
+            "Charging_Tariff_per_kWh":     0.09,    # STEG commercial/industrial tariff band, USD-equivalent
+            "EV_Consumption_kWh_per_100km":88.9,
             "Monthly_km":              6000,
             "Interest_Rate":           0.08,   # 8% — BCT policy rate environment
             "ICE_Residual_Pct":        0.40,
@@ -1136,7 +1376,11 @@ TIER1 = {
             "ICE_Capex":               80000,
             "EV_Capex":                108000,
             "ICE_Energy_Cost_per_km":  0.40,
-            "EV_Energy_Cost_per_km":   0.0099,
+            "EV_Energy_Cost_per_km":   0.0739,  # corrected to heavy-truck-consistent consumption (was 0.0099, LCV-derived)
+            "Diesel_Price_per_L":          1.143,   # RWF 1,600/L ÷ 1,400 RWF/USD
+            "ICE_Consumption_L_per_100km": 35.0,
+            "Charging_Tariff_per_kWh":     0.0821,  # RURA e-mobility tariff: RWF 115/kWh ÷ 1,400 RWF/USD
+            "EV_Consumption_kWh_per_100km":90.0,    # standardised to heavy-truck class, consistent with other 8 markets
             "Monthly_km":              6700,
             "Interest_Rate":           0.13,   # 13% — NBR policy rate environment
             "ICE_Residual_Pct":        0.40,
@@ -1569,37 +1813,55 @@ def gen_rw_ev_adoption():
 #     Risk Radar, Gate Index
 # ══════════════════════════════════════════════════════════════════════════════
 @st.cache_data
-def gen_tco_60month_df(country: str) -> pd.DataFrame:
+def gen_tco_60month_df(
+    country: str,
+    diesel_price_override: float = None,
+    charging_tariff_override: float = None,
+    ice_consumption_override: float = None,
+    ev_consumption_override: float = None,
+    monthly_km_override: float = None,
+) -> pd.DataFrame:
     """
     60-month (5-year) cumulative TCO comparison: ICE vs EV.
+
+    v12.0 upgrade: energy cost is no longer a single fixed per-km number.
+    It is now derived live from four independent factors —
+        ICE OPEX = Monthly_km * Diesel_Price_per_L * ICE_Consumption_L_per_100km / 100
+        EV  OPEX = Monthly_km * Charging_Tariff_per_kWh * EV_Consumption_kWh_per_100km / 100
+    — so that a sales rep can drag the Diesel Price slider and the Commercial
+    Charging Tariff slider independently and watch the break-even point move
+    in real time. Any *_override argument, if provided, replaces the
+    country's default tco_params value for that one factor only; all other
+    factors keep their dictionary defaults. This is what makes the sandbox
+    interactive without requiring a parallel "live" dict for every country.
 
     Three cost layers are modelled, in the order a CFO would actually
     underwrite this deal:
       1. Capex, financed at the country's Interest_Rate (straight-line
          amortisation over 60 months, interest accrued on the declining
          outstanding balance).
-      2. Cumulative energy cost (diesel litres vs kWh at local pricing).
+      2. Cumulative energy cost (diesel litres vs kWh at the live, possibly
+         slider-overridden, local pricing).
       3. Residual value penalty: at month 60, the vehicle is assumed sold
          into the local 2nd-hand market. ICE_Residual_Pct / EV_Residual_Pct
-         (set per-country in tco_params) determine what fraction of the
-         ORIGINAL CAPEX is recovered as a cash inflow. This inflow is
-         subtracted from cumulative cost at month 60 — modelled as a
-         single step-down, since resale is a discrete liquidity event,
-         not a gradual one.
-
-    This is the CFO-grade refinement requested: financing cost makes EV
-    look worse in high-rate markets; the residual penalty makes EV look
-    worse again at exit, since used EV markets are thinner and battery
-    degradation discounts resale value harder than for diesel. Both
-    effects are real and both are now in the model — no rosy-EV bias.
+         determine what fraction of the ORIGINAL CAPEX is recovered as a
+         cash inflow, subtracted from cumulative cost at month 60 as a
+         discrete liquidity event.
     """
     p = TIER1[country]["tco_params"]
     months = np.arange(0, 61)
     ice_capex = p["ICE_Capex"]
     ev_capex  = p["EV_Capex"]
-    ice_per_km = p["ICE_Energy_Cost_per_km"]
-    ev_per_km  = p["EV_Energy_Cost_per_km"]
-    km_per_month = p["Monthly_km"]
+
+    diesel_price     = diesel_price_override     if diesel_price_override     is not None else p["Diesel_Price_per_L"]
+    charging_tariff  = charging_tariff_override  if charging_tariff_override  is not None else p["Charging_Tariff_per_kWh"]
+    ice_consumption  = ice_consumption_override  if ice_consumption_override  is not None else p["ICE_Consumption_L_per_100km"]
+    ev_consumption   = ev_consumption_override   if ev_consumption_override   is not None else p["EV_Consumption_kWh_per_100km"]
+    km_per_month     = monthly_km_override       if monthly_km_override       is not None else p["Monthly_km"]
+
+    ice_per_km = diesel_price * ice_consumption / 100
+    ev_per_km  = charging_tariff * ev_consumption / 100
+
     annual_rate = p.get("Interest_Rate", 0.0)
     monthly_rate = annual_rate / 12
     ice_residual_pct = p.get("ICE_Residual_Pct", 0.40)
@@ -1621,9 +1883,6 @@ def gen_tco_60month_df(country: str) -> pd.DataFrame:
         gross_cost = capex + np.array(interest_series) + energy_series
 
         # Residual value penalty: subtract resale proceeds at month 60 only.
-        # Modelled as a step function — before month 60 the asset is still
-        # in service and has no realised cash inflow; at month 60 it is
-        # liquidated and the residual value reduces net cumulative cost.
         residual_value = capex * residual_pct
         net_cost = gross_cost.copy()
         net_cost[-1] = net_cost[-1] - residual_value
@@ -1637,27 +1896,44 @@ def gen_tco_60month_df(country: str) -> pd.DataFrame:
         "ICE_Cumulative_Cost": ice_cumulative,
         "EV_Cumulative_Cost":  ev_cumulative,
     })
-    # Stash residual figures as DataFrame attrs for downstream chart/caption use
     df.attrs["ice_residual_value"] = ice_residual_value
     df.attrs["ev_residual_value"]  = ev_residual_value
     df.attrs["ice_residual_pct"]   = ice_residual_pct
     df.attrs["ev_residual_pct"]    = ev_residual_pct
+    df.attrs["ice_per_km"]         = ice_per_km
+    df.attrs["ev_per_km"]          = ev_per_km
+    df.attrs["diesel_price"]       = diesel_price
+    df.attrs["charging_tariff"]    = charging_tariff
     return df
 
 
-def calc_tco_breakeven(country: str):
+def calc_tco_breakeven(
+    country: str,
+    diesel_price_override: float = None,
+    charging_tariff_override: float = None,
+    ice_consumption_override: float = None,
+    ev_consumption_override: float = None,
+    monthly_km_override: float = None,
+):
     """
     Returns (breakeven_month, breakeven_cost) or (None, None) if EV never
-    reaches cost parity with ICE within the 60-month horizon.
+    reaches cost parity with ICE within the 60-month horizon. Accepts the
+    same slider overrides as gen_tco_60month_df so the break-even badge
+    updates in lockstep with the chart.
 
     Handles three cases:
-      1. EV starts more expensive and crosses below ICE within 60mo
-         (the crossing may occur either from ongoing energy savings, or
-         as a step-change at month 60 when the residual penalty hits).
+      1. EV starts more expensive and crosses below ICE within 60mo.
       2. EV starts at or below ICE cost from Month 0.
       3. EV never catches up within 60 months -> (None, None).
     """
-    df = gen_tco_60month_df(country)
+    df = gen_tco_60month_df(
+        country,
+        diesel_price_override=diesel_price_override,
+        charging_tariff_override=charging_tariff_override,
+        ice_consumption_override=ice_consumption_override,
+        ev_consumption_override=ev_consumption_override,
+        monthly_km_override=monthly_km_override,
+    )
     diff = df["EV_Cumulative_Cost"] - df["ICE_Cumulative_Cost"]
 
     if diff.iloc[0] <= 0:
@@ -1783,29 +2059,57 @@ def chart_segment_apps_heatmap(df: pd.DataFrame) -> go.Figure:
     })
 
 
-def chart_tco_breakeven(country: str) -> go.Figure:
+def chart_tco_breakeven(
+    country: str,
+    diesel_price_override: float = None,
+    charging_tariff_override: float = None,
+    ice_consumption_override: float = None,
+    ev_consumption_override: float = None,
+    monthly_km_override: float = None,
+) -> go.Figure:
     """
     60-month (5-year) cumulative TCO comparison with financing cost and
     residual value penalty included. The break-even crossing is marked
     with a dotted vertical line + star marker, and the month-60 residual
     value step-down is separately annotated so the CFO can see exactly
     where in the curve the resale liquidity event lands.
+
+    v12.0: accepts live slider overrides (diesel price, charging tariff,
+    consumption rates, monthly km) so the chart redraws in real time as
+    a sales rep drags the sandbox controls — this is the core deliverable
+    of the TCO Engine Upgrade.
     """
-    df = gen_tco_60month_df(country)
-    breakeven_month, breakeven_cost = calc_tco_breakeven(country)
+    df = gen_tco_60month_df(
+        country,
+        diesel_price_override=diesel_price_override,
+        charging_tariff_override=charging_tariff_override,
+        ice_consumption_override=ice_consumption_override,
+        ev_consumption_override=ev_consumption_override,
+        monthly_km_override=monthly_km_override,
+    )
+    breakeven_month, breakeven_cost = calc_tco_breakeven(
+        country,
+        diesel_price_override=diesel_price_override,
+        charging_tariff_override=charging_tariff_override,
+        ice_consumption_override=ice_consumption_override,
+        ev_consumption_override=ev_consumption_override,
+        monthly_km_override=monthly_km_override,
+    )
     ice_resid = df.attrs.get("ice_residual_value", 0)
     ev_resid  = df.attrs.get("ev_residual_value", 0)
+    diesel_price_live    = df.attrs.get("diesel_price", 0)
+    charging_tariff_live = df.attrs.get("charging_tariff", 0)
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=df["Month"], y=df["ICE_Cumulative_Cost"],
-        name="ICE — Cumulative TCO (incl. financing & residual)",
+        name=f"ICE — Cumulative TCO (diesel ${diesel_price_live:.2f}/L)",
         mode="lines", line=dict(color="#21325B", width=2.5),
         hovertemplate="<b>Month %{x}</b><br>ICE Cumulative: <b>$%{y:,.0f}</b><extra></extra>",
     ))
     fig.add_trace(go.Scatter(
         x=df["Month"], y=df["EV_Cumulative_Cost"],
-        name="EV — Cumulative TCO (incl. financing & residual)",
+        name=f"EV — Cumulative TCO (charging ${charging_tariff_live:.3f}/kWh)",
         mode="lines", line=dict(color="#D04A02", width=2.5),
         hovertemplate="<b>Month %{x}</b><br>EV Cumulative: <b>$%{y:,.0f}</b><extra></extra>",
     ))
@@ -2316,21 +2620,107 @@ def _render_market_risk_tab(country: str, cdata: dict):
         )
     with tco_col:
         p = cdata["tco_params"]
-        _chdr("60-Month TCO Break-even", "ICE vs. EV Cumulative Cost (incl. financing & residual)",
+        _chdr("60-Month TCO Break-even Sandbox", "ICE vs. EV Cumulative Cost (incl. financing & residual)",
               f"Capex ICE ${p['ICE_Capex']:,.0f} vs EV ${p['EV_Capex']:,.0f} · "
-              f"financed at {p['Interest_Rate']*100:.0f}% p.a. · {p['Monthly_km']:,} km/month · "
+              f"financed at {p['Interest_Rate']*100:.0f}% p.a. · "
               f"5-yr residual: ICE {p['ICE_Residual_Pct']:.0%} / EV {p['EV_Residual_Pct']:.0%}",
               p["source_name"], p["source_url"])
-        st.plotly_chart(chart_tco_breakeven(country), use_container_width=True,
-                        config=PLOTLY_CFG, key=f"{country}_tco")
-        breakeven_month, _ = calc_tco_breakeven(country)
+
+        # ── Interactive TCO sandbox sliders (v12.0 core deliverable) ────────
+        st.markdown(
+            '<div style="font-size:.72rem;font-weight:700;color:#5A6070;'
+            'text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;">'
+            '🎛️ Live Sandbox — drag to re-price the deal in real time</div>',
+            unsafe_allow_html=True
+        )
+        sld_l, sld_r = st.columns(2)
+        with sld_l:
+            diesel_price_live = st.slider(
+                "⛽ Diesel Price (USD/L)",
+                min_value=0.05, max_value=2.50,
+                value=float(p["Diesel_Price_per_L"]), step=0.01,
+                key=f"{country}_diesel_slider",
+                help="Local pump price for diesel, USD-equivalent. Drag to model fuel subsidy "
+                     "removal, price spikes, or regional variance.",
+            )
+        with sld_r:
+            charging_tariff_live = st.slider(
+                "🔌 Commercial Charging Tariff (USD/kWh)",
+                min_value=0.01, max_value=0.40,
+                value=float(p["Charging_Tariff_per_kWh"]), step=0.005,
+                key=f"{country}_charge_slider",
+                help="Local commercial/industrial electricity tariff for depot fleet charging, "
+                     "USD-equivalent. Drag to model grid tariff changes or dedicated e-mobility rates.",
+            )
+        with st.expander("⚙️ Advanced — consumption & utilisation overrides", expanded=False):
+            adv_l, adv_r = st.columns(2)
+            with adv_l:
+                ice_consumption_live = st.slider(
+                    "ICE consumption (L/100km)", min_value=10.0, max_value=80.0,
+                    value=float(p["ICE_Consumption_L_per_100km"]), step=0.5,
+                    key=f"{country}_ice_cons_slider",
+                )
+                monthly_km_live = st.slider(
+                    "Monthly utilisation (km/month)", min_value=2000, max_value=15000,
+                    value=int(p["Monthly_km"]), step=250,
+                    key=f"{country}_km_slider",
+                )
+            with adv_r:
+                ev_consumption_live = st.slider(
+                    "EV consumption (kWh/100km)", min_value=40.0, max_value=160.0,
+                    value=float(p["EV_Consumption_kWh_per_100km"]), step=1.0,
+                    key=f"{country}_ev_cons_slider",
+                )
+
+        st.plotly_chart(
+            chart_tco_breakeven(
+                country,
+                diesel_price_override=diesel_price_live,
+                charging_tariff_override=charging_tariff_live,
+                ice_consumption_override=ice_consumption_live,
+                ev_consumption_override=ev_consumption_live,
+                monthly_km_override=monthly_km_live,
+            ),
+            use_container_width=True, config=PLOTLY_CFG, key=f"{country}_tco"
+        )
+        breakeven_month, _ = calc_tco_breakeven(
+            country,
+            diesel_price_override=diesel_price_live,
+            charging_tariff_override=charging_tariff_live,
+            ice_consumption_override=ice_consumption_live,
+            ev_consumption_override=ev_consumption_live,
+            monthly_km_override=monthly_km_live,
+        )
         be_text = f"Month {breakeven_month:.1f} ({breakeven_month/12:.1f} yrs)" if breakeven_month is not None else "Not reached within 60 months"
-        st.caption(f"Break-even: **{be_text}** · Financing rate: {p['Interest_Rate']*100:.0f}% p.a.")
+        ice_per_km_live = diesel_price_live * ice_consumption_live / 100
+        ev_per_km_live  = charging_tariff_live * ev_consumption_live / 100
+        st.caption(
+            f"Break-even: **{be_text}** · ICE energy: ${ice_per_km_live:.3f}/km · "
+            f"EV energy: ${ev_per_km_live:.3f}/km · "
+            f"Energy delta: ${ice_per_km_live - ev_per_km_live:.3f}/km in EV's favour"
+            if ice_per_km_live >= ev_per_km_live else
+            f"Break-even: **{be_text}** · ICE energy: ${ice_per_km_live:.3f}/km · "
+            f"EV energy: ${ev_per_km_live:.3f}/km · "
+            f"⚠ EV energy is now MORE expensive than ICE at these slider settings"
+        )
         st.caption(
             "📌 TCO 测算已包含当地高息融资成本及二手车残值惩罚 / "
             "TCO modelling includes local high-interest financing cost and "
             "second-hand residual value penalty."
         )
+        # Stash live sandbox state on session_state so the GTM Playbook tab's
+        # one-click Pitch Memo generator (Tab 3) can pull the exact numbers
+        # the sales rep just modelled, without recomputing independently.
+        st.session_state[f"_tco_live_{country}"] = {
+            "breakeven_month": breakeven_month,
+            "diesel_price": diesel_price_live,
+            "charging_tariff": charging_tariff_live,
+            "ice_per_km": ice_per_km_live,
+            "ev_per_km": ev_per_km_live,
+            "monthly_km": monthly_km_live,
+            "ice_capex": p["ICE_Capex"],
+            "ev_capex": p["EV_Capex"],
+        }
 
     _level_hdr(3, "Market Depth · 市场深度", "Brand competitive set and country-specific structural story")
 
@@ -2419,23 +2809,250 @@ def _render_due_diligence_tab(country: str, cdata: dict):
     render_strategic_action(cdata)
 
 
+def _render_company_card(record: dict, country: str, cdata: dict):
+    """
+    Renders a single matched COMPANY_INTELLIGENCE_DB record as a 5-panel
+    dossier (Overview / Footprint / Fleet / Green Initiatives / Pitch Angle)
+    inside an expander, followed by the one-click Pitch Memo generator that
+    blends this company's intelligence with whatever the sales rep just
+    modelled on the live TCO sandbox in Tab 1.
+    """
+    with st.expander(f"{record['flag']} {record['name']} — Full Commercial Dossier", expanded=True):
+        st.markdown(f"""
+<div class="gtm-card" style="margin-bottom:14px;">
+    <div class="gtm-card-hdr product">
+        <div class="gtm-card-icon">🏢</div>
+        <div>
+            <div class="gtm-card-title">{record['name']}</div>
+            <div class="gtm-card-subtitle">{record['flag']} {record['country']} · Enterprise Overview</div>
+        </div>
+    </div>
+    <div class="gtm-card-body">{record['Overview']}</div>
+</div>
+""", unsafe_allow_html=True)
+
+        d1, d2 = st.columns(2, gap="medium")
+        with d1:
+            st.markdown(f"""
+<div class="gtm-card">
+    <div class="gtm-card-hdr supply">
+        <div class="gtm-card-icon">🗺️</div>
+        <div>
+            <div class="gtm-card-title">Business Footprint</div>
+            <div class="gtm-card-subtitle">核心业务版图与物流干线</div>
+        </div>
+    </div>
+    <div class="gtm-card-body">{record['Business_Footprint']}</div>
+</div>
+""", unsafe_allow_html=True)
+        with d2:
+            st.markdown(f"""
+<div class="gtm-card">
+    <div class="gtm-card-hdr supply">
+        <div class="gtm-card-icon">🚛</div>
+        <div>
+            <div class="gtm-card-title">Estimated Fleet Size</div>
+            <div class="gtm-card-subtitle">预估商用车队规模</div>
+        </div>
+    </div>
+    <div class="gtm-card-body">{record['Fleet_Size_Est']}</div>
+</div>
+""", unsafe_allow_html=True)
+
+        d3, d4 = st.columns(2, gap="medium")
+        with d3:
+            st.markdown(f"""
+<div class="gtm-card">
+    <div class="gtm-card-hdr persona">
+        <div class="gtm-card-icon">🌱</div>
+        <div>
+            <div class="gtm-card-title">Green Initiatives / Pain Points</div>
+            <div class="gtm-card-subtitle">ESG 目标或绿电痛点</div>
+        </div>
+    </div>
+    <div class="gtm-card-body">{record['Green_Initiatives']}</div>
+</div>
+""", unsafe_allow_html=True)
+        with d4:
+            st.markdown(f"""
+<div class="gtm-card">
+    <div class="gtm-card-hdr persona">
+        <div class="gtm-card-icon">🗣️</div>
+        <div>
+            <div class="gtm-card-title">Strategic Pitch Angle</div>
+            <div class="gtm-card-subtitle">专属销售破冰话术</div>
+        </div>
+    </div>
+    <div class="gtm-card-body">{record['Strategic_Pitch_Angle']}</div>
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown(
+            '<div style="font-size:.78rem;font-weight:700;color:#D04A02;'
+            'text-transform:uppercase;letter-spacing:.5px;">'
+            '✉️ One-Click Pitch Memo Generator</div>',
+            unsafe_allow_html=True
+        )
+        st.caption(
+            "Blends this account's dossier with the live TCO sandbox numbers from Tab 1 "
+            "(visit Tab 1 first and adjust the sliders, then return here) into a ready-to-send "
+            "bilingual email / WhatsApp memo."
+        )
+        if st.button(f"🚀 Generate Pitch Memo for {record['name']}",
+                    key=f"gen_memo_{country}_{record['name']}", use_container_width=True):
+            memo_text = _build_pitch_memo(record, country, cdata)
+            st.session_state[f"_pitch_memo_{country}"] = memo_text
+
+        memo = st.session_state.get(f"_pitch_memo_{country}")
+        if memo:
+            st.text_area(
+                "📋 Pitch Memo (copy and send)", value=memo, height=420,
+                key=f"memo_display_{country}_{record['name']}",
+            )
+
+
+def _build_pitch_memo(record: dict, country: str, cdata: dict) -> str:
+    """
+    Generates a bilingual (EN/CN) sales memo combining:
+      - The matched company's dossier (footprint, fleet size, green angle, pitch hook)
+      - The live TCO sandbox numbers from Tab 1, if the rep has run the sliders
+        for this country (pulled from st.session_state); falls back to the
+        country's default tco_params if the sandbox has not been touched yet.
+    """
+    live = st.session_state.get(f"_tco_live_{country}")
+    p = cdata["tco_params"]
+
+    if live:
+        breakeven_month = live["breakeven_month"]
+        diesel_price = live["diesel_price"]
+        charging_tariff = live["charging_tariff"]
+        ice_per_km = live["ice_per_km"]
+        ev_per_km = live["ev_per_km"]
+        monthly_km = live["monthly_km"]
+        sandbox_note_en = "(live sandbox figures from Tab 1)"
+        sandbox_note_cn = "（来自 Tab 1 实时沙盘测算）"
+    else:
+        breakeven_month, _ = calc_tco_breakeven(country)
+        diesel_price = p["Diesel_Price_per_L"]
+        charging_tariff = p["Charging_Tariff_per_kWh"]
+        ice_per_km = p["ICE_Energy_Cost_per_km"]
+        ev_per_km = p["EV_Energy_Cost_per_km"]
+        monthly_km = p["Monthly_km"]
+        sandbox_note_en = "(default market parameters — visit Tab 1 to model a custom scenario)"
+        sandbox_note_cn = "（默认市场参数 — 前往 Tab 1 可自定义沙盘测算）"
+
+    be_str = f"Month {breakeven_month:.1f} (~{breakeven_month/12:.1f} years)" if breakeven_month is not None else "beyond the 60-month horizon at current pricing"
+    be_str_cn = f"第 {breakeven_month:.1f} 个月（约 {breakeven_month/12:.1f} 年）" if breakeven_month is not None else "超出60个月测算窗口"
+    monthly_saving = (ice_per_km - ev_per_km) * monthly_km
+    annual_saving = monthly_saving * 12
+
+    memo = f"""SUBJECT / 主题: Electrification Opportunity Brief for {record['name']} — {country}
+致 {record['name']} 关于{country}市场商用车电动化机遇简报
+
+──────────────────────────────────────────────
+EN — DRAFT EMAIL / WHATSAPP MEMO
+──────────────────────────────────────────────
+Dear [Contact Name],
+
+Following up on our review of {record['name']}'s {country} operations, I wanted to share a
+specific cost model based on your fleet profile.
+
+Account context:
+- {record['Business_Footprint'][:220]}...
+- Estimated fleet exposure: {record['Fleet_Size_Est'][:160]}...
+
+The numbers {sandbox_note_en}:
+- Diesel price assumed: ${diesel_price:.2f}/L
+- Commercial charging tariff assumed: ${charging_tariff:.3f}/kWh
+- ICE energy cost: ${ice_per_km:.3f}/km vs. EV energy cost: ${ev_per_km:.3f}/km
+- At {monthly_km:,.0f} km/month utilisation, this is an estimated
+  ${monthly_saving:,.0f}/month (${annual_saving:,.0f}/year) energy cost saving per vehicle.
+- Modelled TCO break-even (financing + residual value included): {be_str}.
+
+Strategic angle for {record['name']} specifically:
+{record['Strategic_Pitch_Angle']}
+
+I'd welcome 30 minutes to walk through the full fleet-level model and discuss a pilot scope.
+
+Best regards,
+[Your Name]
+
+──────────────────────────────────────────────
+中文 — 邮件/WhatsApp 备忘录草稿
+──────────────────────────────────────────────
+尊敬的 [联系人姓名]：
+
+我们梳理了 {record['name']} 在{country}市场的运营情况，现分享一份基于贵司车队特点的专属测算模型。
+
+客户背景：
+- {record['Business_Footprint'][:220]}...
+- 预估车队规模：{record['Fleet_Size_Est'][:160]}...
+
+测算数据{sandbox_note_cn}：
+- 假设柴油价格：${diesel_price:.2f}/升
+- 假设商用充电电价：${charging_tariff:.3f}/kWh
+- 柴油车每公里能耗成本：${ice_per_km:.3f} vs 纯电车每公里能耗成本：${ev_per_km:.3f}
+- 按月行驶 {monthly_km:,.0f} 公里计算，预估每辆车每月可节省
+  ${monthly_saving:,.0f}（每年约 ${annual_saving:,.0f}）能耗成本。
+- TCO回本周期（已含融资成本及残值惩罚）：{be_str_cn}。
+
+针对 {record['name']} 的专属切入角度：
+{record['Strategic_Pitch_Angle']}
+
+期待安排30分钟深入交流完整车队级测算模型及试点方案。
+
+此致
+[您的姓名]
+"""
+    return memo
+
+
 def _render_gtm_playbook_tab(country: str, cdata: dict):
     """
     Tab 3 content: 🚀 GTM Playbook (一国一策战术板).
-    Renders cdata['gtm_playbook'] (product_matrix / supply_chain_mode /
-    target_persona) as three mission-card columns. For the 3 Tier 1
-    markets that do not yet have a playbook authored (Kenya, Ethiopia,
-    Algeria), this renders a clear "not yet available" notice instead
-    of crashing — the dashboard must never break on missing data.
-    """
-    gtm = cdata.get("gtm_playbook")
 
+    v12.0: now opens with the Key Account Intelligence Terminal — a free-text
+    search box against COMPANY_INTELLIGENCE_DB, replacing the deprecated
+    checkbox qualification funnel entirely. A match renders a full 5-panel
+    dossier + one-click bilingual Pitch Memo generator; a miss renders the
+    'Target not in Tier-1 DB' fallback. Below that, the existing 3-card
+    product/supply-chain/persona playbook (or its 'not yet authored'
+    fallback for Kenya/Ethiopia/Algeria) renders unchanged.
+    """
     st.markdown(f"""
 <div class="gtm-mission-banner">
     <div class="gtm-mission-title">🚀 {country} — GTM Tactical Playbook</div>
     <div class="gtm-mission-sub">一国一策战术板 · Mission brief for frontline sales &amp; channel teams</div>
 </div>
 """, unsafe_allow_html=True)
+
+    # ── Key Account Intelligence Terminal ─────────────────────────────────────
+    _sdiv("🎯 Target Account Search · 目标客户情报穿透",
+          "Search any Tier-1 African corporate account for a full commercial dossier")
+    search_query = st.text_input(
+        "🎯 目标客户情报穿透 (Target Account Search)",
+        placeholder="e.g. Dangote, OCP, Imperial Logistics, SNTL...",
+        key=f"company_search_{country}",
+    )
+
+    if search_query:
+        match = search_company_intelligence(search_query)
+        if match:
+            _render_company_card(match, country, cdata)
+        else:
+            st.info(
+                f"**Target not in Tier-1 DB. Proceed with standard KYC.**\n\n"
+                f"No commercial dossier found for \"{search_query}\" in the Key Account "
+                f"Intelligence Database. Currently covered accounts: "
+                f"{', '.join(COMPANY_INTELLIGENCE_DB.keys())}. "
+                f"For all other prospects, follow the standard fleet-procurement KYC process.",
+                icon="🔍"
+            )
+        st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── Existing 3-card country-level playbook ────────────────────────────────
+    gtm = cdata.get("gtm_playbook")
 
     if not gtm:
         st.warning(
