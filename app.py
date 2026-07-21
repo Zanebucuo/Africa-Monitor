@@ -1665,24 +1665,29 @@ INTERNAL_COMPETITOR_DATA = {
         ),
     },
     "South Africa": {
-        "vehicle_class": "e-LCV / Panel Van (Gauteng仓配轻卡)",
+        "vehicle_class": "e-LCV / Panel Van (Cape Town / Gauteng 仓配轻卡)",
         "competitors": [
-            {"Model":"Our EV — X1 e-Van","Brand_Type":"Ours (我司纯电)","Price_USD":51000,"Length_mm":5200,"Battery_kWh":82.0,"Payload_kg":1550,"Channel_Strategy":"约翰内斯堡直营+1家SKD合作方","Channel_Count":3},
-            {"Model":"Foton iBlue EV","Brand_Type":"Chinese EV Rival","Price_USD":47500,"Length_mm":5100,"Battery_kWh":75.0,"Payload_kg":1450,"Channel_Strategy":"依托FAW南非组装厂配套渠道","Channel_Count":14},
-            {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":49800,"Length_mm":5400,"Battery_kWh":88.0,"Payload_kg":1650,"Channel_Strategy":"SAIC南非独家总代","Channel_Count":11},
-            {"Model":"Isuzu NQR (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":41000,"Length_mm":5985,"Battery_kWh":None,"Payload_kg":3500,"Channel_Strategy":"Isuzu南非本土化生产近80年，网点密度全国第一","Channel_Count":110},
+            {"Model":"SV-L1H1","Brand_Type":"Ours (我司纯电)","Price_USD":53619,"Length_mm":4990,"Battery_kWh":83.0,"Payload_kg":1245,"Channel_Strategy":"开普敦首店（我司南非首家直营门店）","Channel_Count":1},
+            {"Model":"Foton eView Panel Van","Brand_Type":"Chinese EV Rival","Price_USD":38500,"Length_mm":5380,"Battery_kWh":50.23,"Payload_kg":1150,"Channel_Strategy":"依托FAW南非组装厂配套渠道，全国铺开","Channel_Count":60},
+            {"Model":"Maxus eDeliver5","Brand_Type":"Chinese EV Rival","Price_USD":57390,"Length_mm":5400,"Battery_kWh":64.0,"Payload_kg":1190,"Channel_Strategy":"SAIC南非独家总代，仅少量旗舰点","Channel_Count":5},
+            {"Model":"Toyota Quantum Van (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":45232,"Length_mm":5380,"Battery_kWh":None,"Payload_kg":1155,"Channel_Strategy":"Toyota南非本土化生产近80年，网点密度全国第一","Channel_Count":200},
         ],
         "chinese_footprint": (
-            "南非是中资品牌CKD产能布局最深的市场：FAW 与一汽南非合资厂已实现规模化本地组装，"
-            "配合APDP Phase 2本地化返税，成本结构对我司CBU/SKD路线形成结构性压制；SAIC/Maxus 则以独家总代模式"
-            "把控高端EV细分。<b>2026年3月150%抵税新政生效后，未完成本地化的品牌将被系统性淘汰出局</b>——"
-            "我司必须在窗口期内锁定SKD合作方，否则会同时输给中资CKD阵营和欧洲传统油车阵营的双重夹击。"
+            "实测数据显示：Foton eView 定价（$38,500）比我司 SV-L1H1（$53,619）低约 <b>28%</b>，"
+            "且网点数量是我司的 60 倍（60+ vs 1家开普敦首店），是南非渠道渗透最深的中资EV玩家；"
+            "Maxus eDeliver5 走的是反向路线——定价比我司还高 7%，但网点仅5+，走精品旗舰路线，"
+            "证明南非EV市场并非只能靠低价取胜。Toyota Quantum 凭借近80年本土化生产与200+网点，"
+            "在电量/续航故事尚未被验证前仍是运营车队的默认选择。<b>我司真正的威胁不是价格战本身，"
+            "而是 Foton 的渠道密度</b>——应避免与 Foton 拼网点数量，转而对标 Maxus 的精品旗舰打法，"
+            "以开普敦首店为样板店，用整车尺寸(4990mm，全场最短)与83kWh大电量（全场最高）打"
+            "'小车身大电量'的差异化产品故事，锁定城市高频短途配送场景的车队直销客户。"
         ),
     },
     "Morocco": {
         "vehicle_class": "e-LCV / Panel Van (卡萨布兰卡城配)",
         "competitors": [
             {"Model":"Our EV — X1 e-Van","Brand_Type":"Ours (我司纯电)","Price_USD":39500,"Length_mm":5200,"Battery_kWh":78.0,"Payload_kg":1500,"Channel_Strategy":"卡萨布兰卡港区合作方，网点筹建中","Channel_Count":1},
+
             {"Model":"DFSK C35 EV","Brand_Type":"Chinese EV Rival","Price_USD":33800,"Length_mm":4995,"Battery_kWh":58.0,"Payload_kg":1200,"Channel_Strategy":"东风小康与Auto Hall集团深度绑定分销","Channel_Count":22},
             {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":41200,"Length_mm":5400,"Battery_kWh":80.0,"Payload_kg":1600,"Channel_Strategy":"SAIC北非独家进口商","Channel_Count":9},
             {"Model":"Renault Trucks Master (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":36500,"Length_mm":5548,"Battery_kWh":None,"Payload_kg":1700,"Channel_Strategy":"欧盟AA协定2.5%关税，欧洲品牌心智垄断","Channel_Count":38},
