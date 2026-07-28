@@ -1,6 +1,6 @@
 """
 Africa Commercial Vehicle Market Intelligence Platform
-Enterprise BI Engine v14.0 · Executive Governance
+Enterprise BI Engine v11.0
 McKinsey UX Refactor — Narrative-Flow Layout · Zero Text Overlap · Collapsed Intel Feed
 """
 
@@ -170,6 +170,25 @@ button[aria-selected="true"][data-baseweb="tab"]{
 
 /* ── MANDATORY ANTI TEXT-OVERLAP RULE (Task 1) ── */
 .stMarkdown, p, div {word-wrap: break-word; overflow-wrap: break-word;}
+
+/* ── B2B Pricing & Margin Sandbox (Battle 3) ── */
+.b2b-banner{
+    background:linear-gradient(135deg,#21325B 0%,#1A2747 100%);
+    border-radius:var(--radius);padding:16px 22px;margin:18px 0 16px 0;
+    box-shadow:0 4px 16px rgba(33,50,91,.25);
+}
+.b2b-banner-title{font-size:.92rem;font-weight:700;color:#fff;letter-spacing:.3px;}
+.b2b-banner-sub{font-size:.72rem;color:#B8C4DC;margin-top:4px;}
+.b2b-output-card{
+    background:var(--white);border:2px solid var(--border);border-radius:var(--radius);
+    padding:20px 22px;box-shadow:var(--shadow);text-align:center;height:100%;
+}
+.b2b-output-card.fob{border-color:var(--navy);}
+.b2b-output-card.profit-ok{border-color:var(--green);background:linear-gradient(135deg,#F2FBF6 0%,#EAF6F0 100%);}
+.b2b-output-card.profit-bad{border-color:var(--red);background:linear-gradient(135deg,#FDF3F2 0%,#FBEAE8 100%);}
+.b2b-output-label{font-size:.66rem;font-weight:700;letter-spacing:.8px;color:var(--dim);text-transform:uppercase;}
+.b2b-output-value{font-size:2.1rem;font-weight:700;font-family:'Inter';margin-top:6px;}
+.b2b-output-sub{font-size:.68rem;color:var(--dim);margin-top:4px;}
 
 /* ── TCO Sandbox lock banner (Battle 2) ── */
 .tco-lock-banner{
@@ -685,7 +704,7 @@ TIER1 = {
         "action": (
             "FX liquidity is the binding constraint, not tariffs. Structure all contracts in "
             "<b>USD-denominated CKD kits</b> with a Nigerian assembly partner (capturing the 0% CKD "
-            "duty) only as a future localisation reserve; controlled CBU export remains the primary entry route "
+            "duty) rather than CBU export — this avoids NGN devaluation risk on the bulk of the deal "
             "value. Target Dangote and BUA Group fleet renewal cycles directly; Apapa port delays make "
             "CKD-Lagos-assembly strictly faster to deliver than CBU import in 2026."
         ),
@@ -699,7 +718,7 @@ TIER1 = {
                 "diesel tractors remain the only bankable choice for long-haul mining logistics through 2028."
             ),
             "supply_chain_mode": (
-                "**CBU-led controlled entry, invoiced in USD.** CKD may be assessed later after repeatable volume "
+                "**CKD assembly via a Lagos-based JV partner, invoiced in USD.** This is non-negotiable "
                 "given NGN's >60% two-year depreciation — any naira-denominated contract erodes margin "
                 "faster than the 0% duty saves it. Structure milestone payments in USD with a 90-day FX "
                 "forward on the naira-denominated local assembly labour component only. Route CBU spares "
@@ -1580,6 +1599,29 @@ TIER1 = {
 }
 
 # ══════════════════════════════════════════════════════════════════════════════
+# 5B. B2B PRICING SANDBOX — reference duty table (Battle 3)
+#     Standalone lookup dict, deliberately separate from tco_params so the
+#     Pricing & Margin calculator can read a single clean "Import Duty & Tax %"
+#     figure per country without parsing free-text policy strings. Figures are
+#     the headline CBU/BEV duty rate referenced in each country's KPI/policy
+#     block above — illustrative, not a substitute for a customs ruling.
+# ══════════════════════════════════════════════════════════════════════════════
+B2B_IMPORT_DUTY_PCT = {
+    "Nigeria":       0.0,
+    "South Africa":  25.0,
+    "Morocco":       25.0,
+    "Egypt":         40.0,
+    "Kenya":         25.0,
+    "Ethiopia":      0.0,
+    "Algeria":       30.0,
+    "Tunisia":       0.0,
+    "Rwanda":        0.0,
+    "Djibouti":      33.0,
+    "Mauritius":     0.0,
+    "Madagascar":    20.0,
+}
+
+DEFAULT_LOGISTICS_COST_USD = 1500
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 5C. INTERNAL COMPETITIVE INTELLIGENCE DATABASE — Internal Use Only
@@ -2187,320 +2229,6 @@ def gen_rw_ev_adoption():
     })
 
 # ══════════════════════════════════════════════════════════════════════════════
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# EXECUTIVE GOVERNANCE LAYER
-# These fields are merged into every TIER1 country record so all downstream
-# renderers consume one consistent country object.
-# CBU is the group-wide primary export mode. CKD is never the default verdict;
-# it is retained only as a staged risk-mitigation option where conditions justify it.
-# ══════════════════════════════════════════════════════════════════════════════
-GOVERNANCE_DATA = {
-    "Nigeria": {
-        "strategic_guardrails": {
-            "red_lines": [
-                "Do not treat the 0% EV tariff as proof of bankable demand. No unsecured NGN-denominated receivables, open-ended price validity, or shipment without verified hard-currency settlement.",
-                "Do not scale CBU inventory through Apapa before confirming port dwell time, homologation responsibility, spare-parts readiness, and a named fleet off-taker.",
-                "Do not position long-haul electric tractors as a nationwide solution while grid reliability and route charging remain unproven."
-            ],
-            "green_zone": "CBU remains the primary entry route: use controlled batches for USD-funded corporate fleets on closed urban or depot-return routes. Release each batch only against secured payment, service capacity, and verified utilisation."
-        },
-        "market_mechanics": {
-            "market_access": "SON/NAFDAC requirements and Form M discipline matter, but foreign-exchange access is the real gate. A tariff advantage has no value if the buyer cannot obtain USD or clear the vehicle predictably.",
-            "channel_ecosystem": "Demand is concentrated in large industrial groups, distributors and public-linked fleets. Dealer reach matters for service, yet creditworthy anchor fleets—not fragmented retail—should determine market entry.",
-            "value_pool": "The bankable EV pool sits in high-mileage, depot-return FMCG and industrial distribution. Long-haul economics remain exposed to charging availability, road quality and downtime.",
-            "governance_test": "Approve only where payment currency, port plan, off-taker, charging responsibility and aftersales ownership are documented before shipment."
-        },
-        "farizon_alignment": {
-            "portfolio_rule": "Lead with a controlled CBU programme; preserve CKD as a later localisation option after repeatable volume and partner governance are demonstrated.",
-            "models": [
-                {"model": "V6E / V7E", "role": "Urban FMCG and industrial distribution", "mode": "CBU primary", "logic": "Depot-return duty cycle and high utilisation create the clearest operating-cost case."},
-                {"model": "F1E", "role": "Closed industrial and port-adjacent routes", "mode": "CBU pilot", "logic": "Deploy only with captive charging and a USD-funded anchor fleet."},
-                {"model": "CKD readiness", "role": "Volume localisation reserve", "mode": "Future option", "logic": "Evaluate only after stable CBU sell-through, quality governance and hard-currency settlement are proven."}
-            ]
-        }
-    },
-    "South Africa": {
-        "strategic_guardrails": {
-            "red_lines": [
-                "Do not assume South Africa is EV-import friendly: the CBU EV tariff disadvantage versus ICE vehicles must be reflected in every investment case.",
-                "Do not enter on product price alone without a national-grade parts, warranty and technical-support model; established OEM networks define the service benchmark.",
-                "Do not overstate ESG intent as purchase demand. Fleet conversion requires route-level uptime, payload and residual-value evidence."
-            ],
-            "green_zone": "Use CBU as the primary market-validation route for selected LCV and controlled fleet programmes. Scale only where premium fleet customers accept the tariff burden and service coverage is contractually credible."
-        },
-        "market_mechanics": {
-            "market_access": "Homologation and NRCS compliance are demanding but transparent. The larger structural barrier is the tariff architecture and the credibility gap faced by a new brand on residual value and aftersales.",
-            "channel_ecosystem": "The market is institutionally mature and network-led. Large fleet tenders are influenced by leasing companies, body builders, service coverage and total uptime—not solely by the vehicle buyer.",
-            "value_pool": "Urban logistics, municipal and ESG-accountable fleets can support early EV adoption; broad-market expansion requires financing and used-vehicle confidence.",
-            "governance_test": "No national rollout before homologation, parts fill-rate, response-time SLA, residual-value assumptions and priority fleet pipeline pass executive review."
-        },
-        "farizon_alignment": {
-            "portfolio_rule": "CBU is the primary route for proof and brand establishment. CKD/local contract assembly may be assessed later as a tariff and scale response, never as a precondition to entering.",
-            "models": [
-                {"model": "V6E", "role": "Urban courier and service fleets", "mode": "CBU primary", "logic": "Best fit for predictable city routes and return-to-base charging."},
-                {"model": "V7E", "role": "Higher-volume parcel and retail distribution", "mode": "CBU primary", "logic": "Payload and cargo-volume proposition must be validated against mature ICE incumbents."},
-                {"model": "F1E", "role": "Corporate and municipal closed-loop duty", "mode": "Selective CBU", "logic": "Use only where charging and fleet uptime governance are controlled."},
-                {"model": "CKD readiness", "role": "Tariff mitigation at scale", "mode": "Future option", "logic": "Trigger assessment after repeatable demand and a qualified industrial partner are evidenced."}
-            ]
-        }
-    },
-    "Morocco": {
-        "strategic_guardrails": {
-            "red_lines": [
-                "Do not model OCP as a simple direct truck buyer; procurement is distributed across contractors, logistics operators and project ecosystems.",
-                "Do not extrapolate mining-sector visibility into nationwide EV readiness. Route ownership, charging power and contractor economics must be verified separately.",
-                "Do not concede control of pricing, customer data or service standards to a distributor without measurable performance obligations."
-            ],
-            "green_zone": "CBU-led entry is appropriate for demonstrator fleets, urban logistics and contractor-operated closed routes. Use evidence from these deployments to build a broader institutional account strategy."
-        },
-        "market_mechanics": {
-            "market_access": "European-oriented homologation and technical expectations favour disciplined product documentation. Industrial policy is sophisticated, so incentives are tied to local value creation rather than import status alone.",
-            "channel_ecosystem": "The market combines powerful industrial groups, contractor ecosystems and established distributor networks. Access to OCP-linked demand depends on mapping the contractors that actually own and operate vehicles.",
-            "value_pool": "Casablanca urban logistics, industrial estates and selected phosphate-related fixed routes are more actionable than generic national fleet claims.",
-            "governance_test": "Approve deployment only when the real asset owner, tender path, duty cycle, charging site and service operator are identified."
-        },
-        "farizon_alignment": {
-            "portfolio_rule": "Use CBU as the primary route to validate products and accounts. Local assembly is a later industrial-policy option if sustained volume and partner economics justify it.",
-            "models": [
-                {"model": "V6E / V7E", "role": "Casablanca urban and industrial distribution", "mode": "CBU primary", "logic": "Return-to-base routes offer the cleanest entry and reference-building path."},
-                {"model": "F1E", "role": "Contractor-operated industrial corridors", "mode": "CBU project deployment", "logic": "Proceed where route and charging assets are captive and procurement authority is clear."},
-                {"model": "CKD readiness", "role": "Industrial policy response", "mode": "Future option", "logic": "Evaluate after CBU demand reaches a stable, auditable scale."}
-            ]
-        }
-    },
-    "Egypt": {
-        "strategic_guardrails": {
-            "red_lines": [
-                "Absolute prohibition on unsecured CBU credit exposure while hard-currency availability and EGP volatility remain material. No shipment without secured settlement and a defined repatriation path.",
-                "Do not use subsidised diesel or headline EV policy to claim automatic TCO superiority; financing, import approvals and currency conversion can reverse the result.",
-                "Do not let a future CKD discussion become a reason to reject CBU. CKD is a contingency reserve, not the primary entry verdict."
-            ],
-            "green_zone": "CBU remains the primary route for tightly controlled, hard-currency-funded fleets and government-backed or multinational projects. Keep batch size, payment security and inventory exposure under executive limits."
-        },
-        "market_mechanics": {
-            "market_access": "Import registration, foreign-currency allocation and evolving industrial policy create a multi-layer gate. Formal compliance alone does not guarantee the ability to pay for or release vehicles.",
-            "channel_ecosystem": "The market is relationship- and institution-led, with influential assemblers, agents, banks and public bodies. A credible local operator is needed for approvals and service, but counterparty risk must remain visible.",
-            "value_pool": "Closed urban fleets and hard-currency-backed operators are more defensible than broad retail. Subsidised diesel weakens the pure energy-cost argument.",
-            "governance_test": "Board approval requires secured currency, credit protection, import responsibility, inventory ceiling and a service plan; any one missing item stops shipment."
-        },
-        "farizon_alignment": {
-            "portfolio_rule": "CBU is the primary controlled-entry mode. CKD/local contract assembly is a future FX and tariff hedge once demand, partner governance and quality control are proven.",
-            "models": [
-                {"model": "V6E / V7E", "role": "Urban delivery and multinational fleets", "mode": "CBU primary", "logic": "Target hard-currency-funded, depot-return operations with visible ESG mandates."},
-                {"model": "F1E", "role": "Closed industrial or public fleet projects", "mode": "Selective CBU", "logic": "Require sovereign, bank or parent-company payment protection."},
-                {"model": "CKD readiness", "role": "FX/tariff resilience", "mode": "Future option", "logic": "Activate assessment only when volume, partner quality and local-content economics clear formal gates."}
-            ]
-        }
-    },
-    "Kenya": {
-        "strategic_guardrails": {
-            "red_lines": [
-                "Do not confuse Nairobi pilot visibility with national charging readiness or mass-market affordability.",
-                "Do not grant nationwide exclusivity to a dealer without service-capacity milestones and named fleet access.",
-                "Do not finance fragmented SME demand on unsecured local-currency terms."
-            ],
-            "green_zone": "CBU-led deployment should focus on Nairobi and Mombasa anchor fleets with depot charging, measurable route utilisation and a service partner able to support uptime."
-        },
-        "market_mechanics": {
-            "market_access": "Standards and import processes are manageable, but tax interpretation and EV policy execution can change. Compliance evidence and landed-cost assumptions require periodic refresh.",
-            "channel_ecosystem": "Established Japanese brands and dealer networks shape trust. Corporate fleets, leasing firms and logistics operators are the practical gateways for a new EV brand.",
-            "value_pool": "Urban FMCG, courier and selected port logistics routes have the strongest utilisation and charging control.",
-            "governance_test": "Scale only after a named anchor fleet, depot power study, parts stocking plan and dealer service KPI are approved."
-        },
-        "farizon_alignment": {
-            "portfolio_rule": "CBU is the default entry and scaling route; localisation is considered only after repeat fleet demand is established.",
-            "models": [
-                {"model": "V6E", "role": "Nairobi courier and service fleets", "mode": "CBU primary", "logic": "Compact urban duty and return-to-base charging fit the market's early adoption pattern."},
-                {"model": "V7E", "role": "FMCG and retail distribution", "mode": "CBU primary", "logic": "Use high-mileage fleets where energy savings are measurable."},
-                {"model": "F1E", "role": "Mombasa closed logistics routes", "mode": "CBU pilot", "logic": "Proceed only with controlled charging and a contracted operator."}
-            ]
-        }
-    },
-    "Ethiopia": {
-        "strategic_guardrails": {
-            "red_lines": [
-                "Do not equate restrictions on new ICE imports with electrification of the operating fleet; affordability, power availability and aftersales remain binding constraints.",
-                "No unsecured exposure to ETB or assumptions of unrestricted USD conversion.",
-                "Do not deploy vehicles beyond service and charging corridors merely to capture policy headlines."
-            ],
-            "green_zone": "Use CBU for institutionally funded Addis Ababa fleets and controlled corridors where payment currency, charging and maintenance are secured. Treat policy as an access catalyst, not proof of commercial viability."
-        },
-        "market_mechanics": {
-            "market_access": "Policy strongly favours EV registration, but FX allocation and administrative execution determine actual importability. Product compliance must be matched by payment and release capability.",
-            "channel_ecosystem": "Public institutions, large local groups and development-finance-backed programmes dominate bankable demand. Dealer-led retail is secondary until service and finance mature.",
-            "value_pool": "Addis Ababa urban fleets and fixed institutional routes are the near-term pool; nationwide freight electrification is not yet a valid base case.",
-            "governance_test": "Require hard-currency funding, route power confirmation, parts inventory and clear government/import approvals before CBU shipment."
-        },
-        "farizon_alignment": {
-            "portfolio_rule": "CBU is the primary response to the immediate EV import window. Local assembly may be examined later if volumes and industrial policy create a controlled case.",
-            "models": [
-                {"model": "V6E / V7E", "role": "Addis Ababa institutional delivery", "mode": "CBU primary", "logic": "Urban fixed routes align with present charging and service concentration."},
-                {"model": "F1E", "role": "Municipal and large-enterprise closed fleets", "mode": "Selective CBU", "logic": "Use only where funding and depot power are contractually secured."},
-                {"model": "CKD readiness", "role": "Long-term industrial option", "mode": "Future option", "logic": "Do not delay viable CBU projects while localisation conditions remain unproven."}
-            ]
-        }
-    },
-    "Algeria": {
-        "strategic_guardrails": {
-            "red_lines": [
-                "Do not rely on an import-only volume thesis where licensing and industrial-policy changes can abruptly constrain CBU quotas.",
-                "Do not commit capital to a local partner without governance rights, quality accountability and auditable localisation economics.",
-                "Do not frame CKD as mandatory from day one; controlled CBU entry remains the preferred proof mechanism whenever licences permit."
-            ],
-            "green_zone": "Pursue CBU projects selectively under confirmed import permissions and institutional demand. Maintain a staged localisation file as a contingency, not as a substitute for commercial validation."
-        },
-        "market_mechanics": {
-            "market_access": "Administrative quotas, homologation and industrial-policy objectives dominate access. Regulatory timing can matter more than underlying demand.",
-            "channel_ecosystem": "The market is concentrated around licensed importers, industrial partners and public-linked buyers. Partner political and execution capability require separate assessment.",
-            "value_pool": "Institutional fleets, utilities and controlled industrial applications are more governable than speculative dealer inventory.",
-            "governance_test": "No shipment or localisation commitment without written import authority, payment security, service responsibility and partner-control provisions."
-        },
-        "farizon_alignment": {
-            "portfolio_rule": "CBU remains the primary controlled-entry route when legally available. CKD is a later regulatory-risk option subject to volume and partner-quality gates.",
-            "models": [
-                {"model": "V7E", "role": "Urban institutional distribution", "mode": "Selective CBU", "logic": "Use approved fleet projects rather than speculative channel stock."},
-                {"model": "F1E", "role": "Utility and industrial fleets", "mode": "CBU project mode", "logic": "Best suited to closed operations with accountable infrastructure."},
-                {"model": "CKD readiness", "role": "Industrial-policy contingency", "mode": "Future option", "logic": "Advance only through formal investment-gate review."}
-            ]
-        }
-    },
-    "Tunisia": {
-        "strategic_guardrails": {
-            "red_lines": [
-                "Do not ship a configuration without documented UN-ECE conformity and confirmation that all type-approval evidence is accepted locally.",
-                "Do not treat fiscal incentives as sufficient demand; charging, financing and distributor service capability must be proven.",
-                "Do not dilute product specification to chase price if it compromises European-standard compliance or residual-value credibility."
-            ],
-            "green_zone": "Use compliant CBU vehicles as the primary entry route for urban and depot-return fleets. Tunisia should function as a standards-validation market and North African reference case."
-        },
-        "market_mechanics": {
-            "market_access": "UN-ECE-oriented homologation is a high technical gate but creates defensibility once passed. Documentation quality and configuration discipline are non-negotiable.",
-            "channel_ecosystem": "The market is relatively concentrated among established importers and European-aligned brands. Distributor technical competence is more important than nominal outlet count.",
-            "value_pool": "Urban logistics, service fleets and corporate operators benefit most from the policy-TCO gap; long-distance applications remain charging constrained.",
-            "governance_test": "Release only homologated configurations through a technically qualified channel with parts, diagnostics and warranty ownership."
-        },
-        "farizon_alignment": {
-            "portfolio_rule": "CBU is the natural primary mode for a standards-led, moderate-volume market. CKD is not a near-term requirement and should be considered only if scale materially changes.",
-            "models": [
-                {"model": "V6E", "role": "Urban service and last-mile fleets", "mode": "CBU primary", "logic": "Strong fit with depot-return routes and a compliance-led premium proposition."},
-                {"model": "V7E", "role": "Retail and parcel distribution", "mode": "CBU primary", "logic": "Use UN-ECE-compliant specification as a trust and resale-value anchor."},
-                {"model": "F1E", "role": "Closed municipal/industrial duty", "mode": "Selective CBU", "logic": "Deploy only where charging responsibility is explicit."}
-            ]
-        }
-    },
-    "Rwanda": {
-        "strategic_guardrails": {
-            "red_lines": [
-                "Do not mistake regulatory openness and 0% duties for a large addressable volume; market size and public-procurement concentration cap scale.",
-                "Do not build the case on a single government or bus tender. Private fleet proof is required to avoid policy-dependent demand.",
-                "Do not sell dispersed retail EVs without confirmed charging access and service coverage outside Kigali."
-            ],
-            "green_zone": "Use CBU as the primary mode for Kigali fleet references, taking advantage of clear EV policy and explicit GB/T recognition. Keep inventory lean and tie scale to repeat orders."
-        },
-        "market_mechanics": {
-            "market_access": "Certification is comparatively pragmatic and the 2026 charging framework explicitly recognises GB/T, reducing technical uncertainty. Licensing and operator obligations still require local execution.",
-            "channel_ecosystem": "Demand is small and concentrated around government, development organisations, bus operators and a limited group of formal fleets. Direct key-account governance is more effective than a broad dealer push.",
-            "value_pool": "Kigali delivery, hospitality, institutional and scheduled fleet operations offer the clearest fit; national volume remains structurally limited.",
-            "governance_test": "Judge Rwanda on policy reference value and reproducible fleet use cases—not on absolute revenue contribution."
-        },
-        "farizon_alignment": {
-            "portfolio_rule": "CBU is decisively preferred for this low-volume policy showcase. CKD would add complexity without a sufficient scale base.",
-            "models": [
-                {"model": "V6E", "role": "Kigali delivery, hospitality and service fleets", "mode": "CBU primary", "logic": "Compact market, supportive policy and GB/T recognition enable a controlled reference fleet."},
-                {"model": "V7E", "role": "Institutional distribution", "mode": "CBU selective", "logic": "Match deployment to committed depot charging and repeatable routes."},
-                {"model": "F1E", "role": "Public or scheduled fleet demonstration", "mode": "CBU project", "logic": "Treat as a policy and product reference, not a volume forecast."}
-            ]
-        }
-    },
-    "Djibouti": {
-        "strategic_guardrails": {
-            "red_lines": [
-                "Do not evaluate Djibouti on domestic registrations alone; the strategic asset is the Ethiopia trade corridor and port-drainage system.",
-                "Do not deploy electric tractors on uncontrolled long-haul corridor duty before heat, payload, charging and uptime are validated.",
-                "Do not rely on a single port stakeholder without clarifying concession, operator and fleet-ownership boundaries."
-            ],
-            "green_zone": "Use CBU for controlled port and free-zone drayage pilots with captive charging and a named terminal or logistics operator. Scale by corridor productivity evidence."
-        },
-        "market_mechanics": {
-            "market_access": "Formal market size is small, but port concessions and free-zone rules shape access. Technical success depends more on operator permission and site power than national retail regulation.",
-            "channel_ecosystem": "A small number of port, terminal, free-zone and corridor logistics actors control the bankable demand. Direct institutional engagement is essential.",
-            "value_pool": "Short, repetitive port-to-yard and port-to-rail movements create a distinctive electrification case; general domestic distribution does not.",
-            "governance_test": "Require route telemetry, charging-site rights, heat-management validation and operator accountability before fleet expansion."
-        },
-        "farizon_alignment": {
-            "portfolio_rule": "CBU project deployment is the primary route. CKD is economically unjustified at current domestic scale.",
-            "models": [
-                {"model": "F1E", "role": "Port and free-zone drayage", "mode": "CBU pilot/primary", "logic": "Short captive cycles can support high utilisation and central charging."},
-                {"model": "V7E", "role": "Free-zone and urban distribution", "mode": "Selective CBU", "logic": "Secondary opportunity tied to formal logistics operators."}
-            ]
-        }
-    },
-    "Mauritius": {
-        "strategic_guardrails": {
-            "red_lines": [
-                "Do not pursue volume-led inventory in a structurally small market.",
-                "Do not enter through a weak service partner merely because EV policy is favourable; island reputation effects are immediate.",
-                "Do not ignore cyclone resilience, coastal corrosion and charging-site continuity in fleet specifications."
-            ],
-            "green_zone": "Use CBU as the primary and appropriate mode for premium, visible fleet references with disciplined inventory and high service standards."
-        },
-        "market_mechanics": {
-            "market_access": "Import rules are relatively transparent and EV economics benefit from fuel import dependence. Product quality, warranty execution and island-specific durability are the true barriers.",
-            "channel_ecosystem": "The market is compact, relationship-driven and concentrated among established distributors, hospitality groups, logistics operators and public bodies.",
-            "value_pool": "Hospitality, airport, municipal and premium corporate fleets value visibility and decarbonisation alongside operating cost.",
-            "governance_test": "Prioritise reference quality, uptime and brand reputation over unit volume; cap inventory to contracted demand."
-        },
-        "farizon_alignment": {
-            "portfolio_rule": "CBU is the clear primary mode. The market is too small to justify CKD complexity.",
-            "models": [
-                {"model": "V6E", "role": "Hospitality, service and municipal fleets", "mode": "CBU primary", "logic": "Compact routes and visible sustainability value support a premium reference case."},
-                {"model": "V7E", "role": "Airport and formal logistics", "mode": "CBU selective", "logic": "Deploy with corrosion protection and strong uptime support."}
-            ]
-        }
-    },
-    "Madagascar": {
-        "strategic_guardrails": {
-            "red_lines": [
-                "Prohibit dispersed retail EV selling and down-market dealer inventory where grid access, road quality and service reach cannot support the product.",
-                "Do not present EV as a nationwide answer; outside controlled compounds, infrastructure and recovery risk can overwhelm energy savings.",
-                "Do not grant credit or ship specialised vehicles without an anchor operator, service plan and secure payment."
-            ],
-            "green_zone": "CBU remains valid and must not be rejected: focus on rugged, specification-led vehicles for mining, utilities and controlled urban compounds. EV CBU is limited to captive routes with dedicated charging."
-        },
-        "market_mechanics": {
-            "market_access": "Regulatory certification is less demanding than physical operating conditions. Road degradation, grid weakness, parts logistics and recovery time are the real barriers.",
-            "channel_ecosystem": "Formal demand is concentrated among mining companies, utilities, NGOs and a small number of large operators; fragmented retail is high-cost to serve.",
-            "value_pool": "Rugged commercial vehicles for mining and infrastructure are the core pool. Electric LCVs are relevant only inside controlled Antananarivo or industrial compounds.",
-            "governance_test": "No EV deployment without captive charging, route inspection, recovery capability and a named technical operator."
-        },
-        "farizon_alignment": {
-            "portfolio_rule": "CBU remains the primary export mode. Use product segmentation—not a countrywide CBU rejection—to control risk; CKD has no near-term scale rationale.",
-            "models": [
-                {"model": "V6E", "role": "Controlled urban/industrial compound duty", "mode": "Highly selective CBU", "logic": "Only where charging, roads and service are captive."},
-                {"model": "F1E", "role": "Closed mining or utility operations", "mode": "Project-specific CBU", "logic": "Proceed after terrain, payload and energy-infrastructure validation."},
-                {"model": "ICE/rugged portfolio", "role": "Mining and poor-road operations", "mode": "CBU primary", "logic": "Infrastructure reality—not ideology—determines the near-term powertrain mix."}
-            ]
-        }
-    }
-}
-
-for _country_name, _governance_fields in GOVERNANCE_DATA.items():
-    if _country_name not in TIER1:
-        raise KeyError(f"Governance data references unknown country: {_country_name}")
-    TIER1[_country_name].update(_governance_fields)
-
-_missing_governance = [
-    _name for _name, _data in TIER1.items()
-    if not all(_field in _data for _field in (
-        "strategic_guardrails", "market_mechanics", "farizon_alignment"
-    ))
-]
-if _missing_governance:
-    raise ValueError(f"Missing executive governance fields: {_missing_governance}")
-
-
 # 8B. CORE v13.0 GENERATORS — TCO w/ Interest + Residual Value, Segment Apps,
 #     Risk Radar, Gate Index
 #     Battle 2 upgrade: gen_tco_60month_df / calc_tco_breakeven / chart_tco_breakeven
@@ -3159,10 +2887,10 @@ def _kpi_row(cdata):
 # 11. MASTER NARRATIVE-FLOW RENDERER
 #     One function drives all 12 countries top-to-bottom:
 #       Level 1 → KPIs + Risk Radar + Gate Index + FX Alert
-#       Level 2 → Segment Heatmap (L) + immutable macro TCO baseline (R)
+#       Level 2 → Segment Heatmap (L) + TCO Break-even Sandbox (R) — Battle 2
 #       Level 3 → Brand Share (L) + Country-Exclusive Chart (R)
 #       Level 4 → Due Diligence (single column) + Strategic Action box
-#     Tab 3 → Executive Market Mechanics & Guardrails
+#     Tab 3 → GTM Playbook, now led by the B2B Pricing & Margin Sandbox — Battle 3
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _exclusive_chart_nigeria():
@@ -3190,12 +2918,12 @@ def _exclusive_chart_egypt():
     _chdr("Market Context · EOS",
           "Subsidised Diesel Erodes EV Cost Case",
           "At EGP 9.75/L subsidised diesel, the ICE energy cost floor is structurally low — "
-          "CBU remains the controlled entry route; a later KD assessment can mitigate tariff exposure once volume and partner governance are proven.",
+          "the KD tariff route (5% vs 40% CBU) is the only realistic lever, not EV TCO.",
           src[0], src[1])
     st.info(
         "**No standalone chart for this slot.** Egypt's commercial story is the **KD tariff "
-        "context**, reflected in the fixed TCO baseline — subsidised diesel weakens the EV cost case. "
-        "CBU projects therefore require secured payment and controlled fleet use; CKD remains a future hedge.",
+        "waterfall**, already quantified in Level 2's TCO panel — energy subsidy keeps ICE "
+        "structurally cheap to run, so the differentiator is assembly tariff, not fuel cost.",
         icon="ℹ️"
     )
 
@@ -3315,7 +3043,13 @@ EXCLUSIVE_CHART_REGISTRY = {
 
 
 def _render_market_risk_tab(country: str, cdata: dict):
-    """Executive market and risk view with an immutable country baseline TCO."""
+    """
+    Tab 1 content: 市场与风控全景.
+    Level 1 + Level 2 + Level 3. Level 2's TCO sandbox is the Battle 2
+    rebuild: session_state-backed sliders, a 🔒/🔓 lock toggle (default
+    locked = baseline curve only), a 🔄 Reset-to-Default button, and
+    dramatically widened slider ranges across all 8 tunable factors.
+    """
     _level_hdr(1, "Decision Overview · 决策全景", "KPIs, market access gate, and FX risk screen")
     _kpi_row(cdata)
     st.markdown("<br>", unsafe_allow_html=True)
@@ -3326,22 +3060,18 @@ def _render_market_risk_tab(country: str, cdata: dict):
 
     radar_col, gate_col = st.columns([3, 1], gap="large")
     with radar_col:
-        _chdr(
-            "Market Access Radar", f"5-Dimension Operational Risk Profile · {country}",
-            "FX Liquidity · Tariff Advantage · Port Efficiency · Grid Stability · Policy Consistency (0–10)",
-            cdata["sources"]["trade"][0], cdata["sources"]["trade"][1]
-        )
-        st.plotly_chart(
-            chart_risk_radar(gen_risk_radar_df(country), country),
-            use_container_width=True, config=PLOTLY_CFG, key=f"{country}_radar"
-        )
+        _chdr("Market Access Radar", f"5-Dimension Operational Risk Profile — {country}",
+              "FX Liquidity · Tariff Advantage · Port Efficiency · Grid Stability · Policy Consistency (0-10 scale)",
+              cdata["sources"]["trade"][0], cdata["sources"]["trade"][1])
+        st.plotly_chart(chart_risk_radar(gen_risk_radar_df(country), country),
+                        use_container_width=True, config=PLOTLY_CFG, key=f"{country}_radar")
     with gate_col:
         st.markdown(f"""
 <div class="gate-index-card">
     <div class="gate-index-label">Market Access Gate Index</div>
     <div class="gate-index-value" style="color:{gate_color};">{gate_index:.0f}<span style="font-size:1rem;color:#9BA3B2;">/100</span></div>
     <div class="gate-index-label" style="margin-top:6px;color:{gate_color};">
-        {"LOW RISK" if gate_index >= 65 else "MODERATE RISK" if gate_index >= 45 else "HIGH RISK"}
+        {"LOW RISK" if gate_index>=65 else "MODERATE RISK" if gate_index>=45 else "HIGH RISK"}
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -3349,82 +3079,254 @@ def _render_market_risk_tab(country: str, cdata: dict):
 
     if fx_score <= 3:
         st.error(
-            f"**FX LIQUIDITY ALERT — {fx_score:.1f}/10**\n\n"
-            f"Hard-currency access in **{country}** is severely constrained. CBU remains a valid "
-            "primary route, but exposure must be limited through secured settlement, inventory "
-            "caps and explicit repatriation controls."
+            f"🚨 **FATAL RISK ALERT — FX Liquidity Score: {fx_score:.1f}/10**\n\n"
+            f"USD/hard-currency access in **{country}** is severely constrained. Any deal structure "
+            f"that assumes smooth profit repatriation or stable local-currency pricing carries "
+            f"material risk of capital trapping or margin erosion. Structure contracts in "
+            f"USD-indexed terms with FX hedging clauses before proceeding.",
+            icon="🚨"
         )
 
-    _level_hdr(
-        2, "Market Economics · 市场经济性",
-        "Application readiness and the immutable country-level ICE/EV cost baseline"
-    )
+    _level_hdr(2, "Commercial Monetisation · 商业变现", "Where EV wins by application, and when it pays for itself")
     seg_col, tco_col = st.columns(2, gap="large")
     with seg_col:
-        _chdr(
-            "Application Segment Heatmap", "EV Readiness by Use Case",
-            "Urban FMCG · Port Drayage · Long-Haul Mining — volume and readiness",
-            cdata["sources"]["trade"][0], cdata["sources"]["trade"][1]
-        )
-        st.plotly_chart(
-            chart_segment_apps_heatmap(gen_segment_apps_df(country)),
-            use_container_width=True, config=PLOTLY_CFG, key=f"{country}_segheat"
-        )
+        _chdr("Application Segment Heatmap", "EV Readiness by Use Case",
+              "Urban FMCG · Port Drayage · Long-Haul Mining — volume and electrification readiness",
+              cdata["sources"]["trade"][0], cdata["sources"]["trade"][1])
+        st.plotly_chart(chart_segment_apps_heatmap(gen_segment_apps_df(country)),
+                        use_container_width=True, config=PLOTLY_CFG, key=f"{country}_segheat")
         seg_df = gen_segment_apps_df(country)
         st.caption(
-            "Volumes: " + " · ".join(
-                f"{row['Application'].split('(')[0].strip()}: {row['Volume']:,}/yr"
-                for _, row in seg_df.iterrows()
-            )
+            "Volumes: " + " · ".join(f"{r['Application'].split('(')[0].strip()}: {r['Volume']:,}/yr"
+                                     for _, r in seg_df.iterrows())
         )
-
     with tco_col:
         p = cdata["tco_params"]
-        _chdr(
-            "60-Month Market TCO Baseline", "ICE vs. EV Cumulative Cost",
-            f"Fixed country benchmark · ICE ${p['ICE_Capex']:,.0f} vs EV ${p['EV_Capex']:,.0f} · "
-            f"interest {p['Interest_Rate']*100:.0f}% · residual ICE {p['ICE_Residual_Pct']:.0%} / EV {p['EV_Residual_Pct']:.0%}",
-            p["source_name"], p["source_url"]
+        _chdr("60-Month TCO Break-even Sandbox", "ICE vs. EV Cumulative Cost (incl. financing & residual)",
+              f"Capex ICE ${p['ICE_Capex']:,.0f} vs EV ${p['EV_Capex']:,.0f} · "
+              f"financed at {p['Interest_Rate']*100:.0f}% p.a. · "
+              f"5-yr residual: ICE {p['ICE_Residual_Pct']:.0%} / EV {p['EV_Residual_Pct']:.0%}",
+              p["source_name"], p["source_url"])
+
+        # ── Battle 2: 参数默认值 + session_state 初始化 ──────────────────────
+        defaults = {
+            "diesel":   float(p["Diesel_Price_per_L"]),
+            "charge":   float(p["Charging_Tariff_per_kWh"]),
+            "ice_cons": float(p["ICE_Consumption_L_per_100km"]),
+            "ev_cons":  float(p["EV_Consumption_kWh_per_100km"]),
+            "km":       int(p["Monthly_km"]),
+            "interest": round(float(p.get("Interest_Rate", 0.10)) * 100, 1),
+            "ice_res":  round(float(p.get("ICE_Residual_Pct", 0.40)) * 100, 1),
+            "ev_res":   round(float(p.get("EV_Residual_Pct", 0.15)) * 100, 1),
+        }
+        skeys = {name: f"{country}_{name}_slider" for name in defaults}
+        for name, val in defaults.items():
+            st.session_state.setdefault(skeys[name], val)
+
+        lock_key = f"tco_unlocked_{country}"
+        st.session_state.setdefault(lock_key, False)
+
+        lock_l, lock_r = st.columns([3, 2])
+        with lock_l:
+            unlocked = st.toggle(
+                "🔓 解锁参数修改 (Unlock to Edit)" if not st.session_state[lock_key]
+                else "🔒 点击重新锁定 (Click to Re-lock)",
+                key=lock_key,
+                help="默认锁定，仅展示基准曲线，防止前线业务员误触打乱基准数据；"
+                     "解锁后可自由拖动全部滑块进行现场测算。",
+            )
+        with lock_r:
+            if st.button("🔄 一键恢复默认 (Reset to Default)", key=f"tco_reset_{country}",
+                        use_container_width=True):
+                for name, val in defaults.items():
+                    st.session_state[skeys[name]] = val
+                st.rerun()
+
+        locked = not st.session_state[lock_key]
+        banner_cls = "tco-lock-banner" if locked else "tco-lock-banner unlocked"
+        banner_txt = (
+            "🔒 <b>参数已锁定</b> — 当前展示该国基准曲线，防止误触。点击上方开关解锁后方可拖动滑块。 / "
+            "Locked — showing baseline curve only. Toggle above to unlock sliders."
+            if locked else
+            "🔓 <b>参数已解锁</b> — 可自由拖动下方全部滑块进行实时测算，测算完成后建议重新锁定。 / "
+            "Unlocked — drag any slider below to re-price the deal live."
         )
+        st.markdown(f'<div class="{banner_cls}" style="font-size:.74rem;color:#5A6070;">{banner_txt}</div>',
+                    unsafe_allow_html=True)
+
+        if locked:
+            # 锁定状态下强制回写基准值，确保滑块显示与图表口径完全一致
+            for name, val in defaults.items():
+                st.session_state[skeys[name]] = val
+
+        sld_l, sld_r = st.columns(2)
+        with sld_l:
+            diesel_price_live = st.slider(
+                "⛽ Diesel Price (USD/L)",
+                min_value=0.0, max_value=5.0, step=0.01,
+                key=skeys["diesel"], disabled=locked,
+                help="放开至 0–5 USD/L 的极限区间，可模拟补贴取消、价格飙升或跨区域差异。",
+            )
+        with sld_r:
+            charging_tariff_live = st.slider(
+                "🔌 Commercial Charging Tariff (USD/kWh)",
+                min_value=0.0, max_value=1.0, step=0.005,
+                key=skeys["charge"], disabled=locked,
+                help="放开至 0–1 USD/kWh，可模拟电网尖峰电价或专属 e-mobility 优惠电价。",
+            )
+
+        with st.expander("⚙️ Advanced — 消耗 / 里程 / 融资 / 残值 极限扩容", expanded=False):
+            adv_l, adv_r = st.columns(2)
+            with adv_l:
+                ice_consumption_live = st.slider(
+                    "ICE consumption (L/100km)", min_value=0.0, max_value=150.0, step=1.0,
+                    key=skeys["ice_cons"], disabled=locked,
+                )
+                monthly_km_live = st.slider(
+                    "Monthly utilisation (km/month)", min_value=0, max_value=50000, step=100,
+                    key=skeys["km"], disabled=locked,
+                )
+                interest_pct_live = st.slider(
+                    "💰 Financing Interest Rate (%/yr)", min_value=0.0, max_value=50.0, step=1.0,
+                    key=skeys["interest"], disabled=locked,
+                    help="按用户要求放开至 0%–50% 的极限融资利率区间。",
+                )
+            with adv_r:
+                ev_consumption_live = st.slider(
+                    "EV consumption (kWh/100km)", min_value=0.0, max_value=300.0, step=1.0,
+                    key=skeys["ev_cons"], disabled=locked,
+                )
+                ice_resid_pct_live = st.slider(
+                    "ICE Residual Value @ 60mo (%)", min_value=0.0, max_value=100.0, step=1.0,
+                    key=skeys["ice_res"], disabled=locked,
+                )
+                ev_resid_pct_live = st.slider(
+                    "EV Residual Value @ 60mo (%)", min_value=0.0, max_value=100.0, step=1.0,
+                    key=skeys["ev_res"], disabled=locked,
+                )
+
+        interest_rate_live = interest_pct_live / 100
+        ice_residual_live  = ice_resid_pct_live / 100
+        ev_residual_live   = ev_resid_pct_live / 100
+
         st.plotly_chart(
-            chart_tco_breakeven(country),
-            use_container_width=True, config=PLOTLY_CFG, key=f"{country}_tco_baseline"
+            chart_tco_breakeven(
+                country,
+                diesel_price_override=diesel_price_live,
+                charging_tariff_override=charging_tariff_live,
+                ice_consumption_override=ice_consumption_live,
+                ev_consumption_override=ev_consumption_live,
+                monthly_km_override=monthly_km_live,
+                interest_rate_override=interest_rate_live,
+                ice_residual_override=ice_residual_live,
+                ev_residual_override=ev_residual_live,
+            ),
+            use_container_width=True, config=PLOTLY_CFG, key=f"{country}_tco"
         )
-        breakeven_month, _ = calc_tco_breakeven(country)
-        be_text = (
-            f"Month {breakeven_month:.1f} ({breakeven_month/12:.1f} years)"
-            if breakeven_month is not None else "Not reached within 60 months"
+        breakeven_month, _ = calc_tco_breakeven(
+            country,
+            diesel_price_override=diesel_price_live,
+            charging_tariff_override=charging_tariff_live,
+            ice_consumption_override=ice_consumption_live,
+            ev_consumption_override=ev_consumption_live,
+            monthly_km_override=monthly_km_live,
+            interest_rate_override=interest_rate_live,
+            ice_residual_override=ice_residual_live,
+            ev_residual_override=ev_residual_live,
         )
-        ice_per_km = p["Diesel_Price_per_L"] * p["ICE_Consumption_L_per_100km"] / 100
-        ev_per_km = p["Charging_Tariff_per_kWh"] * p["EV_Consumption_kWh_per_100km"] / 100
+        be_text = f"Month {breakeven_month:.1f} ({breakeven_month/12:.1f} yrs)" if breakeven_month is not None else "Not reached within 60 months"
+        ice_per_km_live = diesel_price_live * ice_consumption_live / 100
+        ev_per_km_live  = charging_tariff_live * ev_consumption_live / 100
         st.caption(
-            f"Baseline parity: **{be_text}** · ICE energy ${ice_per_km:.3f}/km · "
-            f"EV energy ${ev_per_km:.3f}/km · fixed management reference; no user overrides."
+            f"Break-even: **{be_text}** · ICE energy: ${ice_per_km_live:.3f}/km · "
+            f"EV energy: ${ev_per_km_live:.3f}/km · "
+            f"Energy delta: ${ice_per_km_live - ev_per_km_live:.3f}/km in EV's favour"
+            if ice_per_km_live >= ev_per_km_live else
+            f"Break-even: **{be_text}** · ICE energy: ${ice_per_km_live:.3f}/km · "
+            f"EV energy: ${ev_per_km_live:.3f}/km · "
+            f"⚠ EV energy is now MORE expensive than ICE at these slider settings"
         )
-        st.info(
-            "This curve is an approved market benchmark, not a customer quotation or sales calculator. "
-            "Assumptions are controlled in the TIER1 country record."
+        st.caption(
+            "📌 TCO 测算已包含当地高息融资成本及二手车残值惩罚，融资利率与残值比例现已加入实时沙盘 / "
+            "TCO modelling includes local financing cost and residual value penalty — both now "
+            "part of the live sandbox above."
         )
+        st.session_state[f"_tco_live_{country}"] = {
+            "breakeven_month": breakeven_month,
+            "diesel_price": diesel_price_live,
+            "charging_tariff": charging_tariff_live,
+            "ice_per_km": ice_per_km_live,
+            "ev_per_km": ev_per_km_live,
+            "monthly_km": monthly_km_live,
+            "interest_rate": interest_rate_live,
+            "ice_capex": p["ICE_Capex"],
+            "ev_capex": p["EV_Capex"],
+        }
 
-    _level_hdr(3, "Country Evidence · 国家证据", "Brand structure and country-specific decision evidence")
-    brand_col, country_col = st.columns(2, gap="large")
-    with brand_col:
-        _chdr(
-            "Competitive Structure", f"{country} Brand Share Proxy",
-            "Directional market structure; validate against current registration/customs data",
-            cdata["sources"]["market"][0], cdata["sources"]["market"][1]
-        )
-        st.plotly_chart(
-            chart_brand(gen_brand_df(country), country),
-            use_container_width=True, config=PLOTLY_CFG, key=f"{country}_brand"
-        )
-    with country_col:
-        exclusive_renderer = EXCLUSIVE_CHART_REGISTRY.get(country)
-        if exclusive_renderer:
-            exclusive_renderer()
-        else:
-            st.info("No country-exclusive evidence panel registered.")
+    _level_hdr(3, "Market Depth · 市场深度", "Brand competitive set and country-specific structural story")
 
+    if country == "South Africa":
+        # South Africa keeps its full 4-chart Stats SA / NAAMSA depth panel —
+        # explicitly preserved at the user's request rather than collapsed
+        # into a single exclusive chart like the other markets.
+        src = cdata["sources"]["trade"]
+        STATSSA = "https://www.statssa.gov.za/publications/P7162/P7162.html"
+        NAAMSA  = "https://naamsa.co.za"
+
+        row1_l, row1_r = st.columns(2, gap="large")
+        with row1_l:
+            _chdr("Competitive Set", f"Brand Market Share — {country}",
+                  "Top 5 brands by annual CV unit sales", src[0], src[1])
+            st.plotly_chart(chart_brand(gen_brand_df(country), country),
+                            use_container_width=True, config=PLOTLY_CFG, key=f"{country}_brand")
+        with row1_r:
+            _chdr("Exclusive · Transnet / NAAMSA",
+                  "Rail Collapse → Road HCV Demand Transfer",
+                  "Rail freight down 46% from 2018 peak; HCV road sales absorb displaced demand",
+                  "Transnet Annual Report",
+                  "https://www.transnet.net/InvestorCentre/Pages/AnnualReports.aspx")
+            st.plotly_chart(chart_za_scissors(), use_container_width=True, config=PLOTLY_CFG, key="za_scissors")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        row2_l, row2_r = st.columns(2, gap="large")
+        with row2_l:
+            _chdr("Exclusive · Stats SA P7162", "Road Freight Revenue by Commodity Category",
+                  "Mining & Quarrying dominates at 35.4% of total freight revenue", "Stats SA — P7162", STATSSA)
+            st.plotly_chart(chart_za_freight_cat(gen_za_freight_category()),
+                            use_container_width=True, config=PLOTLY_CFG, key="za_freight_cat")
+        with row2_r:
+            _chdr("Exclusive · Stats SA P7162", "Payload Volume vs. Freight Income — The Cost Squeeze",
+                  "Diverging trends illustrate per-km cost inflation burden on fleet operators",
+                  "Stats SA — P7162", STATSSA)
+            st.plotly_chart(chart_za_payload_income(gen_za_payload_income()),
+                            use_container_width=True, config=PLOTLY_CFG, key="za_payload_income")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        row3_l, row3_r = st.columns(2, gap="large")
+        with row3_l:
+            _chdr("Exclusive · NAAMSA", "HCV Sales by Channel",
+                  "Dealer retail dominates; corporate fleet growing", "NAAMSA", NAAMSA)
+            st.plotly_chart(chart_za_channel(gen_za_channel()),
+                            use_container_width=True, config=PLOTLY_CFG, key="za_channel")
+        with row3_r:
+            _chdr("Exclusive · NAAMSA", "HCV Sales by Province",
+                  "Gauteng accounts for 45.1% — industrial heartland concentration", "NAAMSA", NAAMSA)
+            st.plotly_chart(chart_za_province(gen_za_province()),
+                            use_container_width=True, config=PLOTLY_CFG, key="za_province")
+        st.caption(f"Sources: [Stats SA P7162]({STATSSA}) · [NAAMSA]({NAAMSA}) · Simulated data modelled on actual report structures.")
+
+    else:
+        brand_col, excl_col = st.columns(2, gap="large")
+        with brand_col:
+            src = cdata["sources"]["trade"]
+            _chdr("Competitive Set", f"Brand Market Share — {country}",
+                  "Top 5 brands by annual CV unit sales", src[0], src[1])
+            st.plotly_chart(chart_brand(gen_brand_df(country), country),
+                            use_container_width=True, config=PLOTLY_CFG, key=f"{country}_brand")
+        with excl_col:
+            renderer = EXCLUSIVE_CHART_REGISTRY.get(country)
+            if renderer:
+                renderer()
 
 
 def _render_due_diligence_tab(country: str, cdata: dict):
@@ -3444,62 +3346,178 @@ def _render_due_diligence_tab(country: str, cdata: dict):
         with st.expander(f"🔍  {t['title']}", expanded=False):
             render_triangulation(tk)
 
-    st.info(f"**Governance implication:** {cdata['market_mechanics']['governance_test']}")
+    render_strategic_action(cdata)
 
 
-def _render_guardrails_tab(country: str, cdata: dict):
-    """Board-level market mechanics and behavioural guardrails."""
-    guardrails = cdata["strategic_guardrails"]
-    mechanics = cdata["market_mechanics"]
-    alignment = cdata["farizon_alignment"]
+def _render_gtm_playbook_tab(country: str, cdata: dict):
+    """
+    Tab 3 content: 🚀 GTM Playbook (一国一策战术板).
 
+    Battle 3 rebuild: the deprecated 'Target Account Search' company-intel
+    lookup (checked against a 4-company hardcoded DB — useless for the vast
+    majority of real-world small/mid dealer prospects) has been REMOVED
+    entirely and replaced with the 【B2B 落地报价与毛利倒推 (Pricing & Margin
+    Sandbox)】 — an interactive calculator any frontline rep or dealer can
+    use on any deal, in any market, without needing the customer's name in
+    a database first.
+    """
     st.markdown(f"""
 <div class="gtm-mission-banner">
-    <div class="gtm-mission-title">🚦 {country} · Market Mechanics &amp; Guardrails</div>
-    <div class="gtm-mission-sub">Executive governance view · objective market logic, decision boundaries and Farizon portfolio alignment</div>
+    <div class="gtm-mission-title">🚀 {country} — GTM Tactical Playbook</div>
+    <div class="gtm-mission-sub">一国一策战术板 · Mission brief for frontline sales &amp; channel teams</div>
 </div>
 """, unsafe_allow_html=True)
 
-    _sdiv("🛑 Strategic Red Lines & Boundaries", "业务红线与约束边界")
-    for red_line in guardrails["red_lines"]:
-        st.error(red_line)
-    st.success(f"**Permitted strategic zone**\n\n{guardrails['green_zone']}")
+    # ══ B2B Pricing & Margin Sandbox (Battle 3 core deliverable) ══════════════
+    st.markdown("""
+<div class="b2b-banner">
+    <div class="b2b-banner-title">💰 B2B 落地报价与毛利倒推沙盘 · Pricing &amp; Margin Sandbox</div>
+    <div class="b2b-banner-sub">从当地终端零售价倒推我司必须做到的离岸底价，现场就能算给经销商听</div>
+</div>
+""", unsafe_allow_html=True)
 
-    _sdiv("⚙️ Market Operating Logic", "市场运作机制全景")
-    labels = [
-        ("准入与合规壁垒", "Access & Compliance", "market_access"),
-        ("供应链与渠道生态", "Supply Chain & Channel", "channel_ecosystem"),
-        ("真实价值池", "Addressable Value Pool", "value_pool"),
-    ]
-    cols = st.columns(3, gap="medium")
-    for col, (cn_label, en_label, key) in zip(cols, labels):
-        with col:
-            st.markdown(f"""
+    p = cdata["tco_params"]
+    default_duty = B2B_IMPORT_DUTY_PCT.get(country, 25.0)
+    default_retail = int(round(p["ICE_Capex"] * 1.35 / 500.0) * 500)
+    cost_floor = p["ICE_Capex"] * 0.68  # illustrative OEM manufacturing cost floor ("红线")
+
+    in_l, in_r = st.columns(2, gap="large")
+    with in_l:
+        retail_price = st.number_input(
+            "🎯 Target Retail Price (当地对标竞品终端售价, USD)",
+            min_value=5000, max_value=500000, value=default_retail, step=500,
+            key=f"b2b_retail_{country}",
+            help="当地市场对标竞品（Isuzu/Foton/Sinotruk 等）的终端到手售价，示例默认值 $45,000 级别。",
+        )
+        dealer_margin_pct = st.slider(
+            "🤝 Dealer Margin % (给当地代理商留的利润率)",
+            min_value=0.0, max_value=50.0, value=15.0, step=0.5,
+            key=f"b2b_margin_{country}",
+        )
+    with in_r:
+        duty_pct = st.slider(
+            "🏛 Import Duty & Tax % (进口关税与税负，默认读取该国关税参数)",
+            min_value=0.0, max_value=60.0, value=float(default_duty), step=0.5,
+            key=f"b2b_duty_{country}",
+            help=f"默认值 {default_duty:.1f}% 取自 {country} 的关税基准（见 Tab 2 政策解读）；可自行调整以测算 CKD/关税优惠情形。",
+        )
+        logistics_cost = st.number_input(
+            "🚢 Logistics Cost (单车海运物流费, USD)",
+            min_value=0, max_value=20000, value=DEFAULT_LOGISTICS_COST_USD, step=100,
+            key=f"b2b_logi_{country}",
+        )
+
+    # ── 倒推逻辑 / Reverse-engineering logic ──
+    #   Landed_Cost_to_Dealer = Retail_Price × (1 − Dealer_Margin%)
+    #   Landed_Cost_to_Dealer = (FOB + Logistics_Cost) × (1 + Duty%)
+    #   ⇒ FOB = Landed_Cost_to_Dealer ÷ (1 + Duty%) − Logistics_Cost
+    landed_cost_to_dealer = retail_price * (1 - dealer_margin_pct / 100)
+    fob_target = landed_cost_to_dealer / (1 + duty_pct / 100) - logistics_cost
+    gross_profit = fob_target - cost_floor
+    margin_on_cost = (gross_profit / cost_floor) if cost_floor else 0.0
+
+    out_l, out_r = st.columns(2, gap="large")
+    with out_l:
+        st.markdown(f"""
+<div class="b2b-output-card fob">
+    <div class="b2b-output-label">🏭 OEM Target FOB Price · 离岸底价</div>
+    <div class="b2b-output-value" style="color:#21325B;">${fob_target:,.0f}</div>
+    <div class="b2b-output-sub">在满足经销商 {dealer_margin_pct:.1f}% 利润与 {duty_pct:.1f}% 关税/税负前提下，
+    我司必须做到的离岸(FOB)底价</div>
+</div>
+""", unsafe_allow_html=True)
+    with out_r:
+        profit_cls = "profit-ok" if gross_profit >= 0 else "profit-bad"
+        profit_color = "#1A8C5B" if gross_profit >= 0 else "#B91C1C"
+        st.markdown(f"""
+<div class="b2b-output-card {profit_cls}">
+    <div class="b2b-output-label">📊 Gross Profit per Unit · 单车毛利</div>
+    <div class="b2b-output-value" style="color:{profit_color};">${gross_profit:,.0f}</div>
+    <div class="b2b-output-sub">对比制造成本红线 ${cost_floor:,.0f}（≈ 该国标杆 Capex 的 68%）
+    · 毛利率 {margin_on_cost*100:.1f}%</div>
+</div>
+""", unsafe_allow_html=True)
+
+    st.caption(
+        "计算逻辑 / Formula: Landed Cost to Dealer = Retail × (1 − Dealer Margin%)  →  "
+        "FOB = Landed Cost ÷ (1 + Duty%) − Logistics Cost  →  Gross Profit = FOB − 制造成本红线。"
+        "制造成本红线为illustrative估算值，实际签单前请以财务口径最终成本为准。"
+    )
+
+    if fob_target < cost_floor:
+        st.error(
+            "🚨 利润击穿警告：在此终端定价下，出海面临亏损！请要求代理商压低利润预期或转为 CKD 模式！"
+        )
+    elif margin_on_cost >= 0.15:
+        st.success("🟢 利润健康，可签单！(毛利率 ≥15%，安全边际充足)")
+    else:
+        st.warning(
+            f"⚠️ 毛利率偏薄（{margin_on_cost*100:.1f}%）——尚可推进，但建议争取更优关税/CKD路径，"
+            f"或与代理商协商压缩物流成本以扩大安全边际。"
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ══ Existing 3-card country-level playbook ════════════════════════════════
+    gtm = cdata.get("gtm_playbook")
+
+    if not gtm:
+        st.warning(
+            f"**Playbook not yet authored for {country}.**\n\n"
+            "This market currently has full Market & Risk Analytics and Due Diligence coverage, "
+            "but a GTM tactical playbook has not yet been written by the strategy team. "
+            "Request authoring via the GTM Strategy Director before committing sales resources "
+            "to this market without a tactical brief. The Pricing & Margin Sandbox above still "
+            "works for this market regardless.",
+            icon="⚠️"
+        )
+        return
+
+    pm_col, sc_col, tp_col = st.columns(3, gap="medium")
+    with pm_col:
+        st.markdown(f"""
 <div class="gtm-card">
     <div class="gtm-card-hdr product">
+        <div class="gtm-card-icon">🎯</div>
         <div>
-            <div class="gtm-card-title">{en_label}</div>
-            <div class="gtm-card-subtitle">{cn_label}</div>
+            <div class="gtm-card-title">Product Matrix</div>
+            <div class="gtm-card-subtitle">产品阵型与应用场景</div>
         </div>
     </div>
-    <div class="gtm-card-body">{mechanics[key]}</div>
+    <div class="gtm-card-body">{gtm['product_matrix']}</div>
 </div>
 """, unsafe_allow_html=True)
-    st.info(f"**Executive decision gate:** {mechanics['governance_test']}")
+    with sc_col:
+        st.markdown(f"""
+<div class="gtm-card">
+    <div class="gtm-card-hdr supply">
+        <div class="gtm-card-icon">⚙️</div>
+        <div>
+            <div class="gtm-card-title">Supply Chain & Pricing</div>
+            <div class="gtm-card-subtitle">供应链与定价打法</div>
+        </div>
+    </div>
+    <div class="gtm-card-body">{gtm['supply_chain_mode']}</div>
+</div>
+""", unsafe_allow_html=True)
+    with tp_col:
+        st.markdown(f"""
+<div class="gtm-card">
+    <div class="gtm-card-hdr persona">
+        <div class="gtm-card-icon">🧭</div>
+        <div>
+            <div class="gtm-card-title">Target Persona</div>
+            <div class="gtm-card-subtitle">靶向客户画像</div>
+        </div>
+    </div>
+    <div class="gtm-card-body">{gtm['target_persona']}</div>
+</div>
+""", unsafe_allow_html=True)
 
-    _sdiv("🎯 Farizon Strategic Alignment", "我司战略与车型落位")
-    st.markdown(f"**Portfolio rule:** {alignment['portfolio_rule']}")
-    alignment_df = pd.DataFrame(alignment["models"]).rename(columns={
-        "model": "Farizon model / capability",
-        "role": "Market role",
-        "mode": "Entry mode",
-        "logic": "Strategic rationale",
-    })
-    st.table(alignment_df)
     st.caption(
-        "Group-wide boundary: CBU is the primary export mode. CKD/local assembly is a staged future "
-        "option only where tariff, FX, repeatable volume and partner governance jointly justify it. "
-        "No country-level conclusion may reject CBU as a whole."
+        "📌 战术板基于尽职调查模块的交叉验证结论制定，应配合 Tab 2 的研判结果协同使用 / "
+        "Playbook tactics are derived from the Due Diligence cross-validation conclusions in Tab 2 "
+        "— review both before committing account resources."
     )
 
 
@@ -3711,16 +3729,22 @@ def _render_competitive_intel_tab(country: str, cdata: dict):
 
 def render_country_dashboard(country: str, cdata: dict):
     """
-    Shared four-tab executive renderer for all Tier 1 countries.
-    Tab 1: market/risk analytics with immutable macro TCO baseline.
-    Tab 2: analyst due diligence and evidence triangulation.
-    Tab 3: market mechanics, behavioural guardrails and Farizon alignment.
-    Tab 4: internal competitive intelligence.
+    Master renderer. Every Tier 1 country flows through the same
+    4-tab structure:
+        Tab 1 → 📊 Market & Risk Analytics  (Level 1+2+3; Level 2 = TCO sandbox)
+        Tab 2 → 🕵️ Analyst Due Diligence    (Level 4)
+        Tab 3 → 🚀 GTM Playbook              (B2B Pricing & Margin Sandbox + tactics)
+        Tab 4 → 🕵️ Internal Competitive Intel (Internal Use Only — competitor
+                 positioning scatter + editable spec showdown + Chinese
+                 rivals channel-footprint insight)
+    No country gets a bespoke page structure; only a bespoke Level-3-right
+    chart via EXCLUSIVE_CHART_REGISTRY, a bespoke 'action' sentence, and
+    (for most markets) bespoke 'gtm_playbook' / 'competitors' data.
     """
     tab_market, tab_dd, tab_gtm, tab_intel = st.tabs([
         "📊 Market & Risk Analytics",
-        "🔎 Analyst Due Diligence",
-        "🚦 Market Mechanics & Guardrails",
+        "🕵️ Analyst Due Diligence",
+        "🚀 GTM Playbook",
         "🕵️ Internal Competitive Intel",
     ])
 
@@ -3731,7 +3755,7 @@ def render_country_dashboard(country: str, cdata: dict):
         _render_due_diligence_tab(country, cdata)
 
     with tab_gtm:
-        _render_guardrails_tab(country, cdata)
+        _render_gtm_playbook_tab(country, cdata)
 
     with tab_intel:
         _render_competitive_intel_tab(country, cdata)
@@ -4045,7 +4069,7 @@ st.markdown(f"""
         <div>
             <strong style="color:#5A6070;">Africa CV Market Intelligence Platform v13.0</strong>
             &nbsp;·&nbsp; Internal strategic use only
-            &nbsp;·&nbsp; +DJ/MU/MG Strategic Expansion · Immutable TCO Baseline · Executive Guardrails
+            &nbsp;·&nbsp; +DJ/MU/MG Strategic Expansion · TCO Sandbox Lock/Reset · B2B Margin Sandbox
         </div>
         <div style="text-align:right;">
             RDB · RURA · NAAMSA · Stats SA · National Treasury ZA · ANME TN · OCP · DPFZA · MRA · JIRAMA · Reuters · Bloomberg · AfDB
