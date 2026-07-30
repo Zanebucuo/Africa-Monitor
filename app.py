@@ -1,7 +1,7 @@
 """
 Africa Commercial Vehicle Market Governance & Intelligence Platform
-Enterprise BI Engine v11.0
-McKinsey UX Refactor — Narrative-Flow Layout · Zero Text Overlap · Collapsed Intel Feed
+Enterprise BI Engine v16.0
+McKinsey UX Refactor â€” Narrative-Flow Layout Â· Zero Text Overlap Â· Collapsed Intel Feed
 """
 
 import streamlit as st
@@ -13,24 +13,30 @@ import numpy as np
 import copy
 from datetime import datetime, timedelta
 
-# ══════════════════════════════════════════════════════════════════════════════
+APP_VERSION = "16.0.0"
+DATA_VERSION = "2026-07-30"
+SCHEMA_VERSION = "1.0"
+MODEL_NOTICE_EN = "Model estimate or internal judgement; not official market statistics."
+MODEL_NOTICE_ZH = "æ¨¡åž‹ä¼°ç®—æˆ–å†…éƒ¨åˆ¤æ–­ï¼Œä¸ä»£è¡¨å®˜æ–¹å¸‚åœºç»Ÿè®¡ã€‚"
+
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # 0. PAGE CONFIG
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 st.set_page_config(
     page_title="Africa CV Market Intelligence",
-    page_icon="🌍",
+    page_icon="ðŸŒ",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # V15 GLOBAL LANGUAGE LAYER
 # Internal keys remain English to protect charts/data logic. Display labels
 # and all new executive-governance content use this single language state.
-# ─────────────────────────────────────────────────────────────────────────────
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 if "v15_lang" not in st.session_state:
     st.session_state.v15_lang = "zh"
 V15_LANG = st.session_state.v15_lang
@@ -41,10 +47,10 @@ def tr(en: str, zh: str) -> str:
 
 
 V15_MODE_ZH = {
-    "Scale CBU": "规模化CBU",
-    "Controlled CBU": "受控CBU",
-    "Project-Based CBU": "项目型CBU",
-    "Validation CBU": "验证型CBU",
+    "Scale CBU": "è§„æ¨¡åŒ–CBU",
+    "Controlled CBU": "å—æŽ§CBU",
+    "Project-Based CBU": "é¡¹ç›®åž‹CBU",
+    "Validation CBU": "éªŒè¯åž‹CBU",
 }
 
 
@@ -53,18 +59,18 @@ def v15_mode_label(mode: str) -> str:
 
 
 V15_PORTFOLIO = {
-    "Nigeria":      {"zh":"尼日利亚","attract":82,"execute":42,"size":45200,"mode":"Project-Based CBU","role":["FX-controlled scale opportunity","外汇约束下的规模机会"]},
-    "South Africa": {"zh":"南非","attract":88,"execute":55,"size":33100,"mode":"Controlled CBU","role":["Premium fleet validation","高价值车队验证"]},
-    "Morocco":      {"zh":"摩洛哥","attract":78,"execute":66,"size":18200,"mode":"Controlled CBU","role":["Industrial ecosystem reference","工业生态标杆"]},
-    "Egypt":        {"zh":"埃及","attract":86,"execute":38,"size":39800,"mode":"Project-Based CBU","role":["High-volume constrained market","高容量高约束市场"]},
-    "Kenya":        {"zh":"肯尼亚","attract":74,"execute":61,"size":16800,"mode":"Controlled CBU","role":["East Africa urban gateway","东非城市入口"]},
-    "Ethiopia":     {"zh":"埃塞俄比亚","attract":73,"execute":45,"size":14200,"mode":"Project-Based CBU","role":["Policy-led institutional EV","政策驱动机构电动车市场"]},
-    "Algeria":      {"zh":"阿尔及利亚","attract":72,"execute":36,"size":20500,"mode":"Project-Based CBU","role":["Regulation-gated institution","监管门槛型机构市场"]},
-    "Tunisia":      {"zh":"突尼斯","attract":65,"execute":70,"size":7600,"mode":"Validation CBU","role":["EU-standard reference","欧标合规参考"]},
-    "Rwanda":       {"zh":"卢旺达","attract":58,"execute":82,"size":2800,"mode":"Validation CBU","role":["Policy showcase","政策样板"]},
-    "Djibouti":     {"zh":"吉布提","attract":60,"execute":64,"size":1600,"mode":"Project-Based CBU","role":["Port-corridor niche","港口走廊细分市场"]},
-    "Mauritius":    {"zh":"毛里求斯","attract":55,"execute":84,"size":1900,"mode":"Validation CBU","role":["Premium green showcase","高端绿色样板"]},
-    "Madagascar":   {"zh":"马达加斯加","attract":52,"execute":30,"size":4200,"mode":"Project-Based CBU","role":["Infrastructure-constrained niche","基础设施约束型细分市场"]},
+    "Nigeria":      {"zh":"å°¼æ—¥åˆ©äºš","attract":82,"execute":42,"size":45200,"mode":"Project-Based CBU","role":["FX-controlled scale opportunity","å¤–æ±‡çº¦æŸä¸‹çš„è§„æ¨¡æœºä¼š"]},
+    "South Africa": {"zh":"å—éž","attract":88,"execute":55,"size":33100,"mode":"Controlled CBU","role":["Premium fleet validation","é«˜ä»·å€¼è½¦é˜ŸéªŒè¯"]},
+    "Morocco":      {"zh":"æ‘©æ´›å“¥","attract":78,"execute":66,"size":18200,"mode":"Controlled CBU","role":["Industrial ecosystem reference","å·¥ä¸šç”Ÿæ€æ ‡æ†"]},
+    "Egypt":        {"zh":"åŸƒåŠ","attract":86,"execute":38,"size":39800,"mode":"Project-Based CBU","role":["High-volume constrained market","é«˜å®¹é‡é«˜çº¦æŸå¸‚åœº"]},
+    "Kenya":        {"zh":"è‚¯å°¼äºš","attract":74,"execute":61,"size":16800,"mode":"Controlled CBU","role":["East Africa urban gateway","ä¸œéžåŸŽå¸‚å…¥å£"]},
+    "Ethiopia":     {"zh":"åŸƒå¡žä¿„æ¯”äºš","attract":73,"execute":45,"size":14200,"mode":"Project-Based CBU","role":["Policy-led institutional EV","æ”¿ç­–é©±åŠ¨æœºæž„ç”µåŠ¨è½¦å¸‚åœº"]},
+    "Algeria":      {"zh":"é˜¿å°”åŠåˆ©äºš","attract":72,"execute":36,"size":20500,"mode":"Project-Based CBU","role":["Regulation-gated institution","ç›‘ç®¡é—¨æ§›åž‹æœºæž„å¸‚åœº"]},
+    "Tunisia":      {"zh":"çªå°¼æ–¯","attract":65,"execute":70,"size":7600,"mode":"Validation CBU","role":["EU-standard reference","æ¬§æ ‡åˆè§„å‚è€ƒ"]},
+    "Rwanda":       {"zh":"å¢æ—ºè¾¾","attract":58,"execute":82,"size":2800,"mode":"Validation CBU","role":["Policy showcase","æ”¿ç­–æ ·æ¿"]},
+    "Djibouti":     {"zh":"å‰å¸ƒæ","attract":60,"execute":64,"size":1600,"mode":"Project-Based CBU","role":["Port-corridor niche","æ¸¯å£èµ°å»Šç»†åˆ†å¸‚åœº"]},
+    "Mauritius":    {"zh":"æ¯›é‡Œæ±‚æ–¯","attract":55,"execute":84,"size":1900,"mode":"Validation CBU","role":["Premium green showcase","é«˜ç«¯ç»¿è‰²æ ·æ¿"]},
+    "Madagascar":   {"zh":"é©¬è¾¾åŠ æ–¯åŠ ","attract":52,"execute":30,"size":4200,"mode":"Project-Based CBU","role":["Infrastructure-constrained niche","åŸºç¡€è®¾æ–½çº¦æŸåž‹ç»†åˆ†å¸‚åœº"]},
 }
 
 
@@ -72,8 +78,69 @@ def v15_country_label(country: str) -> str:
     return V15_PORTFOLIO[country]["zh"] if V15_LANG == "zh" else country
 
 
-# 1. GLOBAL CSS — including mandatory anti text-overlap rule
-# ══════════════════════════════════════════════════════════════════════════════
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# V16 COMMERCIAL OPERATING LAYER
+# Additive only: original market, TCO, policy, risk, triangulation and visual
+# components below remain untouched. These structured tables close the loop from
+# country insight to dealer, customer, opportunity and action management.
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+V16_DEALERS = pd.DataFrame([
+    ["Tunisia","Loukil Group","Target",78,"National automotive group; validate EV-CV mandate and investment appetite.","Confirm management sponsor and service investment plan","2026-09-15","Judgement","SRC-MOD-01"],
+    ["Tunisia","Aures Auto / UADH","Target",70,"Potential channel case; legal-entity relationship and portfolio conflicts require verification.","Complete entity, brand and conflict map","2026-09-30","Judgement","SRC-MOD-01"],
+    ["South Africa","National CV Partner","Qualified",76,"National fleet and aftersales capability subject to SLA validation.","Agree anchor-fleet pilot SLA","2026-10-15","Judgement","SRC-MOD-01"],
+    ["Egypt","Institutional Import Partner","Target",64,"Importer capability depends on licence, FX access and secured settlement.","Validate licence and bank route","2026-10-31","Judgement","SRC-MOD-01"],
+    ["Rwanda","EV Mobility Partner","Qualified",74,"Strong EV orientation; fleet scale and technical capacity remain gating items.","Select pilot accounts and charging scope","2026-09-30","Judgement","SRC-MOD-01"],
+], columns=["Country","Dealer / Group","Relationship Stage","Partner Score","Commercial Assessment","Next Action","Deadline","Data Type","Source ID"])
+
+V16_CUSTOMERS = pd.DataFrame([
+    ["Tunisia","Tunis Urban Logistics Prospect","3PL",120,"Last-mile delivery",150,"Medium",78,"Collect route and depot-power data","Judgement","SRC-MOD-01"],
+    ["Tunisia","Public Utility Prospect","Utility",200,"Service fleet",90,"High",72,"Confirm tender and replacement cycle","Judgement","SRC-MOD-01"],
+    ["South Africa","National Parcel Fleet Prospect","3PL",850,"Parcel delivery",180,"Medium",88,"Build 20-unit pilot TCO and SLA","Judgement","SRC-MOD-01"],
+    ["Egypt","State-linked Fleet Prospect","Institutional",500,"Service fleet",120,"Low",65,"Verify funding and import pathway","Judgement","SRC-MOD-01"],
+    ["Rwanda","Kigali Delivery Prospect","Delivery",80,"Urban delivery",100,"High",80,"Confirm depot charging design","Judgement","SRC-MOD-01"],
+], columns=["Country","Customer","Type","Fleet Size","Application","Daily km","Charging Readiness","Fit Score","Next Action","Data Type","Source ID"])
+
+V16_OPPORTUNITIES = pd.DataFrame([
+    ["Tunisia","Tunis last-mile pilot","Electric LCV","Pilot",20,38000,.55,"2027-03-31","Medium","Complete route TCO","2026-09-30"],
+    ["Tunisia","Utility fleet validation","Electric LCV","Qualified",30,39000,.25,"2027-06-30","Medium","Confirm tender calendar","2026-10-15"],
+    ["South Africa","National parcel pilot","Large electric van","Proposal",50,52000,.40,"2027-04-30","Medium","Submit pilot SLA","2026-10-15"],
+    ["Egypt","Institutional fleet project","Electric LCV","Research",100,35000,.05,"2027-12-31","High","Validate FX allocation","2026-10-31"],
+    ["Rwanda","Kigali showcase","Compact electric van","Negotiation",15,32000,.70,"2027-02-28","Low","Close charging scope","2026-09-15"],
+], columns=["Country","Project","Vehicle","Stage","Expected Units","Unit Value USD","Probability","Expected Close","Risk","Next Action","Next Action Date"])
+
+V16_ACTIONS = pd.DataFrame([
+    ["Tunisia","Regulation","Obtain written homologation checklist","P0","Homologation","2026-09-15","Open","Approved document checklist"],
+    ["Tunisia","Channel","Complete Loukil / Aures scorecard","P0","Country Manager","2026-09-30","Open","Partner recommendation"],
+    ["Tunisia","Customer","Collect duty cycle from two anchor fleets","P0","Country Manager","2026-10-15","Open","Route-based TCO"],
+    ["South Africa","Customer","Define national parcel pilot","P0","Country Manager","2026-10-15","Open","Vehicle SLA and trial plan"],
+    ["Egypt","Finance","Validate secured FX and payment route","P0","Finance","2026-10-31","Open","Written payment structure"],
+    ["Rwanda","Pilot","Close depot charging scope","P1","Country Manager","2026-09-15","Open","Charging BOQ"],
+], columns=["Country","Workstream","Action","Priority","Owner","Deadline","Status","Expected Output"])
+
+V16_SOURCES = pd.DataFrame([
+    ["SRC-TN-01","Tunisia","Institut National de la Statistique","https://www.ins.tn/statistiques/117","Government","2024-12-31","A","Transport statistics","Exact downloadable table preferred"],
+    ["SRC-TN-02","Tunisia","Tunisian Customs â€” vehicle taxation","https://www.douane.gov.tn/taxationveh/","Government","2026-01-01","A","Tax and customs","Confirm HS code and treatment in writing"],
+    ["SRC-TN-03","Tunisia","OCT â€” rolling-equipment concessionaires","https://www.oct.gov.tn/fr/concessionnaire-materiels-roulants","Government","2026-01-01","A","Dealer authorisation","Confirm licence scope"],
+    ["SRC-TN-04","Tunisia","ATTT","https://www.attt.com.tn/","Government","2026-01-01","A","Registration and homologation","Replace homepage with exact procedure when obtained"],
+    ["SRC-TN-05","Tunisia","Automobile.tn â€” 2024 VUL market","https://www.automobile.tn/fr/magazine/actu/2025-02-03-le-marche-des-vehicules-utilitaires-legers-en-tunisie-en-2024.html","Media","2025-02-03","B","VUL market","Secondary source"],
+    ["SRC-TN-06","Tunisia","Fiat Professional Tunisia 2024","https://www.media.stellantis.com/me-en/fiat-professional/press/fiat-professional-achieves-record-market-share-in-tunisia-in-2024","OEM","2025-02-01","B","Brand registrations","OEM-reported"],
+    ["SRC-MCK-01","Cross-market","McKinsey â€” EV adoption in LCV","https://www.mckinsey.com/industries/automotive-and-assembly/our-insights/built-for-purpose-ev-adoption-in-light-commercial-vehicles","Consulting","2022-09-01","B","TCO duty-cycle method","Method only; not a country statistic"],
+    ["SRC-MOD-01","Cross-market","Internal V16 planning model","","Internal","2026-07-30","D","Commercial assumptions","Not official statistics"],
+], columns=["Source ID","Country","Source Name","Source URL","Source Type","Publication Date","Confidence","Scope","Audit Note"])
+
+V16_METRIC_AUDIT = pd.DataFrame([
+    ["Tunisia","VUL registration growth",14,"%","2024","Reported","B","SRC-TN-05","2026-07-29"],
+    ["Tunisia","Fiat Professional registrations",1596,"units","2024","Reported","B","SRC-TN-06","2026-07-29"],
+    ["Tunisia","Fiat Professional share",21,"%","2024","Reported","B","SRC-TN-06","2026-07-29"],
+    ["Tunisia","Addressable annual CBU EV volume",150,"units","2027","Modelled","D","SRC-MOD-01","2026-07-29"],
+    ["South Africa","Commercial-vehicle opportunity pool",33100,"units","2025","Estimated","C","SRC-MOD-01","2026-07-29"],
+    ["Egypt","Commercial-vehicle opportunity pool",39800,"units","2025","Estimated","D","SRC-MOD-01","2026-07-29"],
+    ["Rwanda","Addressable EV-van pilot",20,"units","2027","Modelled","D","SRC-MOD-01","2026-07-29"],
+], columns=["Country","Metric","Value","Unit","Period","Data Type","Confidence","Source ID","Updated At"])
+
+
+# 1. GLOBAL CSS â€” including mandatory anti text-overlap rule
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -189,7 +256,7 @@ button[aria-selected="true"][data-baseweb="tab"]{
 .gate-index-value{font-size:2.2rem;font-weight:700;font-family:'Inter';}
 .gate-index-label{font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;margin-top:4px;}
 
-/* ── GTM Playbook cards (Task 3) ── */
+/* â”€â”€ GTM Playbook cards (Task 3) â”€â”€ */
 .gtm-card{
     background:var(--white);border:1px solid var(--border);border-radius:var(--radius);
     padding:0;box-shadow:var(--shadow);overflow:hidden;margin-bottom:16px;height:100%;
@@ -216,10 +283,10 @@ button[aria-selected="true"][data-baseweb="tab"]{
 [data-testid="stToolbar"]{display:none;}
 .block-container{padding-top:0!important;}
 
-/* ── MANDATORY ANTI TEXT-OVERLAP RULE (Task 1) ── */
+/* â”€â”€ MANDATORY ANTI TEXT-OVERLAP RULE (Task 1) â”€â”€ */
 .stMarkdown, p, div {word-wrap: break-word; overflow-wrap: break-word;}
 
-/* ── Internal Competitive Intel (Tab 4) ── */
+/* â”€â”€ Internal Competitive Intel (Tab 4) â”€â”€ */
 .intel-banner{
     background:linear-gradient(135deg,#1A1F2E 0%,#2D1B0F 100%);
     border:1px solid #3A2A1A;border-radius:var(--radius);
@@ -245,9 +312,9 @@ button[aria-selected="true"][data-baseweb="tab"]{
 </style>
 """, unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # 2. CHART THEME
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 PwC_COLORS = ["#D04A02","#21325B","#295BA5","#EB6C2D","#4C7FA8","#8BA7C4","#C0C8D8","#F0C4AC"]
 
 CHART_BASE = dict(
@@ -274,209 +341,209 @@ def _apply(fig, ov=None):
     return fig
 
 PLOTLY_CFG = {"displayModeBar": False}
-# ══════════════════════════════════════════════════════════════════════════════
-# 3. TRIANGULATION DATA — unchanged structure, reused verbatim
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 3. TRIANGULATION DATA â€” unchanged structure, reused verbatim
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 TRIANGULATION = {
     "rw_sandbox": {
-        "title": "Rwanda Market Size vs. Strategic EAC Value — Small Volume, Outsized Positioning",
+        "title": "Rwanda Market Size vs. Strategic EAC Value â€” Small Volume, Outsized Positioning",
         "claim": "Rwanda's total CV market of ~3,200 units/year is too small to justify meaningful commercial investment in fleet sales or local distribution infrastructure for a Chinese commercial vehicle manufacturer.",
         "cross_validation_items": [
-            "**[Fact]** Rwanda Development Board (RDB) confirmed: EV commercial vehicles enjoy **0% import duty, 0% VAT, 0% excise tax** — the most comprehensive EV fiscal exemption package in Sub-Saharan Africa (RDB Investment Incentives 2024).",
+            "**[Fact]** Rwanda Development Board (RDB) confirmed: EV commercial vehicles enjoy **0% import duty, 0% VAT, 0% excise tax** â€” the most comprehensive EV fiscal exemption package in Sub-Saharan Africa (RDB Investment Incentives 2024).",
             "**[Fact]** Rwanda's corporate income tax for qualifying EV/clean energy enterprises is **15%** (vs standard 30%) under the Special Economic Zone and Priority Sector incentive regime (RRA, 2024).",
-            "**[Fact]** RURA has established a dedicated **e-mobility electricity tariff** of RWF 115/kWh — approximately **14× cheaper** than diesel-equivalent energy cost.",
+            "**[Fact]** RURA has established a dedicated **e-mobility electricity tariff** of RWF 115/kWh â€” approximately **14Ã— cheaper** than diesel-equivalent energy cost.",
             "**[Fact]** Kigali's grid reliability is among Africa's highest: **<2% outage rate** (REG), powered predominantly by hydro, methane, and solar.",
             "**[Structural logic]** Rwanda is the **EAC headquarters hub**: AfDB East Africa Regional Office, AUDA-NEPAD, and 47+ international organisations are based in Kigali.",
             "**[Market trajectory]** Rwanda's 2035 target to transition 100% of public transport and 70% of commercial vehicles to EV creates a **policy-locked demand pipeline**.",
             "**[Counter-evidence]** Absolute unit volume will remain low (<5,000 CVs/yr through 2030). Infrastructure outside Kigali is limited.",
         ],
-        "verdict": "Rwanda is **not a volume market** — it is a **strategic sandbox and EAC showcase**. Deploy 20–50 EV commercial units in Kigali via G2G bus programmes and B2B city logistics, generate verifiable performance data, and leverage that proof-of-concept to unlock EAC-wide fleet tenders.",
+        "verdict": "Rwanda is **not a volume market** â€” it is a **strategic sandbox and EAC showcase**. Deploy 20â€“50 EV commercial units in Kigali via G2G bus programmes and B2B city logistics, generate verifiable performance data, and leverage that proof-of-concept to unlock EAC-wide fleet tenders.",
         "verdict_type": "success",
         "confidence_items": [
-            ("🟢 Verified Fact", "0% import duty / 0% VAT for EV CVs (RDB 2024)"),
-            ("🟢 Verified Fact", "15% CIT for qualifying clean energy enterprises"),
-            ("🟢 Verified Fact", "RURA e-mobility tariff RWF 115/kWh vs RWF 1,600/L diesel"),
-            ("🟢 Verified Fact", "<2% grid outage rate (REG Annual Report 2024)"),
-            ("🟡 Plausible Estimate", "Kigali EV deployment as EAC-wide proof-of-concept accelerator"),
-            ("🟡 Plausible Estimate", "G2G bus programme as lowest-risk entry vehicle"),
-            ("🔴 Needs Field Verification", "2035 EV mandate enforcement mechanism and budget allocation"),
+            ("ðŸŸ¢ Verified Fact", "0% import duty / 0% VAT for EV CVs (RDB 2024)"),
+            ("ðŸŸ¢ Verified Fact", "15% CIT for qualifying clean energy enterprises"),
+            ("ðŸŸ¢ Verified Fact", "RURA e-mobility tariff RWF 115/kWh vs RWF 1,600/L diesel"),
+            ("ðŸŸ¢ Verified Fact", "<2% grid outage rate (REG Annual Report 2024)"),
+            ("ðŸŸ¡ Plausible Estimate", "Kigali EV deployment as EAC-wide proof-of-concept accelerator"),
+            ("ðŸŸ¡ Plausible Estimate", "G2G bus programme as lowest-risk entry vehicle"),
+            ("ðŸ”´ Needs Field Verification", "2035 EV mandate enforcement mechanism and budget allocation"),
         ],
     },
     "rw_eac_gateway": {
-        "title": "Rwanda as EAC Gateway — Does the Regulatory Advantage Transfer to Neighbouring Markets?",
+        "title": "Rwanda as EAC Gateway â€” Does the Regulatory Advantage Transfer to Neighbouring Markets?",
         "claim": "A Rwanda-registered EV fleet operation automatically grants preferential access to Kenya, Uganda, and Tanzania markets under the EAC Common Market Protocol.",
         "cross_validation_items": [
-            "**[Fact]** The EAC Common Market Protocol establishes free movement of goods — but vehicle registration and homologation requirements remain national, not harmonised.",
+            "**[Fact]** The EAC Common Market Protocol establishes free movement of goods â€” but vehicle registration and homologation requirements remain national, not harmonised.",
             "**[Fact]** KEBS PVoC is required for all vehicles entering Kenya, regardless of EAC origin country.",
             "**[Fact]** TBS maintains separate type-approval requirements; Rwanda registration does not grant automatic TBS homologation.",
-            "**[Nuance]** EAC Customs Union eliminates tariffs between Partner States — but technical standards remain independently enforced.",
+            "**[Nuance]** EAC Customs Union eliminates tariffs between Partner States â€” but technical standards remain independently enforced.",
             "**[Strategic reality]** The gateway value is **reputational and relational**: a Kigali proof-of-concept generates case studies and RDB endorsement letters with significant weight in EAC procurement evaluations.",
         ],
         "verdict": "The EAC gateway thesis is **partially valid**: tariff elimination is confirmed, but technical standards barriers in Kenya and Tanzania require separate homologation investment. The strategic value is primarily proof-of-concept documentation, not automatic regulatory passthrough.",
         "verdict_type": "warning",
         "confidence_items": [
-            ("🟢 Verified Fact", "EAC Customs Union: zero tariffs between Partner States"),
-            ("🟢 Verified Fact", "KEBS PVoC required for Kenya — Rwanda registration not sufficient"),
-            ("🟡 Plausible Estimate", "Kigali proof-of-concept accelerates Kenya/Tanzania procurement"),
-            ("🔴 Needs Field Verification", "TBS (Tanzania) type-approval timeline for Chinese EV CVs"),
+            ("ðŸŸ¢ Verified Fact", "EAC Customs Union: zero tariffs between Partner States"),
+            ("ðŸŸ¢ Verified Fact", "KEBS PVoC required for Kenya â€” Rwanda registration not sufficient"),
+            ("ðŸŸ¡ Plausible Estimate", "Kigali proof-of-concept accelerates Kenya/Tanzania procurement"),
+            ("ðŸ”´ Needs Field Verification", "TBS (Tanzania) type-approval timeline for Chinese EV CVs"),
         ],
     },
     "ma_ocp_modal": {
         "title": "OCP Transport Modal & Road HCV Procurement Potential",
-        "claim": "Industry commentators cite OCP Group as a flagship anchor client with annual HCV procurement of **800–1,000 units/year**, driven by the Khouribga–Jorf Lasfar phosphate corridor.",
+        "claim": "Industry commentators cite OCP Group as a flagship anchor client with annual HCV procurement of **800â€“1,000 units/year**, driven by the Khouribgaâ€“Jorf Lasfar phosphate corridor.",
         "cross_validation_items": [
-            "**[Fact]** OCP operates a dedicated **187 km slurry pipeline** — structurally inaccessible to road HCVs (OCP Integrated Annual Report 2023).",
-            "**[Fact]** OCP also operates the Benguerir–Jorf Lasfar rail corridor for phosphate concentrate.",
-            "**[Structural logic]** Pipeline and rail serve only the primary ore trunk. ~60 contractor companies perform auxiliary logistics — structurally road-dependent.",
+            "**[Fact]** OCP operates a dedicated **187 km slurry pipeline** â€” structurally inaccessible to road HCVs (OCP Integrated Annual Report 2023).",
+            "**[Fact]** OCP also operates the Benguerirâ€“Jorf Lasfar rail corridor for phosphate concentrate.",
+            "**[Structural logic]** Pipeline and rail serve only the primary ore trunk. ~60 contractor companies perform auxiliary logistics â€” structurally road-dependent.",
             "**[Counter-evidence]** No publicly accessible OCP tender database confirms a recurring 800-unit annual HCV figure.",
             "**[Supportive proxy]** OCP 2023 capex of USD 2.1 billion includes mining fleet renewal.",
         ],
         "verdict": "The slurry pipeline dominates primary ore haulage. The contractor ecosystem represents a real and recurring HCV demand segment. The 800 units/year figure is a bottom-up estimate, not a verified tender disclosure.",
         "verdict_type": "warning",
         "confidence_items": [
-            ("🟢 Verified Fact", "Pipeline dominates primary ore trunk (OCP Annual Report)"),
-            ("🟢 Verified Fact", "Rail handles phosphate concentrate flows"),
-            ("🟡 Plausible Estimate", "Contractor ecosystem is structurally road-dependent"),
-            ("🟡 Plausible Estimate", "800 units/yr HCV procurement estimate"),
-            ("🔴 Needs Field Verification", "Specific tender volumes & timing via OCP SupplierPortal"),
+            ("ðŸŸ¢ Verified Fact", "Pipeline dominates primary ore trunk (OCP Annual Report)"),
+            ("ðŸŸ¢ Verified Fact", "Rail handles phosphate concentrate flows"),
+            ("ðŸŸ¡ Plausible Estimate", "Contractor ecosystem is structurally road-dependent"),
+            ("ðŸŸ¡ Plausible Estimate", "800 units/yr HCV procurement estimate"),
+            ("ðŸ”´ Needs Field Verification", "Specific tender volumes & timing via OCP SupplierPortal"),
         ],
     },
     "ma_tariff": {
-        "title": "Morocco 2.5% Tariff Advantage — Sustainable Competitive Moat?",
-        "claim": "Morocco's EU Association Agreement confers a **2.5% CBU import tariff** — cited as the lowest in Africa and a decisive advantage for EU-origin vehicles.",
+        "title": "Morocco 2.5% Tariff Advantage â€” Sustainable Competitive Moat?",
+        "claim": "Morocco's EU Association Agreement confers a **2.5% CBU import tariff** â€” cited as the lowest in Africa and a decisive advantage for EU-origin vehicles.",
         "cross_validation_items": [
-            "**[Fact]** EU–Morocco Association Agreement sets preferential tariff rates confirmed by Direction Générale des Douanes.",
+            "**[Fact]** EUâ€“Morocco Association Agreement sets preferential tariff rates confirmed by Direction GÃ©nÃ©rale des Douanes.",
             "**[Complication]** The 2.5% applies to vehicles of EU origin (Rules of Origin). Chinese-built trucks face standard MFN rates (~25%) unless locally assembled.",
             "**[Strategic implication]** Structurally advantages European brands. Chinese players must pursue CKD assembly or third-country EU-FTA routing.",
-            "**[Risk]** UK–Morocco post-Brexit continuity agreement is periodically renegotiated.",
+            "**[Risk]** UKâ€“Morocco post-Brexit continuity agreement is periodically renegotiated.",
         ],
         "verdict": "The 2.5% tariff is origin-conditioned, not a blanket benefit. Chinese CBU entrants face a de facto ~22.5pp tariff disadvantage. The rational China entry strategy is local CKD assembly or a Morocco-based JV.",
         "verdict_type": "warning",
         "confidence_items": [
-            ("🟢 Verified Fact", "2.5% tariff for EU-origin vehicles (Douane.gov.ma)"),
-            ("🟢 Verified Fact", "Chinese CBU faces ~25% MFN rate"),
-            ("🟡 Plausible Estimate", "CKD assembly as optimal China entry route"),
-            ("🔴 Needs Field Verification", "Specific CKD partner availability & negotiated terms"),
+            ("ðŸŸ¢ Verified Fact", "2.5% tariff for EU-origin vehicles (Douane.gov.ma)"),
+            ("ðŸŸ¢ Verified Fact", "Chinese CBU faces ~25% MFN rate"),
+            ("ðŸŸ¡ Plausible Estimate", "CKD assembly as optimal China entry route"),
+            ("ðŸ”´ Needs Field Verification", "Specific CKD partner availability & negotiated terms"),
         ],
     },
     "za_transnet": {
-        "title": "Transnet Rail Collapse → Road HCV Demand Transfer — Scissors Effect",
-        "claim": "Transnet's operational deterioration has structurally transferred freight to road, creating durable demand uplift of **3,000–5,000 incremental HCV units/year**.",
+        "title": "Transnet Rail Collapse â†’ Road HCV Demand Transfer â€” Scissors Effect",
+        "claim": "Transnet's operational deterioration has structurally transferred freight to road, creating durable demand uplift of **3,000â€“5,000 incremental HCV units/year**.",
         "cross_validation_items": [
-            "**[Fact]** Transnet Freight Rail volumes declined from **228 Mt (FY2018)** to an estimated **122 Mt (FY2026)** — 46% collapse confirmed in Transnet Annual Reports and Stats SA P7162.",
+            "**[Fact]** Transnet Freight Rail volumes declined from **228 Mt (FY2018)** to an estimated **122 Mt (FY2026)** â€” 46% collapse confirmed in Transnet Annual Reports and Stats SA P7162.",
             "**[Fact]** Stats SA P7162 records rising freight income concurrent with declining payload tonnage.",
             "**[Fact]** NAAMSA 2025 data shows HCV segment resilience outperforming overall automotive market.",
-            "**[Critical counter-risk]** Durban Container Terminal concession (initiated 2023) could restore rail competitiveness within 5–8 years.",
+            "**[Critical counter-risk]** Durban Container Terminal concession (initiated 2023) could restore rail competitiveness within 5â€“8 years.",
             "**[Additional risk]** Private rail operators (Grindrod, Traxtion) entering under open-access policy.",
         ],
-        "verdict": "The Transnet modal shift is empirically well-supported by multiple independent data sources. However, consensus systematically underweights rail recovery risk. Stress-test models against a 30–40% rail volume recovery scenario within 5 years.",
+        "verdict": "The Transnet modal shift is empirically well-supported by multiple independent data sources. However, consensus systematically underweights rail recovery risk. Stress-test models against a 30â€“40% rail volume recovery scenario within 5 years.",
         "verdict_type": "warning",
         "confidence_items": [
-            ("🟢 Verified Fact", "Transnet volume collapse 228→122 Mt (Transnet Annual Reports)"),
-            ("🟢 Verified Fact", "Road freight income growth (Stats SA P7162)"),
-            ("🟡 Plausible Estimate", "3,000–5,000 incremental HCV units from modal shift"),
-            ("🟡 Plausible Estimate", "Rail recovery via port privatisation (5-yr horizon)"),
-            ("🔴 Needs Field Verification", "Private rail operator market share trajectory"),
+            ("ðŸŸ¢ Verified Fact", "Transnet volume collapse 228â†’122 Mt (Transnet Annual Reports)"),
+            ("ðŸŸ¢ Verified Fact", "Road freight income growth (Stats SA P7162)"),
+            ("ðŸŸ¡ Plausible Estimate", "3,000â€“5,000 incremental HCV units from modal shift"),
+            ("ðŸŸ¡ Plausible Estimate", "Rail recovery via port privatisation (5-yr horizon)"),
+            ("ðŸ”´ Needs Field Verification", "Private rail operator market share trajectory"),
         ],
     },
     "za_ev_loadshed": {
         "title": "EV Fleet Adoption Under Load-Shedding Constraints",
-        "claim": "South Africa's load-shedding will delay commercial EV fleet adoption by **5–10 years**.",
+        "claim": "South Africa's load-shedding will delay commercial EV fleet adoption by **5â€“10 years**.",
         "cross_validation_items": [
             "**[Fact]** Eskom implemented load-shedding for **335 days in 2023** (Eskom operational reports).",
             "**[Fact]** National EV Strategy (SAIT, 2023) acknowledges grid reliability as primary EV barrier.",
             "**[Nuance]** Large fleet operators deploy behind-the-meter solar + battery systems decoupling depot charging from Eskom grid.",
             "**[Counter-trend]** Eskom FY2025 data shows load-shedding days declining sharply as Kusile Unit 5 and private IPPs come online.",
         ],
-        "verdict": "Load-shedding is real but potentially transient. The 5–10 year delay thesis is overstated for captive depot fleets with solar/battery backup. EV strategy should be segmented: depot distribution fleets viable now; long-haul intercity EV remains a 2028+ proposition.",
+        "verdict": "Load-shedding is real but potentially transient. The 5â€“10 year delay thesis is overstated for captive depot fleets with solar/battery backup. EV strategy should be segmented: depot distribution fleets viable now; long-haul intercity EV remains a 2028+ proposition.",
         "verdict_type": "warning",
         "confidence_items": [
-            ("🟢 Verified Fact", "335 load-shedding days in 2023 (Eskom reports)"),
-            ("🟡 Plausible Estimate", "Solar depot charging feasibility for captive fleets"),
-            ("🟡 Plausible Estimate", "Grid recovery via Kusile + private IPPs"),
-            ("🔴 Needs Field Verification", "Long-haul public charging availability & rollout pace"),
+            ("ðŸŸ¢ Verified Fact", "335 load-shedding days in 2023 (Eskom reports)"),
+            ("ðŸŸ¡ Plausible Estimate", "Solar depot charging feasibility for captive fleets"),
+            ("ðŸŸ¡ Plausible Estimate", "Grid recovery via Kusile + private IPPs"),
+            ("ðŸ”´ Needs Field Verification", "Long-haul public charging availability & rollout pace"),
         ],
     },
     "za_150pct_tax": {
-        "title": "2026 New Energy Manufacturing — 150% Tax Allowance Strategic Pivot",
+        "title": "2026 New Energy Manufacturing â€” 150% Tax Allowance Strategic Pivot",
         "claim": "South Africa's 2026 Budget introduced a **150% accelerated tax deduction** on qualifying NEV manufacturing investment, effective 1 March 2026, capped at R500 million in Year 1.",
         "cross_validation_items": [
             "**[Fact]** National Treasury 2026 Budget Review confirmed Section 12V expansion: 150% first-year deduction on qualifying EV/NEV manufacturing capex, R500m annual cap.",
-            "**[Fact]** APDP Phase 2 continues to issue Production Rebate Certificates (PRCs) — a parallel, stackable incentive.",
-            "**[Structural implication]** On R500m qualifying investment, 150% deduction generates ~R210m tax saving vs ~R140m under standard deduction — net R70m incremental benefit.",
+            "**[Fact]** APDP Phase 2 continues to issue Production Rebate Certificates (PRCs) â€” a parallel, stackable incentive.",
+            "**[Structural implication]** On R500m qualifying investment, 150% deduction generates ~R210m tax saving vs ~R140m under standard deduction â€” net R70m incremental benefit.",
             "**[Strategic consequence]** Pure CBU importers cannot access the 150% deduction or APDP PRCs.",
-            "**[Market validation]** Ford, Toyota, and Isuzu cited the combined 150%/APDP stack as primary driver of 2026–2028 EV localization commitments (Reuters, March 2026).",
+            "**[Market validation]** Ford, Toyota, and Isuzu cited the combined 150%/APDP stack as primary driver of 2026â€“2028 EV localization commitments (Reuters, March 2026).",
         ],
         "verdict": "Pure CBU import will structurally lose competitiveness against locally-assembled competitors capturing the 150% deduction + APDP PRC stack. The long-term commercial moat is CKD/local assembly + APDP enrolment.",
         "verdict_type": "warning",
         "confidence_items": [
-            ("🟢 Verified Fact", "150% deduction from 1 March 2026 (National Treasury)"),
-            ("🟢 Verified Fact", "APDP Phase 2 PRC stackability confirmed"),
-            ("🟡 Plausible Estimate", "R70m incremental tax benefit per R500m qualifying investment"),
-            ("🟡 Plausible Estimate", "CBU competitiveness erosion vs local assemblers within 3–5 years"),
-            ("🔴 Needs Field Verification", "SARS qualifying asset definition for Chinese CKD assembly lines"),
+            ("ðŸŸ¢ Verified Fact", "150% deduction from 1 March 2026 (National Treasury)"),
+            ("ðŸŸ¢ Verified Fact", "APDP Phase 2 PRC stackability confirmed"),
+            ("ðŸŸ¡ Plausible Estimate", "R70m incremental tax benefit per R500m qualifying investment"),
+            ("ðŸŸ¡ Plausible Estimate", "CBU competitiveness erosion vs local assemblers within 3â€“5 years"),
+            ("ðŸ”´ Needs Field Verification", "SARS qualifying asset definition for Chinese CKD assembly lines"),
         ],
     },
     "ng_kd_tariff": {
-        "title": "Nigeria Zero-Tariff KD Policy — Durable Incentive or Policy Risk?",
+        "title": "Nigeria Zero-Tariff KD Policy â€” Durable Incentive or Policy Risk?",
         "claim": "Nigeria's 2023 EV and CKD/SKD zero-tariff policy delivers **~$46,000 per-unit** cost advantage over CBU imports.",
         "cross_validation_items": [
             "**[Fact]** Nigeria Customs Service confirmed 0% import duty on EV commercial vehicles and CKD/SKD kits under 2023 Finance Act amendments.",
             "**[Fact]** NADDC's NAIDP explicitly targets local assembly partnerships as a core strategic pillar.",
-            "**[Risk: Policy]** Nigeria has modified automotive tariff policy 3 times in 6 years (2013–2019).",
+            "**[Risk: Policy]** Nigeria has modified automotive tariff policy 3 times in 6 years (2013â€“2019).",
             "**[Risk: FX]** NGN depreciation >60% since 2022 increases USD cost of KD kits.",
-            "**[Operational risk]** NADDC assembly licence approval averaging 18–24 months in practice.",
+            "**[Operational risk]** NADDC assembly licence approval averaging 18â€“24 months in practice.",
         ],
-        "verdict": "The zero-tariff CKD advantage is legally confirmed and financially material. Structure JVs with USD-indexed kit pricing, multi-year FX forwards, and exit clauses. Realistic net savings after FX: **$28,000–$35,000 per unit**.",
+        "verdict": "The zero-tariff CKD advantage is legally confirmed and financially material. Structure JVs with USD-indexed kit pricing, multi-year FX forwards, and exit clauses. Realistic net savings after FX: **$28,000â€“$35,000 per unit**.",
         "verdict_type": "warning",
         "confidence_items": [
-            ("🟢 Verified Fact", "0% CKD/EV tariff (2023 Finance Act)"),
-            ("🟡 Plausible Estimate", "~$46k gross per-unit saving"),
-            ("🟡 Plausible Estimate", "Net saving after FX hedge: ~$28k–$35k"),
-            ("🔴 Needs Field Verification", "NADDC licence approval timeline"),
-            ("🔴 Needs Field Verification", "Policy stability through 2028"),
+            ("ðŸŸ¢ Verified Fact", "0% CKD/EV tariff (2023 Finance Act)"),
+            ("ðŸŸ¡ Plausible Estimate", "~$46k gross per-unit saving"),
+            ("ðŸŸ¡ Plausible Estimate", "Net saving after FX hedge: ~$28kâ€“$35k"),
+            ("ðŸ”´ Needs Field Verification", "NADDC licence approval timeline"),
+            ("ðŸ”´ Needs Field Verification", "Policy stability through 2028"),
         ],
     },
     "eth_ev_mandate": {
-        "title": "Ethiopia Petroleum Import Ban — EV Transition Reality vs. Headline",
+        "title": "Ethiopia Petroleum Import Ban â€” EV Transition Reality vs. Headline",
         "claim": "Ethiopia's 2022 petroleum vehicle import ban will drive EV penetration to **>90% of commercial vehicle sales** by 2025.",
         "cross_validation_items": [
             "**[Fact]** ERCA formally suspended import permits for petroleum vehicles mid-2022.",
             "**[Implementation gap]** Enforcement is uneven; grey market imports via Djibouti and South Sudan documented.",
-            "**[Infrastructure constraint]** <120 public EV charging points nationwide; Addis–Djibouti corridor has zero public chargers.",
+            "**[Infrastructure constraint]** <120 public EV charging points nationwide; Addisâ€“Djibouti corridor has zero public chargers.",
             "**[Fleet reality]** High EV share reflects new registrations only. Existing ICE fleet of ~80,000 CVs operates for its full economic life.",
             "**[Chinese dominance]** BYD, Foton, King Long collectively >75% of new EV commercial vehicle registrations.",
         ],
-        "verdict": "The ban is real; its impact on new registration sales is transformative. However, '90% EV' conflates sales share with operational fleet electrification. Chinese EV brands have genuine first-mover advantage in urban fleets; long-haul requires 3–5 year charging build-out.",
+        "verdict": "The ban is real; its impact on new registration sales is transformative. However, '90% EV' conflates sales share with operational fleet electrification. Chinese EV brands have genuine first-mover advantage in urban fleets; long-haul requires 3â€“5 year charging build-out.",
         "verdict_type": "warning",
         "confidence_items": [
-            ("🟢 Verified Fact", "Petroleum import ban enacted by ERCA (mid-2022)"),
-            ("🟢 Verified Fact", "Chinese brands >75% new EV registrations"),
-            ("🟡 Plausible Estimate", "EV new sales share >85% (2025 est.)"),
-            ("🟡 Plausible Estimate", "Operational fleet electrification <15%"),
-            ("🔴 Needs Field Verification", "Addis–Djibouti EV corridor viability"),
+            ("ðŸŸ¢ Verified Fact", "Petroleum import ban enacted by ERCA (mid-2022)"),
+            ("ðŸŸ¢ Verified Fact", "Chinese brands >75% new EV registrations"),
+            ("ðŸŸ¡ Plausible Estimate", "EV new sales share >85% (2025 est.)"),
+            ("ðŸŸ¡ Plausible Estimate", "Operational fleet electrification <15%"),
+            ("ðŸ”´ Needs Field Verification", "Addisâ€“Djibouti EV corridor viability"),
         ],
     },
     "ke_sgr": {
-        "title": "Kenya SGR — Road Freight Competitor or Demand Complement?",
-        "claim": "The SGR Mombasa–Nairobi line will displace **30–40% of long-haul container freight** from road by 2026.",
+        "title": "Kenya SGR â€” Road Freight Competitor or Demand Complement?",
+        "claim": "The SGR Mombasaâ€“Nairobi line will displace **30â€“40% of long-haul container freight** from road by 2026.",
         "cross_validation_items": [
-            "**[Fact]** SGR freight volumes: 1.2 Mt (2018) → 5.8 Mt (2023) (Kenya Railways Corporation).",
-            "**[Fact]** Port of Mombasa container throughput grew concurrently — SGR captured incremental freight.",
-            "**[Operational limit]** SGR operates Mombasa–Nairobi only (472 km). Last-mile to Kampala, Kigali, Juba remains road-dependent.",
+            "**[Fact]** SGR freight volumes: 1.2 Mt (2018) â†’ 5.8 Mt (2023) (Kenya Railways Corporation).",
+            "**[Fact]** Port of Mombasa container throughput grew concurrently â€” SGR captured incremental freight.",
+            "**[Operational limit]** SGR operates Mombasaâ€“Nairobi only (472 km). Last-mile to Kampala, Kigali, Juba remains road-dependent.",
             "**[Financial distress]** SGR debt to Exim Bank China (~KES 500bn); extension to Uganda stalled.",
         ],
-        "verdict": "SGR is a complement to, not substitute for, HCV demand in Kenya. Most Kenyan freight — and all EAC cross-border freight — remains road-dependent.",
+        "verdict": "SGR is a complement to, not substitute for, HCV demand in Kenya. Most Kenyan freight â€” and all EAC cross-border freight â€” remains road-dependent.",
         "verdict_type": "success",
         "confidence_items": [
-            ("🟢 Verified Fact", "SGR volumes 5.8 Mt 2023 (Kenya Railways)"),
-            ("🟢 Verified Fact", "Last-mile beyond Nairobi ICD is road-only"),
-            ("🟡 Plausible Estimate", "SGR Uganda extension stalled (debt constraints)"),
-            ("🔴 Needs Field Verification", "Net HCV demand displacement quantum from SGR"),
+            ("ðŸŸ¢ Verified Fact", "SGR volumes 5.8 Mt 2023 (Kenya Railways)"),
+            ("ðŸŸ¢ Verified Fact", "Last-mile beyond Nairobi ICD is road-only"),
+            ("ðŸŸ¡ Plausible Estimate", "SGR Uganda extension stalled (debt constraints)"),
+            ("ðŸ”´ Needs Field Verification", "Net HCV demand displacement quantum from SGR"),
         ],
     },
     "eg_kd": {
-        "title": "Egypt KD Assembly 5% Tariff — Realistic Entry Path?",
+        "title": "Egypt KD Assembly 5% Tariff â€” Realistic Entry Path?",
         "claim": "Egypt's KD assembly preferential tariff (**5% vs 40% CBU**) creates a compelling incentive analogous to the Nigerian model.",
         "cross_validation_items": [
             "**[Fact]** 5% KD rate requires verified local content >40% (Egyptian IDA guidelines).",
@@ -487,139 +554,139 @@ TRIANGULATION = {
         "verdict": "The 5% KD tariff is genuine but the 40% local content threshold requires deliberate supply chain engineering. GB Auto/MAN precedent confirms viability.",
         "verdict_type": "warning",
         "confidence_items": [
-            ("🟢 Verified Fact", "5% KD rate requires 40% local content (IDA confirmed)"),
-            ("🟢 Verified Fact", "GB Auto/MAN proven assembly precedent"),
-            ("🟡 Plausible Estimate", "40% local content achievability for Chinese CV platforms"),
-            ("🔴 Needs Field Verification", "Net margin after FX and supply chain costs"),
+            ("ðŸŸ¢ Verified Fact", "5% KD rate requires 40% local content (IDA confirmed)"),
+            ("ðŸŸ¢ Verified Fact", "GB Auto/MAN proven assembly precedent"),
+            ("ðŸŸ¡ Plausible Estimate", "40% local content achievability for Chinese CV platforms"),
+            ("ðŸ”´ Needs Field Verification", "Net margin after FX and supply chain costs"),
         ],
     },
     "dz_protect": {
-        "title": "Algeria Import Protectionism — Navigable or Structural Barrier?",
+        "title": "Algeria Import Protectionism â€” Navigable or Structural Barrier?",
         "claim": "Algeria's 30% CBU tariff and import licence quota system make direct CV import commercially unviable.",
         "cross_validation_items": [
             "**[Fact]** Algeria's import licence system (reinstated 2022) creates chronic supply uncertainty.",
             "**[Fact]** Renault Trucks operates a proven JV assembly plant in Rouiba (Algiers).",
             "**[Political dynamic]** JV partners committing to technology transfer receive preferential treatment in public procurement.",
-            "**[Risk]** Ministerial-level JV licence approval is opaque; typical timeline 24–36 months.",
+            "**[Risk]** Ministerial-level JV licence approval is opaque; typical timeline 24â€“36 months.",
         ],
-        "verdict": "Algeria is high-barrier but not closed. The Renault Rouiba precedent confirms JV manufacturing partnerships can succeed. Realistic timeline from MOU to first unit production: 3–4 years.",
+        "verdict": "Algeria is high-barrier but not closed. The Renault Rouiba precedent confirms JV manufacturing partnerships can succeed. Realistic timeline from MOU to first unit production: 3â€“4 years.",
         "verdict_type": "warning",
         "confidence_items": [
-            ("🟢 Verified Fact", "30% CBU tariff + quota system confirmed"),
-            ("🟢 Verified Fact", "Renault Rouiba JV as proven entry template"),
-            ("🟡 Plausible Estimate", "3–4 year JV setup timeline"),
-            ("🔴 Needs Field Verification", "Ministerial approval timeline for Chinese brand JVs"),
+            ("ðŸŸ¢ Verified Fact", "30% CBU tariff + quota system confirmed"),
+            ("ðŸŸ¢ Verified Fact", "Renault Rouiba JV as proven entry template"),
+            ("ðŸŸ¡ Plausible Estimate", "3â€“4 year JV setup timeline"),
+            ("ðŸ”´ Needs Field Verification", "Ministerial approval timeline for Chinese brand JVs"),
         ],
     },
     "tn_ev_policy": {
-        "title": "Tunisia 2026 EV Policy Arbitrage — TCO Advantage for Chinese Electric CV",
+        "title": "Tunisia 2026 EV Policy Arbitrage â€” TCO Advantage for Chinese Electric CV",
         "claim": "Tunisia's 2026 Finance Law EV incentives create a structural TCO advantage of **~TND 151,000 per unit** for EV commercial vehicles vs conventional diesel imports.",
         "cross_validation_items": [
             "**[Fact]** Tunisia Loi de Finances 2026: BEV commercial vehicles exempt from customs duty (0%), exempt from Taxe de Consommation (0%), eligible for reduced TVA of 7% (vs standard 19%).",
             "**[Fact]** ANME confirmed TND 10,000 direct subsidy for BEV commercial vehicles registered in Tunisia from January 2026.",
-            "**[Fact]** Conventional diesel commercial vehicle (≥12t) subject to: 10% customs duty, 19% TVA, Taxe de Consommation 25% on CIF value.",
+            "**[Fact]** Conventional diesel commercial vehicle (â‰¥12t) subject to: 10% customs duty, 19% TVA, Taxe de Consommation 25% on CIF value.",
             "**[Structural advantage]** On a CIF base price of TND 300,000, all-in tax loading for diesel = ~TND 162,000; for BEV = ~TND 11,000.",
             "**[Market readiness risk]** Tunisia has <50 commercial EV charging points as of early 2026 (STEG data).",
         ],
-        "verdict": "The Tunisia 2026 EV policy arbitrage is the most clearly quantifiable policy-driven TCO advantage in North Africa. Key risk is operational charging infrastructure — limiting near-term EV suitability to urban distribution and depot-return routes.",
+        "verdict": "The Tunisia 2026 EV policy arbitrage is the most clearly quantifiable policy-driven TCO advantage in North Africa. Key risk is operational charging infrastructure â€” limiting near-term EV suitability to urban distribution and depot-return routes.",
         "verdict_type": "success",
         "confidence_items": [
-            ("🟢 Verified Fact", "0% customs + 0% excise + 7% VAT for BEV (Loi de Finances 2026)"),
-            ("🟢 Verified Fact", "TND 10,000 ANME direct subsidy confirmed (January 2026)"),
-            ("🟢 Verified Fact", "Diesel CV: 10% duty + 19% TVA + 25% excise (standard regime)"),
-            ("🟡 Plausible Estimate", "~TND 151,000 per-unit net tax delta on TND 300k CIF base"),
-            ("🟡 Plausible Estimate", "Urban depot-return routes viable with current charging infrastructure"),
-            ("🔴 Needs Field Verification", "ANME annual programme budget continuity beyond 2026"),
+            ("ðŸŸ¢ Verified Fact", "0% customs + 0% excise + 7% VAT for BEV (Loi de Finances 2026)"),
+            ("ðŸŸ¢ Verified Fact", "TND 10,000 ANME direct subsidy confirmed (January 2026)"),
+            ("ðŸŸ¢ Verified Fact", "Diesel CV: 10% duty + 19% TVA + 25% excise (standard regime)"),
+            ("ðŸŸ¡ Plausible Estimate", "~TND 151,000 per-unit net tax delta on TND 300k CIF base"),
+            ("ðŸŸ¡ Plausible Estimate", "Urban depot-return routes viable with current charging infrastructure"),
+            ("ðŸ”´ Needs Field Verification", "ANME annual programme budget continuity beyond 2026"),
         ],
     },
     "tn_eu": {
-        "title": "Tunisia EU-Aligned Market — Gateway Opportunity or Niche?",
+        "title": "Tunisia EU-Aligned Market â€” Gateway Opportunity or Niche?",
         "claim": "Tunisia's EU Association Agreement and UN-ECE certification mutual recognition make it the easiest African market to enter for EU-compliant commercial vehicles.",
         "cross_validation_items": [
-            "**[Fact]** INNORPI confirms UN-ECE mutual recognition — EU type-approved vehicles require no additional homologation.",
-            "**[Market size]** ~8,000 units/year total CV market — regulatory ease must be weighed against limited scale economics.",
+            "**[Fact]** INNORPI confirms UN-ECE mutual recognition â€” EU type-approved vehicles require no additional homologation.",
+            "**[Market size]** ~8,000 units/year total CV market â€” regulatory ease must be weighed against limited scale economics.",
             "**[Chinese brand challenge]** European brands hold >70% share through decades of network investment.",
             "**[Gateway potential]** Tunisia's EU regulatory alignment could serve as a testbed for EU-spec Chinese CV variants.",
         ],
-        "verdict": "Tunisia is easiest to enter but hardest to scale. The 2026 EV policy arbitrage fundamentally changes this calculus — making Tunisia potentially the most commercially attractive immediate entry market for Chinese EV commercial vehicles in North Africa.",
+        "verdict": "Tunisia is easiest to enter but hardest to scale. The 2026 EV policy arbitrage fundamentally changes this calculus â€” making Tunisia potentially the most commercially attractive immediate entry market for Chinese EV commercial vehicles in North Africa.",
         "verdict_type": "success",
         "confidence_items": [
-            ("🟢 Verified Fact", "UN-ECE mutual recognition (INNORPI confirmed)"),
-            ("🟢 Verified Fact", "European brands >70% market share"),
-            ("🟡 Plausible Estimate", "EV policy arbitrage as primary 2026 entry driver"),
-            ("🔴 Needs Field Verification", "Chinese brand dealer network viability at 8,000 unit market"),
+            ("ðŸŸ¢ Verified Fact", "UN-ECE mutual recognition (INNORPI confirmed)"),
+            ("ðŸŸ¢ Verified Fact", "European brands >70% market share"),
+            ("ðŸŸ¡ Plausible Estimate", "EV policy arbitrage as primary 2026 entry driver"),
+            ("ðŸ”´ Needs Field Verification", "Chinese brand dealer network viability at 8,000 unit market"),
         ],
     },
 
-    # ══ NEW · Battle 1 additions — Djibouti / Mauritius / Madagascar ══
+    # â•â• NEW Â· Battle 1 additions â€” Djibouti / Mauritius / Madagascar â•â•
     "dj_port_gateway": {
-        "title": "Djibouti as Ethiopia's Port Throat — Is Drayage Volume Real or a Transit Mirage?",
-        "claim": "Djibouti's commercial vehicle market is dismissed by regional planners as 'too small to matter' (<1,000 CV/yr domestic registrations) — implying no dedicated fleet strategy is warranted.",
+        "title": "Djibouti as Ethiopia's Port Throat â€” Is Drayage Volume Real or a Transit Mirage?",
+        "claim": "Djibouti's commercial vehicle market is dismissed by regional planners as 'too small to matter' (<1,000 CV/yr domestic registrations) â€” implying no dedicated fleet strategy is warranted.",
         "cross_validation_items": [
-            "**[Fact]** Over 95% of landlocked Ethiopia's import/export trade transits the Addis–Djibouti corridor via the Port of Djibouti and Doraleh Multipurpose Port (Djibouti Ports & Free Zones Authority).",
-            "**[Fact]** Djibouti operates as a free-zone re-export and drayage hub, not a domestic consumption market — the relevant fleet metric is container-drayage truck-days, not local vehicle registrations.",
-            "**[Structural logic]** Short, predictable, high-frequency port-to-railhead / port-to-border drayage runs (Djibouti City ⇄ Ethio-Djibouti Railway terminal, <15km) are the single most EV-friendly duty cycle in the entire 12-market portfolio — fixed routes, fixed hours, depot-return every night.",
+            "**[Fact]** Over 95% of landlocked Ethiopia's import/export trade transits the Addisâ€“Djibouti corridor via the Port of Djibouti and Doraleh Multipurpose Port (Djibouti Ports & Free Zones Authority).",
+            "**[Fact]** Djibouti operates as a free-zone re-export and drayage hub, not a domestic consumption market â€” the relevant fleet metric is container-drayage truck-days, not local vehicle registrations.",
+            "**[Structural logic]** Short, predictable, high-frequency port-to-railhead / port-to-border drayage runs (Djibouti City â‡„ Ethio-Djibouti Railway terminal, <15km) are the single most EV-friendly duty cycle in the entire 12-market portfolio â€” fixed routes, fixed hours, depot-return every night.",
             "**[Counter-evidence]** Djibouti's own grid remains partially diesel-generator-backed outside the capital; national household electrification is uneven, though the Doraleh/Djibouti City grid segment (Ethiopia-Djibouti interconnector + Ghoubet geothermal pipeline) is comparatively stable.",
             "**[Risk]** Flat, non-EAC-style import duty regime (~33% effective) makes CBU import expensive regardless of powertrain; Djibouti has no dedicated EV duty carve-out today.",
         ],
-        "verdict": "Do not evaluate Djibouti on domestic CV sales volume — evaluate it as a **captive drayage asset serving Ethiopia's entire trade volume**. A depot-charged e-drayage tractor fleet based at Doraleh, running fixed <15km port-to-rail legs, is a defensible pilot even without a broad EV duty incentive, because the route profile itself (not policy) is what makes the TCO work.",
+        "verdict": "Do not evaluate Djibouti on domestic CV sales volume â€” evaluate it as a **captive drayage asset serving Ethiopia's entire trade volume**. A depot-charged e-drayage tractor fleet based at Doraleh, running fixed <15km port-to-rail legs, is a defensible pilot even without a broad EV duty incentive, because the route profile itself (not policy) is what makes the TCO work.",
         "verdict_type": "warning",
         "confidence_items": [
-            ("🟢 Verified Fact", "Djibouti carries >95% of Ethiopia's seaborne trade (DPFZA)"),
-            ("🟢 Verified Fact", "Doraleh Multipurpose Port is the primary container gateway"),
-            ("🟡 Plausible Estimate", "Port-to-rail drayage leg is <15km — ideal EV depot-return profile"),
-            ("🟡 Plausible Estimate", "~33% flat effective import duty, no EV carve-out yet"),
-            ("🔴 Needs Field Verification", "Doraleh grid capacity for a multi-unit overnight EV depot charging load"),
+            ("ðŸŸ¢ Verified Fact", "Djibouti carries >95% of Ethiopia's seaborne trade (DPFZA)"),
+            ("ðŸŸ¢ Verified Fact", "Doraleh Multipurpose Port is the primary container gateway"),
+            ("ðŸŸ¡ Plausible Estimate", "Port-to-rail drayage leg is <15km â€” ideal EV depot-return profile"),
+            ("ðŸŸ¡ Plausible Estimate", "~33% flat effective import duty, no EV carve-out yet"),
+            ("ðŸ”´ Needs Field Verification", "Doraleh grid capacity for a multi-unit overnight EV depot charging load"),
         ],
     },
     "mu_green_island": {
-        "title": "Mauritius Green Premium — Does 'Small Island' Mean 'Small Opportunity'?",
+        "title": "Mauritius Green Premium â€” Does 'Small Island' Mean 'Small Opportunity'?",
         "claim": "Mauritius's total commercial vehicle market (~1,800 units/yr) is too small and too EU-brand-loyal for a Chinese OEM to bother building a dedicated go-to-market motion.",
         "cross_validation_items": [
             "**[Fact]** Mauritius has one of the highest EV penetration rates in Sub-Saharan Africa, driven by a government excise-duty exemption on battery-electric vehicles and a national decarbonisation roadmap targeting 60% renewable electricity by 2030 (Mauritius Ministry of Energy).",
-            "**[Fact]** The island's entire road network is under 2,000km, and the longest possible single trip (Port Louis to the furthest resort in the south) is under 60km — structurally eliminating range anxiety as an objection for any commercial EV pitch.",
-            "**[Structural logic]** Mauritius's economy is disproportionately weighted toward luxury tourism (resorts, hotel groups) and duty-free/import-export logistics at Port Louis — both are premium, brand-conscious buyers willing to pay for an ESG-forward fleet story that they can put in their own sustainability reports.",
+            "**[Fact]** The island's entire road network is under 2,000km, and the longest possible single trip (Port Louis to the furthest resort in the south) is under 60km â€” structurally eliminating range anxiety as an objection for any commercial EV pitch.",
+            "**[Structural logic]** Mauritius's economy is disproportionately weighted toward luxury tourism (resorts, hotel groups) and duty-free/import-export logistics at Port Louis â€” both are premium, brand-conscious buyers willing to pay for an ESG-forward fleet story that they can put in their own sustainability reports.",
             "**[Counter-evidence]** Absolute unit volumes are tiny in isolation; a Chinese OEM cannot justify a dedicated dealer network on Mauritius volume alone.",
             "**[Strategic logic]** Mauritius functions as a **reference-account market**: a fleet of electric resort shuttle buses or light EV trucks photographed at a 5-star resort is a marketing asset reusable across every other Indian Ocean and mainland tourism-economy pitch.",
         ],
-        "verdict": "Mauritius is **not a volume play — it is a showcase play**, structurally similar to Rwanda's EAC-sandbox logic but aimed at the luxury hospitality and green-logistics segment instead of G2G. Fund a small EV resort-shuttle and EV light-truck pilot with 2-3 flagship hotel groups, and reuse the case study across every coastal tourism market on the continent.",
+        "verdict": "Mauritius is **not a volume play â€” it is a showcase play**, structurally similar to Rwanda's EAC-sandbox logic but aimed at the luxury hospitality and green-logistics segment instead of G2G. Fund a small EV resort-shuttle and EV light-truck pilot with 2-3 flagship hotel groups, and reuse the case study across every coastal tourism market on the continent.",
         "verdict_type": "success",
         "confidence_items": [
-            ("🟢 Verified Fact", "EV excise duty exemption confirmed (Mauritius Ministry of Energy)"),
-            ("🟢 Verified Fact", "Entire island road network <2,000km — no range-anxiety objection"),
-            ("🟡 Plausible Estimate", "Resort/hospitality groups as premium early-adopter buyer segment"),
-            ("🟡 Plausible Estimate", "Reference-case value transferable to other tourism economies"),
-            ("🔴 Needs Field Verification", "Actual hotel-group capex appetite and fleet renewal cycle timing"),
+            ("ðŸŸ¢ Verified Fact", "EV excise duty exemption confirmed (Mauritius Ministry of Energy)"),
+            ("ðŸŸ¢ Verified Fact", "Entire island road network <2,000km â€” no range-anxiety objection"),
+            ("ðŸŸ¡ Plausible Estimate", "Resort/hospitality groups as premium early-adopter buyer segment"),
+            ("ðŸŸ¡ Plausible Estimate", "Reference-case value transferable to other tourism economies"),
+            ("ðŸ”´ Needs Field Verification", "Actual hotel-group capex appetite and fleet renewal cycle timing"),
         ],
     },
     "mg_infra_reality": {
-        "title": "Madagascar Grid & Road Reality — Why 'Just Sell EVs Everywhere' Fails Here",
+        "title": "Madagascar Grid & Road Reality â€” Why 'Just Sell EVs Everywhere' Fails Here",
         "claim": "Madagascar's poor road infrastructure and mining-sector demand make it a natural candidate for the same EV-led strategy being pursued in Rwanda, Tunisia, and Mauritius.",
         "cross_validation_items": [
-            "**[Fact]** Madagascar's national electrification rate is among the lowest in Africa (under 35% even in nominal terms), and grid reliability outside Antananarivo is poor-to-nonexistent — most mining and industrial sites run on captive diesel generation, not grid power (World Bank / JIRAMA data).",
-            "**[Fact]** Madagascar's core commercial vehicle demand driver is mining and mineral-export logistics (nickel, cobalt, chromite, graphite, and artisanal/industrial gemstone corridors) running on unpaved or badly maintained roads between inland mine sites and the ports of Toamasina and Tuléar.",
-            "**[Structural logic]** Long-haul, high-payload, rough-terrain mining logistics on an unreliable-to-absent grid is the single worst possible use case for battery-electric trucks anywhere in the 12-market portfolio — this is a pure diesel-mining-truck opportunity, not an EV one.",
+            "**[Fact]** Madagascar's national electrification rate is among the lowest in Africa (under 35% even in nominal terms), and grid reliability outside Antananarivo is poor-to-nonexistent â€” most mining and industrial sites run on captive diesel generation, not grid power (World Bank / JIRAMA data).",
+            "**[Fact]** Madagascar's core commercial vehicle demand driver is mining and mineral-export logistics (nickel, cobalt, chromite, graphite, and artisanal/industrial gemstone corridors) running on unpaved or badly maintained roads between inland mine sites and the ports of Toamasina and TulÃ©ar.",
+            "**[Structural logic]** Long-haul, high-payload, rough-terrain mining logistics on an unreliable-to-absent grid is the single worst possible use case for battery-electric trucks anywhere in the 12-market portfolio â€” this is a pure diesel-mining-truck opportunity, not an EV one.",
             "**[Counter-evidence]** A handful of urban Antananarivo distribution routes could theoretically support light EVs if grid-connected depot charging is available, but this is a small, low-priority sub-segment relative to the mining corridor volume.",
             "**[Risk]** Political and currency instability (Ariary volatility, periodic political transitions) adds deal-execution risk on top of the infrastructure risk.",
         ],
-        "verdict": "Madagascar should be pitched **diesel mining/haulage trucks exclusively** — rugged, high-payload, low-electronics-complexity ICE trucks suited to unreliable fuel supply chains and zero charging infrastructure. Do not lead with EV messaging here under any circumstances; it will read as out-of-touch with the buyer's operating reality and cost credibility with the mining-sector decision maker.",
+        "verdict": "Madagascar should be pitched **diesel mining/haulage trucks exclusively** â€” rugged, high-payload, low-electronics-complexity ICE trucks suited to unreliable fuel supply chains and zero charging infrastructure. Do not lead with EV messaging here under any circumstances; it will read as out-of-touch with the buyer's operating reality and cost credibility with the mining-sector decision maker.",
         "verdict_type": "warning",
         "confidence_items": [
-            ("🟢 Verified Fact", "National electrification rate <35%, grid unreliable outside capital (World Bank/JIRAMA)"),
-            ("🟢 Verified Fact", "Core CV demand driver is mining/mineral export logistics, not urban distribution"),
-            ("🟡 Plausible Estimate", "Rough/unpaved road network structurally favours rugged diesel platforms"),
-            ("🔴 Needs Field Verification", "Specific mine-site fleet renewal timelines and tender processes"),
+            ("ðŸŸ¢ Verified Fact", "National electrification rate <35%, grid unreliable outside capital (World Bank/JIRAMA)"),
+            ("ðŸŸ¢ Verified Fact", "Core CV demand driver is mining/mineral export logistics, not urban distribution"),
+            ("ðŸŸ¡ Plausible Estimate", "Rough/unpaved road network structurally favours rugged diesel platforms"),
+            ("ðŸ”´ Needs Field Verification", "Specific mine-site fleet renewal timelines and tender processes"),
         ],
     },
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
-# 4. TRIANGULATION RENDERER — strictly single-column, top-to-bottom (Task 1 + 2)
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 4. TRIANGULATION RENDERER â€” strictly single-column, top-to-bottom (Task 1 + 2)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 def render_triangulation(tri_key: str):
     """
     Renders the three-layer Due Diligence logic in a single vertical column.
-    No st.columns are used here by design — long-form text must never sit
+    No st.columns are used here by design â€” long-form text must never sit
     side-by-side with another long-form text block (this was the source of
     the text-overlap bug in earlier versions).
     """
@@ -627,28 +694,28 @@ def render_triangulation(tri_key: str):
         return
     t = TRIANGULATION[tri_key]
 
-    st.markdown("**① Market Claim &nbsp;/&nbsp; 市场观点**")
+    st.markdown("**â‘  Market Claim &nbsp;/&nbsp; å¸‚åœºè§‚ç‚¹**")
     st.markdown(f"> {t['claim']}")
     st.markdown("")
 
     cv_text = "\n\n".join(f"- {item}" for item in t["cross_validation_items"])
-    st.info(f"**② Cross-Validation &nbsp;/&nbsp; 交叉验证**\n\n{cv_text}", icon="🔍")
+    st.info(f"**â‘¡ Cross-Validation &nbsp;/&nbsp; äº¤å‰éªŒè¯**\n\n{cv_text}", icon="ðŸ”")
 
-    conf_lines = "\n".join(f"- {badge} — {label}" for badge, label in t["confidence_items"])
+    conf_lines = "\n".join(f"- {badge} â€” {label}" for badge, label in t["confidence_items"])
     full_verdict = (
-        f"**③ Analyst Verdict &nbsp;/&nbsp; 最终研判**\n\n"
+        f"**â‘¢ Analyst Verdict &nbsp;/&nbsp; æœ€ç»ˆç ”åˆ¤**\n\n"
         f"{t['verdict']}\n\n---\n"
         f"**Confidence Assessment:**\n\n{conf_lines}"
     )
     if t["verdict_type"] == "success":
-        st.success(full_verdict, icon="✅")
+        st.success(full_verdict, icon="âœ…")
     else:
-        st.warning(full_verdict, icon="⚠️")
+        st.warning(full_verdict, icon="âš ï¸")
 
 
 def render_strategic_action(cdata: dict):
     """
-    Level 4 closing element — a single, visually distinct action box that
+    Level 4 closing element â€” a single, visually distinct action box that
     converts the Due Diligence verdict into a concrete sales instruction.
     Pulled from cdata['action'], which every Tier 1 country dict defines.
     """
@@ -657,40 +724,40 @@ def render_strategic_action(cdata: dict):
         return
     st.markdown(f"""
 <div class="action-box">
-    <div class="action-box-title">🎯 Strategic Action / 销售行动指令</div>
+    <div class="action-box-title">ðŸŽ¯ Strategic Action / é”€å”®è¡ŒåŠ¨æŒ‡ä»¤</div>
     <div style="font-size:.86rem;color:#2D3142;line-height:1.7;">
         {action}
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # 5. TIER-1 COUNTRY DATABASE
-#    v13.0 schema additions (Battle 1 — Strategic Map Expansion):
-#      + Djibouti   (DJ)  — "Ethiopia's Port Throat" · Port Drayage focus
-#      + Mauritius  (MU)  — "High-End Green Island"  · Pure-EV LCV & bus focus
-#      + Madagascar (MG)  — "Brutal Infrastructure & Mining" · Diesel-only mining trucks
-# ══════════════════════════════════════════════════════════════════════════════
+#    v13.0 schema additions (Battle 1 â€” Strategic Map Expansion):
+#      + Djibouti   (DJ)  â€” "Ethiopia's Port Throat" Â· Port Drayage focus
+#      + Mauritius  (MU)  â€” "High-End Green Island"  Â· Pure-EV LCV & bus focus
+#      + Madagascar (MG)  â€” "Brutal Infrastructure & Mining" Â· Diesel-only mining trucks
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 TIER1 = {
     "Nigeria": {
-        "flag":"🇳🇬","iso":"NGA","region":"West Africa","tier":1,
+        "flag":"ðŸ‡³ðŸ‡¬","iso":"NGA","region":"West Africa","tier":1,
         "kpi":{
             "Annual CV Sales":  ("45,200","units/yr","+6.2% YoY","https://naddc.gov.ng"),
             "EV Penetration":   ("3.8%","of total sales","+1.2pp YoY","https://trade.gov.ng"),
-            "EV Import Tariff": ("0%","CBU EV (2023–28)","Zero-rated","https://customs.gov.ng"),
-            "Diesel Price":     ("₦1,180","/litre","≈ $0.74 USD","https://pppra.gov.ng"),
+            "EV Import Tariff": ("0%","CBU EV (2023â€“28)","Zero-rated","https://customs.gov.ng"),
+            "Diesel Price":     ("â‚¦1,180","/litre","â‰ˆ $0.74 USD","https://pppra.gov.ng"),
         },
         "brand_share":{"brands":["Sinotruk","FAW","Foton","Volvo","Scania"],"sales":[1840,1420,980,560,410]},
         "policy":{
-            "tariff":      "CBU EV: 0% (2023–2028). CKD/SKD: 0%. Conventional CBU: 35%.",
+            "tariff":      "CBU EV: 0% (2023â€“2028). CKD/SKD: 0%. Conventional CBU: 35%.",
             "certification":"SON mandatory; NAFDAC for specialist vehicles; Form M import approval required.",
             "key_buyers":  "Dangote Cement, BUA Group (agri & chemicals), NNPC Logistics Division.",
-            "risk":        "NGN/USD depreciation >60% over 18 months. Apapa port congestion: 3–6 week clearance delays.",
+            "risk":        "NGN/USD depreciation >60% over 18 months. Apapa port congestion: 3â€“6 week clearance delays.",
         },
         "news_query":"Nigeria commercial vehicle logistics truck EV",
         "tri_keys":["ng_kd_tariff"],
         "sources":{
-            "trade":  ("NADDC — National Automotive Design & Development Council","https://naddc.gov.ng"),
+            "trade":  ("NADDC â€” National Automotive Design & Development Council","https://naddc.gov.ng"),
             "customs":("Nigeria Customs Service","https://customs.gov.ng"),
             "market": ("Nigeria Trade Hub","https://trade.gov.ng"),
         },
@@ -707,13 +774,13 @@ TIER1 = {
             "Interest_Rate":           0.24,
             "ICE_Residual_Pct":        0.40,
             "EV_Residual_Pct":         0.15,
-            "source_name": "NADDC / Nigeria Customs — Tariff & Fuel Price Modelling 2026",
+            "source_name": "NADDC / Nigeria Customs â€” Tariff & Fuel Price Modelling 2026",
             "source_url":  "https://naddc.gov.ng",
         },
         "segment_apps": {
-            "Urban FMCG (城市快消)":      {"volume": 14200, "ev_readiness": 7.0},
-            "Port Drayage (港口倒短)":    {"volume": 9800,  "ev_readiness": 4.5},
-            "Long-Haul Mining (长途矿业)":{"volume": 21200, "ev_readiness": 0.9},
+            "Urban FMCG (åŸŽå¸‚å¿«æ¶ˆ)":      {"volume": 14200, "ev_readiness": 7.0},
+            "Port Drayage (æ¸¯å£å€’çŸ­)":    {"volume": 9800,  "ev_readiness": 4.5},
+            "Long-Haul Mining (é•¿é€”çŸ¿ä¸š)":{"volume": 21200, "ev_readiness": 0.9},
         },
         "risk_radar": {
             "FX_Liquidity":        1.5,
@@ -725,43 +792,43 @@ TIER1 = {
         "action": (
             "FX liquidity is the binding constraint, not tariffs. Structure all contracts in "
             "<b>USD-denominated CKD kits</b> with a Nigerian assembly partner (capturing the 0% CKD "
-            "duty) rather than CBU export — this avoids NGN devaluation risk on the bulk of the deal "
+            "duty) rather than CBU export â€” this avoids NGN devaluation risk on the bulk of the deal "
             "value. Target Dangote and BUA Group fleet renewal cycles directly; Apapa port delays make "
             "CKD-Lagos-assembly strictly faster to deliver than CBU import in 2026."
         ),
         "gtm_playbook": {
             "product_matrix": (
                 "**Lead SKU: 8t e-LCV** for Lagos/Lagos-Ibadan urban FMCG distribution (Dangote, BUA "
-                "depot runs) — this is the only segment where EV readiness (7.0/10) clears the bar. "
+                "depot runs) â€” this is the only segment where EV readiness (7.0/10) clears the bar. "
                 "**Secondary SKU: 18t SKD rigid** assembled locally to capture 0% CKD duty, positioned "
-                "against Sinotruk/FAW incumbents on landed cost, not on EV narrative — Nigerian buyers "
-                "are price-led, not ESG-led. **Do not lead with EHCV/tractor** (0.9/10 readiness) — "
+                "against Sinotruk/FAW incumbents on landed cost, not on EV narrative â€” Nigerian buyers "
+                "are price-led, not ESG-led. **Do not lead with EHCV/tractor** (0.9/10 readiness) â€” "
                 "diesel tractors remain the only bankable choice for long-haul mining logistics through 2028."
             ),
             "supply_chain_mode": (
                 "**CKD assembly via a Lagos-based JV partner, invoiced in USD.** This is non-negotiable "
-                "given NGN's >60% two-year depreciation — any naira-denominated contract erodes margin "
+                "given NGN's >60% two-year depreciation â€” any naira-denominated contract erodes margin "
                 "faster than the 0% duty saves it. Structure milestone payments in USD with a 90-day FX "
                 "forward on the naira-denominated local assembly labour component only. Route CBU spares "
                 "and high-value components through Lagos Free Trade Zone to defer duty exposure further."
             ),
             "target_persona": (
-                "**Primary:** Group Fleet Director at Dangote Cement / BUA Group — KPI-driven on landed "
+                "**Primary:** Group Fleet Director at Dangote Cement / BUA Group â€” KPI-driven on landed "
                 "cost per tonne-km, controls multi-year framework agreements, immune to EV sentiment "
-                "pitches. **Secondary:** NNPC Logistics Division procurement lead — long sales cycle "
+                "pitches. **Secondary:** NNPC Logistics Division procurement lead â€” long sales cycle "
                 "(12-18 months) but framework volumes once won are sticky and FX-insulated via dollar "
-                "crude revenue. Avoid SME logistics owners — their FX access is worse than the corporates'."
+                "crude revenue. Avoid SME logistics owners â€” their FX access is worse than the corporates'."
             ),
         },
     },
 
     "South Africa": {
-        "flag":"🇿🇦","iso":"ZAF","region":"Southern Africa","tier":1,
+        "flag":"ðŸ‡¿ðŸ‡¦","iso":"ZAF","region":"Southern Africa","tier":1,
         "kpi":{
             "Total Vehicle Sales 2025": ("596,818","units (+15.7% YoY)","NAAMSA Full Year 2025","https://naamsa.co.za"),
             "NEV Sales 2025":           ("16,716","units (+7.1% YoY)","BEV+PHEV+HEV combined","https://naamsa.co.za"),
             "HCV Import Tariff":        ("25%","CBU standard","KD assembly ~12%","https://itac.org.za"),
-            "Diesel Price":             ("R21.60","/litre","≈ $1.18 USD","https://www.energy.gov.za"),
+            "Diesel Price":             ("R21.60","/litre","â‰ˆ $1.18 USD","https://www.energy.gov.za"),
         },
         "brand_share":{"brands":["Mercedes-Benz","Volvo","MAN","Scania","FAW"],"sales":[7200,6100,5800,5200,3100]},
         "policy":{
@@ -773,8 +840,8 @@ TIER1 = {
         "news_query":"South Africa commercial truck NEV NAAMSA 2025 logistics",
         "tri_keys":["za_transnet","za_ev_loadshed","za_150pct_tax"],
         "sources":{
-            "trade":  ("NAAMSA — Automotive Business Council","https://naamsa.co.za"),
-            "customs":("ITAC — International Trade Administration Commission","https://itac.org.za"),
+            "trade":  ("NAAMSA â€” Automotive Business Council","https://naamsa.co.za"),
+            "customs":("ITAC â€” International Trade Administration Commission","https://itac.org.za"),
             "market": ("National Treasury 2026 Budget Review","https://www.treasury.gov.za"),
         },
         "tco_params": {
@@ -794,9 +861,9 @@ TIER1 = {
             "source_url":  "https://naamsa.co.za",
         },
         "segment_apps": {
-            "Urban FMCG (城市快消)":      {"volume": 9600,  "ev_readiness": 6.2},
-            "Port Drayage (港口倒短)":    {"volume": 8100,  "ev_readiness": 3.8},
-            "Long-Haul Mining (长途矿业)":{"volume": 13000, "ev_readiness": 1.2},
+            "Urban FMCG (åŸŽå¸‚å¿«æ¶ˆ)":      {"volume": 9600,  "ev_readiness": 6.2},
+            "Port Drayage (æ¸¯å£å€’çŸ­)":    {"volume": 8100,  "ev_readiness": 3.8},
+            "Long-Haul Mining (é•¿é€”çŸ¿ä¸š)":{"volume": 13000, "ev_readiness": 1.2},
         },
         "risk_radar": {
             "FX_Liquidity":        6.5,
@@ -806,7 +873,7 @@ TIER1 = {
             "Policy_Consistency":  7.0,
         },
         "action": (
-            "Lead with the <b>150% tax deduction + APDP PRC stack</b> — this is the only durable moat "
+            "Lead with the <b>150% tax deduction + APDP PRC stack</b> â€” this is the only durable moat "
             "in this market. Do not pitch CBU export as a long-term strategy; pitch a <b>local assembly "
             "JV</b> structured to qualify for both incentives before the 1 March 2026 deadline. Target "
             "Transnet and Imperial Logistics for the Gauteng-corridor depot fleets where Eskom grid "
@@ -814,16 +881,16 @@ TIER1 = {
         ),
         "gtm_playbook": {
             "product_matrix": (
-                "**Lead SKU: 12t SKD rigid for Gauteng depot distribution** — Eskom grid reliability in "
+                "**Lead SKU: 12t SKD rigid for Gauteng depot distribution** â€” Eskom grid reliability in "
                 "the metro corridor and APDP-qualifying local content make this the most defensible "
                 "near-term play. **Secondary SKU: 8t e-LCV for urban FMCG** (Shoprite/Tiger Brands depot "
-                "loops, 6.2/10 readiness) — overnight charging fits existing depot operating hours. "
-                "**Do not lead with long-haul EHCV/tractor** (1.2/10 readiness) — Transnet's rail "
+                "loops, 6.2/10 readiness) â€” overnight charging fits existing depot operating hours. "
+                "**Do not lead with long-haul EHCV/tractor** (1.2/10 readiness) â€” Transnet's rail "
                 "collapse is creating road HCV demand, but that demand is diesel demand, not EV demand, "
                 "given inter-provincial charging infrastructure gaps."
             ),
             "supply_chain_mode": (
-                "<b>2026年3月后全面转向本地SKD以获取150%抵税与APDP退税</b> — from 1 March 2026, structure "
+                "<b>2026å¹´3æœˆåŽå…¨é¢è½¬å‘æœ¬åœ°SKDä»¥èŽ·å–150%æŠµç¨Žä¸ŽAPDPé€€ç¨Ž</b> â€” from 1 March 2026, structure "
                 "100% of new South African volume as locally-assembled SKD to simultaneously capture the "
                 "150% Section 12V tax deduction (R500m annual cap) and APDP Phase 2 Production Rebate "
                 "Certificates. Pure CBU import after this date forfeits both incentives and concedes "
@@ -831,22 +898,22 @@ TIER1 = {
                 "ZAR-denominated with quarterly FX reset clauses tied to ZAR/USD ~18.5 reference."
             ),
             "target_persona": (
-                "**Primary:** Transnet Freight Rail / Imperial Logistics Fleet Procurement Director — "
+                "**Primary:** Transnet Freight Rail / Imperial Logistics Fleet Procurement Director â€” "
                 "actively seeking road HCV capacity to offset the 46% rail volume collapse since 2018, "
                 "decision authority sits at GM level for multi-year framework deals. **Secondary:** "
-                "Shoprite/Tiger Brands Supply Chain VP — depot-based urban fleets, EV-receptive given "
+                "Shoprite/Tiger Brands Supply Chain VP â€” depot-based urban fleets, EV-receptive given "
                 "ESG reporting pressure from JSE-listed parent, but price-sensitive on TCO payback period."
             ),
         },
     },
 
     "Morocco": {
-        "flag":"🇲🇦","iso":"MAR","region":"North Africa","tier":1,
+        "flag":"ðŸ‡²ðŸ‡¦","iso":"MAR","region":"North Africa","tier":1,
         "kpi":{
             "Annual CV Sales":  ("18,400","units/yr","+8.5% YoY","http://www.aivam.ma"),
             "EV Penetration":   ("2.1%","of total sales","+0.9pp YoY","http://www.aivam.ma"),
             "EV Import Tariff": ("2.5%","EU-origin vehicles","Standard MFN ~25%","https://www.douane.gov.ma"),
-            "Diesel Price":     ("MAD 13.50","/litre","≈ $1.34 USD","https://www.onhym.com"),
+            "Diesel Price":     ("MAD 13.50","/litre","â‰ˆ $1.34 USD","https://www.onhym.com"),
         },
         "brand_share":{"brands":["Renault Trucks","Mercedes-Benz","Volvo","Sinotruk","MAN"],"sales":[4200,3600,3100,2800,2100]},
         "policy":{
@@ -858,9 +925,9 @@ TIER1 = {
         "news_query":"Maroc transport logistique camions OCP fret",
         "tri_keys":["ma_ocp_modal","ma_tariff"],
         "sources":{
-            "trade":  ("AIVAM — Association des Importateurs de Véhicules au Maroc","http://www.aivam.ma"),
-            "customs":("Direction Générale des Douanes","https://www.douane.gov.ma"),
-            "market": ("CNEAT — Centre National d'Essais et d'Homologation","https://www.cneat.ma"),
+            "trade":  ("AIVAM â€” Association des Importateurs de VÃ©hicules au Maroc","http://www.aivam.ma"),
+            "customs":("Direction GÃ©nÃ©rale des Douanes","https://www.douane.gov.ma"),
+            "market": ("CNEAT â€” Centre National d'Essais et d'Homologation","https://www.cneat.ma"),
         },
         "tco_params": {
             "ICE_Capex":               92000,
@@ -879,9 +946,9 @@ TIER1 = {
             "source_url":  "http://www.aivam.ma",
         },
         "segment_apps": {
-            "Urban FMCG (城市快消)":      {"volume": 5400, "ev_readiness": 5.8},
-            "Port Drayage (港口倒短)":    {"volume": 5800, "ev_readiness": 4.2},
-            "Long-Haul Mining (长途矿业)":{"volume": 7200, "ev_readiness": 1.1},
+            "Urban FMCG (åŸŽå¸‚å¿«æ¶ˆ)":      {"volume": 5400, "ev_readiness": 5.8},
+            "Port Drayage (æ¸¯å£å€’çŸ­)":    {"volume": 5800, "ev_readiness": 4.2},
+            "Long-Haul Mining (é•¿é€”çŸ¿ä¸š)":{"volume": 7200, "ev_readiness": 1.1},
         },
         "risk_radar": {
             "FX_Liquidity":        7.5,
@@ -891,61 +958,61 @@ TIER1 = {
             "Policy_Consistency":  8.0,
         },
         "action": (
-            "Chinese CBU cannot win on tariff — the 2.5% EU-origin rate is structurally closed to "
+            "Chinese CBU cannot win on tariff â€” the 2.5% EU-origin rate is structurally closed to "
             "non-EU brands. Pitch a <b>CKD assembly JV</b> co-located near Casablanca Port to access the "
             "2.5% rate via local content rules, and target OCP Group's contractor fleet (road-accessible "
-            "segment only — not the slurry pipeline trunk) as the anchor reference customer."
+            "segment only â€” not the slurry pipeline trunk) as the anchor reference customer."
         ),
         "gtm_playbook": {
             "product_matrix": (
-                "**Lead SKU: 18t SKD rigid for OCP contractor logistics** — targets the road-accessible "
+                "**Lead SKU: 18t SKD rigid for OCP contractor logistics** â€” targets the road-accessible "
                 "segment of phosphate logistics (finished fertiliser, reagent supply, equipment "
                 "mobilisation) explicitly excluded from OCP's slurry pipeline and rail trunk. "
-                "**Secondary SKU: 8t e-LCV for Casablanca urban distribution** (5.8/10 readiness) — "
+                "**Secondary SKU: 8t e-LCV for Casablanca urban distribution** (5.8/10 readiness) â€” "
                 "best positioned against incumbent Renault Trucks/Mercedes on landed cost once local "
                 "content qualifies for the 2.5% EU-equivalent rate. **EHCV/tractor remains a European "
-                "brand stronghold** (>65% share) — do not contest this segment head-on; win share "
+                "brand stronghold** (>65% share) â€” do not contest this segment head-on; win share "
                 "through OCP contractor relationships instead."
             ),
             "supply_chain_mode": (
                 "CKD assembly JV co-located in the Casablanca-Tangier industrial corridor, structured to "
-                "meet Rules of Origin thresholds under the EU Association Agreement — this is the only "
+                "meet Rules of Origin thresholds under the EU Association Agreement â€” this is the only "
                 "path to the 2.5% tariff for a Chinese-brand vehicle, since direct CBU import faces the "
                 "~25% MFN rate with no local content offset. Price in MAD with EUR-indexed input cost "
                 "pass-through, since the EU AA Agreement anchors Morocco's trade pricing norms to euro "
                 "benchmarks even though the local currency is MAD."
             ),
             "target_persona": (
-                "**Primary:** OCP Group Procurement & Logistics Director — controls the largest single "
+                "**Primary:** OCP Group Procurement & Logistics Director â€” controls the largest single "
                 "fleet decision in the market (~800 units/yr estimated, unverified against tender data), "
                 "values supplier relationships measured in decades, not quarters. **Secondary:** "
-                "Tier-1 OCP contractor GMs (CBI, Snef, Cofely) — faster sales cycle than OCP direct, "
+                "Tier-1 OCP contractor GMs (CBI, Snef, Cofely) â€” faster sales cycle than OCP direct, "
                 "serve as the practical entry point while building the OCP direct relationship."
             ),
         },
     },
 
     "Egypt": {
-        "flag":"🇪🇬","iso":"EGY","region":"North Africa","tier":1,
+        "flag":"ðŸ‡ªðŸ‡¬","iso":"EGY","region":"North Africa","tier":1,
         "kpi":{
             "Annual CV Sales": ("25,800","units/yr","+11.2% YoY","https://www.eos.org.eg"),
             "EV Penetration":  ("0.8%","of total sales","+0.3pp YoY","https://www.eos.org.eg"),
             "CBU Tariff":      ("40%","standard rate","KD at 5% (>40% local)","https://www.goeic.gov.eg"),
-            "Diesel Price":    ("EGP 9.75","/litre (subsidised)","≈ $0.20 USD","https://www.mop.gov.eg"),
+            "Diesel Price":    ("EGP 9.75","/litre (subsidised)","â‰ˆ $0.20 USD","https://www.mop.gov.eg"),
         },
         "brand_share":{"brands":["Sinotruk","SAIC Maxus","Foton","Mercedes-Benz","MAN"],"sales":[6200,4800,3900,3500,2800]},
         "policy":{
             "tariff":      "CBU: 40%. KD (>40% local content): 5%. SCZone production: 0%.",
             "certification":"EOS mandatory; GOEIC import licence; SCZone simplified clearance.",
             "key_buyers":  "EGPC logistics, SCZone contractors, building materials distributors.",
-            "risk":        "EGP depreciated >50% in 2 years; FX controls delay payments 45–90 days.",
+            "risk":        "EGP depreciated >50% in 2 years; FX controls delay payments 45â€“90 days.",
         },
         "news_query":"Egypt commercial vehicle logistics Suez Zone truck",
         "tri_keys":["eg_kd"],
         "sources":{
-            "trade":  ("EOS — Egyptian Organisation for Standardisation","https://www.eos.org.eg"),
-            "customs":("GOEIC — General Organisation for Export & Import Control","https://www.goeic.gov.eg"),
-            "market": ("IDSC — Information and Decision Support Center","https://www.idsc.gov.eg"),
+            "trade":  ("EOS â€” Egyptian Organisation for Standardisation","https://www.eos.org.eg"),
+            "customs":("GOEIC â€” General Organisation for Export & Import Control","https://www.goeic.gov.eg"),
+            "market": ("IDSC â€” Information and Decision Support Center","https://www.idsc.gov.eg"),
         },
         "tco_params": {
             "ICE_Capex":               78000,
@@ -964,9 +1031,9 @@ TIER1 = {
             "source_url":  "https://www.mop.gov.eg",
         },
         "segment_apps": {
-            "Urban FMCG (城市快消)":      {"volume": 7200, "ev_readiness": 3.2},
-            "Port Drayage (港口倒短)":    {"volume": 8400, "ev_readiness": 2.0},
-            "Long-Haul Mining (长途矿业)":{"volume": 10200,"ev_readiness": 0.5},
+            "Urban FMCG (åŸŽå¸‚å¿«æ¶ˆ)":      {"volume": 7200, "ev_readiness": 3.2},
+            "Port Drayage (æ¸¯å£å€’çŸ­)":    {"volume": 8400, "ev_readiness": 2.0},
+            "Long-Haul Mining (é•¿é€”çŸ¿ä¸š)":{"volume": 10200,"ev_readiness": 0.5},
         },
         "risk_radar": {
             "FX_Liquidity":        2.5,
@@ -978,31 +1045,31 @@ TIER1 = {
         "action": (
             "Subsidised diesel (EGP 9.75/L) makes EV TCO uncompetitive without a KD tariff play. "
             "Pitch <b>SCZone-based KD assembly</b> (0% production tariff) targeting EGPC logistics "
-            "contracts, and insist on EGP-indexed pricing with quarterly FX reset clauses — do not "
+            "contracts, and insist on EGP-indexed pricing with quarterly FX reset clauses â€” do not "
             "accept fixed EGP pricing given 45-90 day payment delays under current FX controls."
         ),
         "gtm_playbook": {
             "product_matrix": (
-                "**Lead SKU: 18t KD rigid for SCZone construction logistics** — this is a tariff-arbitrage "
+                "**Lead SKU: 18t KD rigid for SCZone construction logistics** â€” this is a tariff-arbitrage "
                 "play, not an EV play, given EGP 9.75/L subsidised diesel makes ICE structurally cheap to "
-                "run. **Secondary SKU: 8t e-LCV for Cairo urban FMCG** (3.2/10 readiness — the best "
-                "available segment, still thin) — only viable for depot-return operators with captive "
+                "run. **Secondary SKU: 8t e-LCV for Cairo urban FMCG** (3.2/10 readiness â€” the best "
+                "available segment, still thin) â€” only viable for depot-return operators with captive "
                 "charging, not as a broad market push. **Avoid EHCV/tractor entirely** (0.5/10 readiness) "
-                "— subsidised diesel plus FX constraints make this the least defensible segment in the "
+                "â€” subsidised diesel plus FX constraints make this the least defensible segment in the "
                 "entire portfolio."
             ),
             "supply_chain_mode": (
                 "KD assembly inside the Suez Canal Economic Zone (SCZone) to access the 0% production "
-                "tariff, modelled on the GB Auto / MAN Trucks Egypt precedent — local content must exceed "
+                "tariff, modelled on the GB Auto / MAN Trucks Egypt precedent â€” local content must exceed "
                 "40% to qualify, which requires sourcing tyres, glass, and wiring harnesses domestically "
                 "since Egypt's CV component supply chain cannot support deeper localisation yet. Price in "
                 "USD with quarterly EGP conversion at spot rate, and build a 60-90 day payment delay "
-                "buffer into cash flow planning given FX controls — do not extend open credit terms."
+                "buffer into cash flow planning given FX controls â€” do not extend open credit terms."
             ),
             "target_persona": (
-                "**Primary:** EGPC Logistics Division Procurement Manager — state-owned, FX-insulated via "
+                "**Primary:** EGPC Logistics Division Procurement Manager â€” state-owned, FX-insulated via "
                 "dollar oil revenue, slower decision cycle but contracts are durable once signed. "
-                "**Secondary:** SCZone-based construction contractor Operations Director — actively "
+                "**Secondary:** SCZone-based construction contractor Operations Director â€” actively "
                 "seeking KD-assembled fleet to support Suez Canal economic zone build-out, more "
                 "commercially agile than EGPC but exposed to the same EGP payment delay risk."
             ),
@@ -1010,26 +1077,26 @@ TIER1 = {
     },
 
     "Kenya": {
-        "flag":"🇰🇪","iso":"KEN","region":"East Africa","tier":1,
+        "flag":"ðŸ‡°ðŸ‡ª","iso":"KEN","region":"East Africa","tier":1,
         "kpi":{
             "Annual CV Sales": ("14,200","units/yr","+9.4% YoY","https://kebs.org"),
             "EV Penetration":  ("2.6%","of total sales","+1.1pp YoY","https://kebs.org"),
             "Import Duty":     ("25%","EAC CET","COMESA: 0%","https://kra.go.ke"),
-            "Diesel Price":    ("KES 188","/litre","≈ $1.42 USD","https://www.epra.go.ke"),
+            "Diesel Price":    ("KES 188","/litre","â‰ˆ $1.42 USD","https://www.epra.go.ke"),
         },
         "brand_share":{"brands":["Isuzu","Toyota","Foton","Sinotruk","Volvo"],"sales":[3800,2900,2400,2100,1200]},
         "policy":{
             "tariff":      "EAC CET: 25%. COMESA: 0%. EV: currently 25% (policy review underway).",
             "certification":"KEBS mandatory PVoC at origin; NTSA inspection on arrival.",
             "key_buyers":  "Kenya Ports Authority, East African Breweries, Bamburi Cement, SGR feeder.",
-            "risk":        "KES depreciation ~20% (2023–24); SGR competition on Mombasa–Nairobi corridor.",
+            "risk":        "KES depreciation ~20% (2023â€“24); SGR competition on Mombasaâ€“Nairobi corridor.",
         },
         "news_query":"Kenya commercial vehicle logistics freight Mombasa Nairobi EAC",
         "tri_keys":["ke_sgr"],
         "sources":{
-            "trade":  ("KEBS — Kenya Bureau of Standards","https://kebs.org"),
-            "customs":("KRA — Kenya Revenue Authority","https://kra.go.ke"),
-            "market": ("EPRA — Energy & Petroleum Regulatory Authority","https://www.epra.go.ke"),
+            "trade":  ("KEBS â€” Kenya Bureau of Standards","https://kebs.org"),
+            "customs":("KRA â€” Kenya Revenue Authority","https://kra.go.ke"),
+            "market": ("EPRA â€” Energy & Petroleum Regulatory Authority","https://www.epra.go.ke"),
         },
         "tco_params": {
             "ICE_Capex":               74000,
@@ -1048,9 +1115,9 @@ TIER1 = {
             "source_url":  "https://www.epra.go.ke",
         },
         "segment_apps": {
-            "Urban FMCG (城市快消)":      {"volume": 4800, "ev_readiness": 4.8},
-            "Port Drayage (港口倒短)":    {"volume": 4400, "ev_readiness": 3.5},
-            "Long-Haul Mining (长途矿业)":{"volume": 5000, "ev_readiness": 0.7},
+            "Urban FMCG (åŸŽå¸‚å¿«æ¶ˆ)":      {"volume": 4800, "ev_readiness": 4.8},
+            "Port Drayage (æ¸¯å£å€’çŸ­)":    {"volume": 4400, "ev_readiness": 3.5},
+            "Long-Haul Mining (é•¿é€”çŸ¿ä¸š)":{"volume": 5000, "ev_readiness": 0.7},
         },
         "risk_radar": {
             "FX_Liquidity":        4.5,
@@ -1068,26 +1135,26 @@ TIER1 = {
     },
 
     "Ethiopia": {
-        "flag":"🇪🇹","iso":"ETH","region":"East Africa","tier":1,
+        "flag":"ðŸ‡ªðŸ‡¹","iso":"ETH","region":"East Africa","tier":1,
         "kpi":{
             "Annual CV Sales":   ("9,800","units/yr","+22.1% YoY","https://www.moti.gov.et"),
             "EV Penetration":    ("8.4%","of total sales","+4.2pp YoY","https://www.moti.gov.et"),
             "EV Import Duty":    ("0%","Petroleum ban (2022)","ICE imports banned","https://www.erca.gov.et"),
-            "Electricity Price": ("ETB 1.42","/kWh","≈ $0.025 USD","https://www.eepco.gov.et"),
+            "Electricity Price": ("ETB 1.42","/kWh","â‰ˆ $0.025 USD","https://www.eepco.gov.et"),
         },
         "brand_share":{"brands":["BYD","Foton EV","King Long EV","Sinotruk","Skywell"],"sales":[2800,2100,1600,1200,800]},
         "policy":{
             "tariff":      "Petroleum vehicle imports BANNED (2022). EV: 0% duty.",
             "certification":"EthSA; EV charging under national grid expansion.",
             "key_buyers":  "Ethiopian Roads Authority, Ethiopian Airlines cargo, Ethio Telecom fleet.",
-            "risk":        "<120 public chargers nationwide; Addis–Djibouti corridor has zero public chargers.",
+            "risk":        "<120 public chargers nationwide; Addisâ€“Djibouti corridor has zero public chargers.",
         },
         "news_query":"Ethiopia EV commercial vehicle petroleum ban transport Addis",
         "tri_keys":["eth_ev_mandate"],
         "sources":{
-            "trade":  ("MoTI — Ministry of Trade & Industry Ethiopia","https://www.moti.gov.et"),
-            "customs":("ERCA — Ethiopian Revenue & Customs Authority","https://www.erca.gov.et"),
-            "market": ("EthSA — Ethiopian Standards Agency","https://www.ethsa.gov.et"),
+            "trade":  ("MoTI â€” Ministry of Trade & Industry Ethiopia","https://www.moti.gov.et"),
+            "customs":("ERCA â€” Ethiopian Revenue & Customs Authority","https://www.erca.gov.et"),
+            "market": ("EthSA â€” Ethiopian Standards Agency","https://www.ethsa.gov.et"),
         },
         "tco_params": {
             "ICE_Capex":               68000,
@@ -1106,9 +1173,9 @@ TIER1 = {
             "source_url":  "https://www.erca.gov.et",
         },
         "segment_apps": {
-            "Urban FMCG (城市快消)":      {"volume": 3400, "ev_readiness": 8.5},
-            "Port Drayage (港口倒短)":    {"volume": 2600, "ev_readiness": 6.0},
-            "Long-Haul Mining (长途矿业)":{"volume": 3800, "ev_readiness": 2.0},
+            "Urban FMCG (åŸŽå¸‚å¿«æ¶ˆ)":      {"volume": 3400, "ev_readiness": 8.5},
+            "Port Drayage (æ¸¯å£å€’çŸ­)":    {"volume": 2600, "ev_readiness": 6.0},
+            "Long-Haul Mining (é•¿é€”çŸ¿ä¸š)":{"volume": 3800, "ev_readiness": 2.0},
         },
         "risk_radar": {
             "FX_Liquidity":        2.0,
@@ -1118,34 +1185,34 @@ TIER1 = {
             "Policy_Consistency":  5.5,
         },
         "action": (
-            "ICE imports are simply illegal — there is no fuel-cost comparison to make, only a sales "
+            "ICE imports are simply illegal â€” there is no fuel-cost comparison to make, only a sales "
             "execution question. Move fast on <b>Urban FMCG fleets</b> (8.5/10 readiness, Addis Ababa "
-            "depot routes) before competitors saturate the market; avoid Addis–Djibouti long-haul "
+            "depot routes) before competitors saturate the market; avoid Addisâ€“Djibouti long-haul "
             "until charging infrastructure is confirmed beyond the capital."
         ),
     },
 
     "Algeria": {
-        "flag":"🇩🇿","iso":"DZA","region":"North Africa","tier":1,
+        "flag":"ðŸ‡©ðŸ‡¿","iso":"DZA","region":"North Africa","tier":1,
         "kpi":{
             "Annual CV Sales": ("12,600","units/yr","+4.8% YoY","https://www.commerce.gov.dz"),
             "EV Penetration":  ("0.4%","of total sales","Early-stage","https://www.commerce.gov.dz"),
             "Import Tariff":   ("30%","CBU standard","CKD JV available","https://www.douane.gov.dz"),
-            "Diesel Price":    ("DZD 45","/litre (subsidised)","≈ $0.33 USD","https://www.energy.gov.dz"),
+            "Diesel Price":    ("DZD 45","/litre (subsidised)","â‰ˆ $0.33 USD","https://www.energy.gov.dz"),
         },
         "brand_share":{"brands":["Mercedes-Benz","Renault Trucks","MAN","Sinotruk","Volvo"],"sales":[3200,2800,2400,2000,1400]},
         "policy":{
             "tariff":      "30% CBU. CKD JV partnerships permitted; Renault Rouiba JV as template.",
             "certification":"IANOR; Euro 3 minimum (Euro 4 upgrade underway).",
             "key_buyers":  "Sonatrach (oil & gas), SNVI, Ministry of Public Works.",
-            "risk":        "Import quotas; FX controls; JV licence approval 24–36 months.",
+            "risk":        "Import quotas; FX controls; JV licence approval 24â€“36 months.",
         },
-        "news_query":"Algérie transport logistique camions Sonatrach véhicule commercial",
+        "news_query":"AlgÃ©rie transport logistique camions Sonatrach vÃ©hicule commercial",
         "tri_keys":["dz_protect"],
         "sources":{
-            "trade":  ("Ministère du Commerce — Algeria","https://www.commerce.gov.dz"),
-            "customs":("Direction Générale des Douanes","https://www.douane.gov.dz"),
-            "market": ("IANOR — Institut Algérien de Normalisation","https://www.ianor.dz"),
+            "trade":  ("MinistÃ¨re du Commerce â€” Algeria","https://www.commerce.gov.dz"),
+            "customs":("Direction GÃ©nÃ©rale des Douanes","https://www.douane.gov.dz"),
+            "market": ("IANOR â€” Institut AlgÃ©rien de Normalisation","https://www.ianor.dz"),
         },
         "tco_params": {
             "ICE_Capex":               85000,
@@ -1160,13 +1227,13 @@ TIER1 = {
             "Interest_Rate":           0.09,
             "ICE_Residual_Pct":        0.40,
             "EV_Residual_Pct":         0.12,
-            "source_name": "Ministère de l'Energie — Subsidised Diesel Schedule 2026",
+            "source_name": "MinistÃ¨re de l'Energie â€” Subsidised Diesel Schedule 2026",
             "source_url":  "https://www.energy.gov.dz",
         },
         "segment_apps": {
-            "Urban FMCG (城市快消)":      {"volume": 4200, "ev_readiness": 2.2},
-            "Port Drayage (港口倒短)":    {"volume": 3600, "ev_readiness": 1.5},
-            "Long-Haul Mining (长途矿业)":{"volume": 4800, "ev_readiness": 0.3},
+            "Urban FMCG (åŸŽå¸‚å¿«æ¶ˆ)":      {"volume": 4200, "ev_readiness": 2.2},
+            "Port Drayage (æ¸¯å£å€’çŸ­)":    {"volume": 3600, "ev_readiness": 1.5},
+            "Long-Haul Mining (é•¿é€”çŸ¿ä¸š)":{"volume": 4800, "ev_readiness": 0.3},
         },
         "risk_radar": {
             "FX_Liquidity":        2.5,
@@ -1177,14 +1244,14 @@ TIER1 = {
         },
         "action": (
             "Subsidised diesel and FX controls make this a long-game market only. Do not pursue CBU "
-            "export — pursue a <b>state-endorsed JV</b> modelled on Renault's Rouiba plant, with a "
+            "export â€” pursue a <b>state-endorsed JV</b> modelled on Renault's Rouiba plant, with a "
             "3-4 year horizon to first production. Defer EV positioning entirely until charging "
             "infrastructure and FX liquidity improve."
         ),
     },
 
     "Tunisia": {
-        "flag":"🇹🇳","iso":"TUN","region":"North Africa","tier":1,
+        "flag":"ðŸ‡¹ðŸ‡³","iso":"TUN","region":"North Africa","tier":1,
         "kpi":{
             "Annual CV Sales":   ("8,100","units/yr","+3.1% YoY","https://www.innorpi.tn"),
             "EV Policy Saving":  ("~TND 151k","/unit vs diesel import","Loi de Finances 2026","https://www.finances.gov.tn"),
@@ -1193,18 +1260,18 @@ TIER1 = {
         },
         "brand_share":{"brands":["Mercedes-Benz","Renault Trucks","MAN","Volvo","Sinotruk"],"sales":[2100,1800,1500,1200,900]},
         "policy":{
-            "tariff":      "Diesel CV (≥12t): 10% customs + 19% TVA + 25% taxe de consommation. BEV: 0% customs + 0% excise + 7% TVA + TND 10,000 ANME subsidy (Loi de Finances 2026).",
+            "tariff":      "Diesel CV (â‰¥12t): 10% customs + 19% TVA + 25% taxe de consommation. BEV: 0% customs + 0% excise + 7% TVA + TND 10,000 ANME subsidy (Loi de Finances 2026).",
             "certification":"INNORPI; ATTT road transport authority; UN-ECE mutual recognition with EU.",
-            "key_buyers":  "CPG (phosphates), Délice Danone (FMCG), Aramex Tunisia (parcels), Port de Tunis logistics.",
+            "key_buyers":  "CPG (phosphates), DÃ©lice Danone (FMCG), Aramex Tunisia (parcels), Port de Tunis logistics.",
             "risk":        "<50 commercial EV charging points nationwide (STEG 2026). Annual ANME budget continuity beyond 2026 not guaranteed.",
         },
-        "news_query":"Tunisie transport logistique camion électrique véhicule commercial fret 2026",
+        "news_query":"Tunisie transport logistique camion Ã©lectrique vÃ©hicule commercial fret 2026",
         "tri_keys":["tn_ev_policy","tn_eu"],
         "sources":{
-            "trade":  ("INNORPI — Institut National de la Normalisation","https://www.innorpi.tn"),
-            "customs":("Direction Générale des Douanes — Tunisie","https://www.douane.gov.tn"),
-            "market": ("ANME — Agence Nationale pour la Maîtrise de l'Énergie","https://www.anme.tn"),
-            "finance":("Ministère des Finances — Loi de Finances 2026","https://www.finances.gov.tn"),
+            "trade":  ("INNORPI â€” Institut National de la Normalisation","https://www.innorpi.tn"),
+            "customs":("Direction GÃ©nÃ©rale des Douanes â€” Tunisie","https://www.douane.gov.tn"),
+            "market": ("ANME â€” Agence Nationale pour la MaÃ®trise de l'Ã‰nergie","https://www.anme.tn"),
+            "finance":("MinistÃ¨re des Finances â€” Loi de Finances 2026","https://www.finances.gov.tn"),
         },
         "tco_params": {
             "ICE_Capex":               95000,
@@ -1225,9 +1292,9 @@ TIER1 = {
             "source_url":  "https://www.finances.gov.tn",
         },
         "segment_apps": {
-            "Urban FMCG (城市快消)":      {"volume": 2800, "ev_readiness": 8.0},
-            "Port Drayage (港口倒短)":    {"volume": 2400, "ev_readiness": 5.5},
-            "Long-Haul Mining (长途矿业)":{"volume": 2900, "ev_readiness": 1.0},
+            "Urban FMCG (åŸŽå¸‚å¿«æ¶ˆ)":      {"volume": 2800, "ev_readiness": 8.0},
+            "Port Drayage (æ¸¯å£å€’çŸ­)":    {"volume": 2400, "ev_readiness": 5.5},
+            "Long-Haul Mining (é•¿é€”çŸ¿ä¸š)":{"volume": 2900, "ev_readiness": 1.0},
         },
         "risk_radar": {
             "FX_Liquidity":        4.0,
@@ -1237,32 +1304,32 @@ TIER1 = {
             "Policy_Consistency":  6.5,
         },
         "action": (
-            "The TND 151,000 per-unit tax delta is the single strongest B2B argument in North Africa — "
-            "lead every sales conversation with this number. Target <b>Délice Danone</b> and <b>Aramex "
+            "The TND 151,000 per-unit tax delta is the single strongest B2B argument in North Africa â€” "
+            "lead every sales conversation with this number. Target <b>DÃ©lice Danone</b> and <b>Aramex "
             "Tunisia</b> for urban depot fleets first; defer phosphate corridor (Gafsa) pitches until "
-            "STEG confirms charging infrastructure beyond the Tunis–Sousse corridor."
+            "STEG confirms charging infrastructure beyond the Tunisâ€“Sousse corridor."
         ),
         "gtm_playbook": {
             "product_matrix": (
-                "**Lead SKU: 8t e-LCV for Tunis urban FMCG** (Délice Danone, SOTUMAG depot routes — "
-                "8.0/10 readiness, the best score in the entire portfolio) — the TND 151,000 "
+                "**Lead SKU: 8t e-LCV for Tunis urban FMCG** (DÃ©lice Danone, SOTUMAG depot routes â€” "
+                "8.0/10 readiness, the best score in the entire portfolio) â€” the TND 151,000 "
                 "tax delta makes this nearly impossible to lose on price alone. **Secondary SKU: 12t "
-                "rigid for Tunis–Sousse port drayage** (5.5/10 readiness) — short predictable routes "
+                "rigid for Tunisâ€“Sousse port drayage** (5.5/10 readiness) â€” short predictable routes "
                 "suit current charging infrastructure. **Defer EHCV/tractor for Gafsa phosphate corridor** "
                 "(1.0/10 readiness) until STEG's 200-charger 2026 rollout plan is confirmed beyond "
-                "announcement stage — do not commit inventory against an unconfirmed infrastructure timeline."
+                "announcement stage â€” do not commit inventory against an unconfirmed infrastructure timeline."
             ),
             "supply_chain_mode": (
-                "<b>0% 关税 + 0% 消费税 + 7% 增值税 + TND 10,000 ANME 政府补贴</b> 全套组合是北非地区最强的政策套利窗口 — "
+                "<b>0% å…³ç¨Ž + 0% æ¶ˆè´¹ç¨Ž + 7% å¢žå€¼ç¨Ž + TND 10,000 ANME æ”¿åºœè¡¥è´´</b> å…¨å¥—ç»„åˆæ˜¯åŒ—éžåœ°åŒºæœ€å¼ºçš„æ”¿ç­–å¥—åˆ©çª—å£ â€” "
                 "import as BEV CBU directly (no CKD assembly needed here, unlike ZA/NG/MA) to capture the "
                 "full Loi de Finances 2026 exemption stack immediately. Quote in TND with the ANME subsidy "
                 "deducted at point of sale to maximise the visible price advantage in the customer's eyes "
-                "rather than as a rebate — this materially changes how the deal feels to a price-anchored buyer."
+                "rather than as a rebate â€” this materially changes how the deal feels to a price-anchored buyer."
             ),
             "target_persona": (
-                "**Primary:** Délice Danone Tunisie Fleet & Logistics Director — FMCG depot fleet, EU "
+                "**Primary:** DÃ©lice Danone Tunisie Fleet & Logistics Director â€” FMCG depot fleet, EU "
                 "parent company under ESG pressure to electrify, Tunis-based with full charging "
-                "infrastructure access. **Secondary:** Aramex Tunisia Country Operations Manager — "
+                "infrastructure access. **Secondary:** Aramex Tunisia Country Operations Manager â€” "
                 "urban last-mile parcels, fast decision cycle, MENA regional fleet standards mean a Tunisia "
                 "win can become a regional reference case."
             ),
@@ -1270,11 +1337,11 @@ TIER1 = {
     },
 
     "Rwanda": {
-        "flag":"🇷🇼","iso":"RWA","region":"East Africa (EAC)","tier":1,
+        "flag":"ðŸ‡·ðŸ‡¼","iso":"RWA","region":"East Africa (EAC)","tier":1,
         "kpi":{
             "Annual CV Sales":       ("~3,200","units/yr","+12.5% YoY","https://www.rdb.rw"),
             "EV Penetration (CVs)":  ("~6.2%","of new CV registrations","+3.1pp YoY","https://www.rura.rw"),
-            "EV Import Tariff":      ("0%","EAC Pioneer — 0% Duty + 0% VAT","Most generous in Sub-Sahara","https://www.rra.gov.rw"),
+            "EV Import Tariff":      ("0%","EAC Pioneer â€” 0% Duty + 0% VAT","Most generous in Sub-Sahara","https://www.rra.gov.rw"),
             "e-Mobility Electricity":("RWF 115","/kWh (RURA e-mobility tariff)","vs RWF 1,600/L diesel","https://www.rura.rw"),
         },
         "brand_share":{
@@ -1284,16 +1351,16 @@ TIER1 = {
         "policy":{
             "tariff":      "EAC Pioneer: 0% import duty + 0% VAT on all EV commercial vehicles (RDB Investment Code 2024). ICE CVs: 25% EAC CET + 18% VAT. Corporate income tax for qualifying EV enterprises: 15% (vs standard 30%).",
             "certification":"Rwanda Standards Board (RSB) mandatory type-approval; RURA e-mobility operator licence for fleet charging; EAC CoC accepted.",
-            "key_buyers":  "Kigali Bus Services (KBS), RwandAir cargo, BRALIRWA (Heineken) distribution, MTN Rwanda fleet, La Colombière construction logistics.",
+            "key_buyers":  "Kigali Bus Services (KBS), RwandAir cargo, BRALIRWA (Heineken) distribution, MTN Rwanda fleet, La ColombiÃ¨re construction logistics.",
             "risk":        "Market volume cap (~5,000 CVs/yr through 2030). Charging infrastructure outside Kigali limited. RWF/USD stability depends on foreign aid inflows.",
         },
         "news_query":"Rwanda Kigali electric vehicle commercial transport e-mobility EV bus",
         "tri_keys":["rw_sandbox","rw_eac_gateway"],
         "sources":{
-            "trade":   ("RDB — Rwanda Development Board","https://www.rdb.rw"),
-            "customs": ("RRA — Rwanda Revenue Authority","https://www.rra.gov.rw"),
-            "market":  ("RURA — Rwanda Utilities Regulatory Authority","https://www.rura.rw"),
-            "energy":  ("REG — Rwanda Energy Group","https://www.reg.rw"),
+            "trade":   ("RDB â€” Rwanda Development Board","https://www.rdb.rw"),
+            "customs": ("RRA â€” Rwanda Revenue Authority","https://www.rra.gov.rw"),
+            "market":  ("RURA â€” Rwanda Utilities Regulatory Authority","https://www.rura.rw"),
+            "energy":  ("REG â€” Rwanda Energy Group","https://www.reg.rw"),
         },
         "tco_params": {
             "ICE_Capex":               80000,
@@ -1314,9 +1381,9 @@ TIER1 = {
             "source_url":  "https://www.rura.rw",
         },
         "segment_apps": {
-            "Urban FMCG (城市快消)":      {"volume": 1300, "ev_readiness": 9.0},
-            "Port Drayage (港口倒短)":    {"volume": 700,  "ev_readiness": 6.5},
-            "Long-Haul Mining (长途矿业)":{"volume": 1200, "ev_readiness": 1.8},
+            "Urban FMCG (åŸŽå¸‚å¿«æ¶ˆ)":      {"volume": 1300, "ev_readiness": 9.0},
+            "Port Drayage (æ¸¯å£å€’çŸ­)":    {"volume": 700,  "ev_readiness": 6.5},
+            "Long-Haul Mining (é•¿é€”çŸ¿ä¸š)":{"volume": 1200, "ev_readiness": 1.8},
         },
         "risk_radar": {
             "FX_Liquidity":        5.0,
@@ -1326,7 +1393,7 @@ TIER1 = {
             "Policy_Consistency":  9.0,
         },
         "action": (
-            "Do not chase volume here — chase <b>proof-of-concept</b>. Propose a 20-50 unit G2G electric "
+            "Do not chase volume here â€” chase <b>proof-of-concept</b>. Propose a 20-50 unit G2G electric "
             "bus pilot with <b>Kigali Bus Services</b>, fully financed against the 0% duty + 15% CIT "
             "stack, and use the resulting performance data as the reference case for EAC-wide tenders "
             "in Kenya and Tanzania within 18 months."
@@ -1334,26 +1401,26 @@ TIER1 = {
         "gtm_playbook": {
             "product_matrix": (
                 "**Lead SKU: Electric bus for Kigali Bus Services G2G pilot** (9.0/10 readiness, the "
-                "highest EV readiness score across all markets and all 3 segments) — Rwanda's grid "
+                "highest EV readiness score across all markets and all 3 segments) â€” Rwanda's grid "
                 "reliability (<2% outage) and RURA's RWF 115/kWh e-mobility tariff make this the single "
                 "most de-risked EV deployment in the entire portfolio. **Secondary SKU: 8t e-LCV for "
-                "BRALIRWA/MTN Rwanda urban distribution** (6.5/10 readiness) — depot-based, fits within "
+                "BRALIRWA/MTN Rwanda urban distribution** (6.5/10 readiness) â€” depot-based, fits within "
                 "Kigali's emerging charging network. **Long-haul mining/construction remains diesel** "
-                "(1.8/10 readiness) — La Colombière and similar contractors should be quoted ICE, not EV."
+                "(1.8/10 readiness) â€” La ColombiÃ¨re and similar contractors should be quoted ICE, not EV."
             ),
             "supply_chain_mode": (
-                "<b>0% EAC关税 + 0% 增值税 + 15%企业所得税(较标准30%大幅优惠)</b> 构成全非洲最激进的EV财政组合 — "
+                "<b>0% EACå…³ç¨Ž + 0% å¢žå€¼ç¨Ž + 15%ä¼ä¸šæ‰€å¾—ç¨Ž(è¾ƒæ ‡å‡†30%å¤§å¹…ä¼˜æƒ )</b> æž„æˆå…¨éžæ´²æœ€æ¿€è¿›çš„EVè´¢æ”¿ç»„åˆ â€” "
                 "import as CBU directly through the EAC Pioneer EV exemption (no local assembly needed to "
                 "access the incentive, unlike Nigeria/South Africa/Morocco). Structure the deal as a "
                 "leasing or G2G financing arrangement rather than an outright municipal purchase, since "
-                "Kigali Bus Services' budget cycle favours opex-style financing — this also lets the 15% "
+                "Kigali Bus Services' budget cycle favours opex-style financing â€” this also lets the 15% "
                 "CIT rate apply if the financing vehicle is structured as a qualifying Rwandan EV enterprise."
             ),
             "target_persona": (
-                "**Primary:** City of Kigali / Kigali Bus Services Transport Directorate — G2G "
+                "**Primary:** City of Kigali / Kigali Bus Services Transport Directorate â€” G2G "
                 "procurement framework, RDB-endorsed pilots receive expedited approval, low absolute "
                 "deal size but outsized reference value across the EAC. **Secondary:** BRALIRWA "
-                "(Heineken Rwanda) Supply Chain Director — multinational parent under group-level ESG "
+                "(Heineken Rwanda) Supply Chain Director â€” multinational parent under group-level ESG "
                 "mandate, Kigali depot operations are the most charging-infrastructure-ready fleet "
                 "segment outside the G2G bus programme."
             ),
@@ -1361,26 +1428,26 @@ TIER1 = {
     },
 
     "Djibouti": {
-        "flag":"🇩🇯","iso":"DJI","region":"East Africa (Horn)","tier":1,
+        "flag":"ðŸ‡©ðŸ‡¯","iso":"DJI","region":"East Africa (Horn)","tier":1,
         "kpi":{
             "Port Transit Share":   ("~95%","of Ethiopia trade via DJ","Djibouti Ports & FZ Authority","https://www.dpfza.gov.dj"),
             "Annual CV Sales":      ("~1,400","units/yr (domestic + drayage fleet)","+7.8% YoY","https://www.commerce.gouv.dj"),
             "CBU Import Duty":      ("~33%","flat effective rate","No EV carve-out yet","https://www.douanes.dj"),
-            "Diesel Price":         ("DJF 210","/litre","≈ $1.18 USD","https://www.energie.gouv.dj"),
+            "Diesel Price":         ("DJF 210","/litre","â‰ˆ $1.18 USD","https://www.energie.gouv.dj"),
         },
         "brand_share":{"brands":["Sinotruk","Isuzu","Mercedes-Benz","Foton","Volvo"],"sales":[420,310,260,240,170]},
         "policy":{
             "tariff":      "Flat ~33% effective CBU import duty (no differentiated EV rate today). Free-zone re-export cargo is duty-exempt but the drayage tractor fleet itself is not.",
             "certification":"Djibouti Ministry of Commerce vehicle registration; port operator (SGTD/DP World Djibouti) equipment pre-qualification for terminal access.",
-            "key_buyers":  "Djibouti Ports & Free Zones Authority (DPFZA), SGTD (Société de Gestion du Terminal à Conteneurs de Doraleh), Ethio-Djibouti Railway freight partners, Ethiopian Shipping & Logistics Services Enterprise (ESLSE).",
+            "key_buyers":  "Djibouti Ports & Free Zones Authority (DPFZA), SGTD (SociÃ©tÃ© de Gestion du Terminal Ã  Conteneurs de Doraleh), Ethio-Djibouti Railway freight partners, Ethiopian Shipping & Logistics Services Enterprise (ESLSE).",
             "risk":        "Grid capacity outside Djibouti City/Doraleh is thin; regional geopolitical volatility (Horn of Africa); Ethiopia-Djibouti relationship is the single point of failure for all volume.",
         },
         "news_query":"Djibouti port logistics Ethiopia corridor truck freight",
         "tri_keys":["dj_port_gateway"],
         "sources":{
-            "trade":  ("DPFZA — Djibouti Ports & Free Zones Authority","https://www.dpfza.gov.dj"),
+            "trade":  ("DPFZA â€” Djibouti Ports & Free Zones Authority","https://www.dpfza.gov.dj"),
             "customs":("Direction des Douanes de Djibouti","https://www.douanes.dj"),
-            "market": ("Ministère du Commerce — Djibouti","https://www.commerce.gouv.dj"),
+            "market": ("MinistÃ¨re du Commerce â€” Djibouti","https://www.commerce.gouv.dj"),
         },
         "tco_params": {
             "ICE_Capex":               88000,
@@ -1399,9 +1466,9 @@ TIER1 = {
             "source_url":  "https://www.dpfza.gov.dj",
         },
         "segment_apps": {
-            "Urban FMCG (城市快消)":      {"volume": 300,  "ev_readiness": 4.0},
-            "Port Drayage (港口倒短)":    {"volume": 5200, "ev_readiness": 7.8},
-            "Long-Haul Mining (长途矿业)":{"volume": 150,  "ev_readiness": 0.4},
+            "Urban FMCG (åŸŽå¸‚å¿«æ¶ˆ)":      {"volume": 300,  "ev_readiness": 4.0},
+            "Port Drayage (æ¸¯å£å€’çŸ­)":    {"volume": 5200, "ev_readiness": 7.8},
+            "Long-Haul Mining (é•¿é€”çŸ¿ä¸š)":{"volume": 150,  "ev_readiness": 0.4},
         },
         "risk_radar": {
             "FX_Liquidity":        6.0,
@@ -1411,7 +1478,7 @@ TIER1 = {
             "Policy_Consistency":  5.5,
         },
         "action": (
-            "Do not sell into Djibouti as a domestic market — sell into it as a <b>captive port-drayage "
+            "Do not sell into Djibouti as a domestic market â€” sell into it as a <b>captive port-drayage "
             "asset serving 100% of Ethiopia's seaborne trade</b>. Pilot a small depot-charged e-drayage "
             "tractor fleet at Doraleh running fixed &lt;15km port-to-rail legs (highest EV readiness "
             "segment in this market at 7.8/10), and use DPFZA/SGTD as the anchor account rather than "
@@ -1419,26 +1486,26 @@ TIER1 = {
         ),
         "gtm_playbook": {
             "product_matrix": (
-                "**Lead SKU: e-Drayage tractor for Doraleh port-to-rail short-haul** (7.8/10 readiness — "
-                "the single best drayage-specific score outside South Africa) — fixed, short, "
+                "**Lead SKU: e-Drayage tractor for Doraleh port-to-rail short-haul** (7.8/10 readiness â€” "
+                "the single best drayage-specific score outside South Africa) â€” fixed, short, "
                 "depot-return routes are the ideal EV duty cycle regardless of national grid weakness "
-                "elsewhere. **Secondary SKU: diesel rigid for general free-zone logistics** — outside the "
+                "elsewhere. **Secondary SKU: diesel rigid for general free-zone logistics** â€” outside the "
                 "core port corridor, stick to conventional diesel given the ~33% flat duty and thin "
-                "national grid. **Do not pitch long-haul EV or mining trucks** (0.4/10 readiness) — "
+                "national grid. **Do not pitch long-haul EV or mining trucks** (0.4/10 readiness) â€” "
                 "Djibouti has essentially no domestic mining logistics segment to speak of."
             ),
             "supply_chain_mode": (
                 "CBU import via the Djibouti free-zone regime, targeting SGTD/DPFZA as an institutional "
-                "buyer rather than a distributed dealer network — a handful of large port-operator "
+                "buyer rather than a distributed dealer network â€” a handful of large port-operator "
                 "framework deals will move more volume here than retail-style sales ever could. Price in "
                 "USD (Djibouti Franc is de facto USD-pegged, removing most FX risk relative to other "
                 "markets) and bundle a depot charging infrastructure package into the port-operator "
                 "proposal, since DPFZA controls the Doraleh grid connection directly."
             ),
             "target_persona": (
-                "**Primary:** DPFZA / SGTD Terminal Operations Director — controls port equipment "
+                "**Primary:** DPFZA / SGTD Terminal Operations Director â€” controls port equipment "
                 "procurement and grid capacity allocation at Doraleh, the single highest-leverage decision "
-                "maker in this market. **Secondary:** Ethio-Djibouti Railway freight operations lead — "
+                "maker in this market. **Secondary:** Ethio-Djibouti Railway freight operations lead â€” "
                 "owns the rail-side handoff and can co-sponsor a port-to-rail e-drayage pilot as a joint "
                 "corridor-efficiency initiative with Ethiopian counterparts."
             ),
@@ -1446,10 +1513,10 @@ TIER1 = {
     },
 
     "Mauritius": {
-        "flag":"🇲🇺","iso":"MUS","region":"Southern Africa (Indian Ocean)","tier":1,
+        "flag":"ðŸ‡²ðŸ‡º","iso":"MUS","region":"Southern Africa (Indian Ocean)","tier":1,
         "kpi":{
             "Annual CV Sales":   ("~1,800","units/yr","+5.4% YoY","https://commerce.govmu.org"),
-            "EV Penetration":    ("~14.5%","of new CV sales — top-tier in SSA","+6.0pp YoY","https://energy.govmu.org"),
+            "EV Penetration":    ("~14.5%","of new CV sales â€” top-tier in SSA","+6.0pp YoY","https://energy.govmu.org"),
             "EV Excise Duty":    ("0%","BEV commercial vehicles","vs 30-55% ICE excise bands","https://mra.mu"),
             "Grid Renewable Mix":("~40%","targeting 60% by 2030","National Energy Roadmap","https://energy.govmu.org"),
         },
@@ -1463,9 +1530,9 @@ TIER1 = {
         "news_query":"Mauritius electric vehicle commercial fleet resort tourism logistics",
         "tri_keys":["mu_green_island"],
         "sources":{
-            "trade":  ("Ministry of Commerce & Consumer Protection — Mauritius","https://commerce.govmu.org"),
+            "trade":  ("Ministry of Commerce & Consumer Protection â€” Mauritius","https://commerce.govmu.org"),
             "customs":("Mauritius Revenue Authority (MRA)","https://mra.mu"),
-            "market": ("Ministry of Energy & Public Utilities — Mauritius","https://energy.govmu.org"),
+            "market": ("Ministry of Energy & Public Utilities â€” Mauritius","https://energy.govmu.org"),
         },
         "tco_params": {
             "ICE_Capex":               72000,
@@ -1484,9 +1551,9 @@ TIER1 = {
             "source_url":  "https://mra.mu",
         },
         "segment_apps": {
-            "Urban FMCG (城市快消)":      {"volume": 900, "ev_readiness": 8.8},
-            "Port Drayage (港口倒短)":    {"volume": 500, "ev_readiness": 6.5},
-            "Long-Haul Mining (长途矿业)":{"volume": 20,  "ev_readiness": 0.2},
+            "Urban FMCG (åŸŽå¸‚å¿«æ¶ˆ)":      {"volume": 900, "ev_readiness": 8.8},
+            "Port Drayage (æ¸¯å£å€’çŸ­)":    {"volume": 500, "ev_readiness": 6.5},
+            "Long-Haul Mining (é•¿é€”çŸ¿ä¸š)":{"volume": 20,  "ev_readiness": 0.2},
         },
         "risk_radar": {
             "FX_Liquidity":        8.0,
@@ -1496,24 +1563,24 @@ TIER1 = {
             "Policy_Consistency":  8.5,
         },
         "action": (
-            "Ignore absolute unit volume — this is a <b>reference-account showcase market</b>. Fund a "
+            "Ignore absolute unit volume â€” this is a <b>reference-account showcase market</b>. Fund a "
             "small pure-EV pilot (light e-trucks + electric shuttle buses) with 2-3 flagship resort "
             "groups (Beachcomber, LUX*, Constance) whose entire operating radius is under 60km, and reuse "
             "the resulting case study across every coastal tourism economy in the portfolio. There is "
-            "effectively no long-haul mining segment here — do not build one into the pitch."
+            "effectively no long-haul mining segment here â€” do not build one into the pitch."
         ),
         "gtm_playbook": {
             "product_matrix": (
                 "**Lead SKU: Pure-electric light truck for resort/hospitality distribution** (8.8/10 "
-                "readiness, the highest urban-FMCG score in the portfolio outside Rwanda/Tunisia) — "
+                "readiness, the highest urban-FMCG score in the portfolio outside Rwanda/Tunisia) â€” "
                 "0% excise duty and an island-wide sub-60km operating radius eliminate the two biggest "
                 "objections (cost and range) simultaneously. **Secondary SKU: Electric shuttle bus for "
-                "resort/airport transfer routes** (6.5/10 readiness) — pairs naturally with hotel groups' "
+                "resort/airport transfer routes** (6.5/10 readiness) â€” pairs naturally with hotel groups' "
                 "own sustainability reporting needs. **Do not build a mining/long-haul SKU strategy here** "
-                "(0.2/10 readiness) — there is essentially no market for it."
+                "(0.2/10 readiness) â€” there is essentially no market for it."
             ),
             "supply_chain_mode": (
-                "Direct CBU import at 0% excise duty — no CKD/local assembly rationale exists given the "
+                "Direct CBU import at 0% excise duty â€” no CKD/local assembly rationale exists given the "
                 "tiny absolute volume; Mauritius is a **margin-rich, low-volume showcase deal**, not a "
                 "manufacturing-localisation play. Price in USD or EUR (Mauritius commercial buyers are "
                 "accustomed to hard-currency equipment financing via international leasing lines), and "
@@ -1522,22 +1589,22 @@ TIER1 = {
             ),
             "target_persona": (
                 "**Primary:** Group Sustainability / Fleet Director at a flagship resort group (Beachcomber, "
-                "LUX*, Constance) — under direct pressure from international tour operators and ESG-linked "
+                "LUX*, Constance) â€” under direct pressure from international tour operators and ESG-linked "
                 "financing covenants to decarbonise ground operations, values the marketing/PR value of a "
                 "visible EV fleet as much as the TCO case. **Secondary:** Mauritius Ports Authority "
-                "logistics lead — smaller volume but adds a non-hospitality reference account to the "
+                "logistics lead â€” smaller volume but adds a non-hospitality reference account to the "
                 "showcase portfolio."
             ),
         },
     },
 
     "Madagascar": {
-        "flag":"🇲🇬","iso":"MDG","region":"Southern Africa (Indian Ocean)","tier":1,
+        "flag":"ðŸ‡²ðŸ‡¬","iso":"MDG","region":"Southern Africa (Indian Ocean)","tier":1,
         "kpi":{
             "Annual CV Sales":     ("~2,600","units/yr","+3.4% YoY","https://www.commerce.gov.mg"),
             "National Electrification":("<35%","of population, grid unreliable outside capital","World Bank / JIRAMA","https://www.jirama.mg"),
             "CBU Import Duty":     ("~20%","standard rate, no EV carve-out","","https://douanes.gov.mg"),
-            "Diesel Price":        ("MGA 5,450","/litre","≈ $1.19 USD","https://www.mines-energie.gov.mg"),
+            "Diesel Price":        ("MGA 5,450","/litre","â‰ˆ $1.19 USD","https://www.mines-energie.gov.mg"),
         },
         "brand_share":{"brands":["Sinotruk","Isuzu","Mercedes-Benz","Foton","Volvo"],"sales":[680,540,420,380,260]},
         "policy":{
@@ -1549,9 +1616,9 @@ TIER1 = {
         "news_query":"Madagascar mining logistics truck nickel cobalt export transport",
         "tri_keys":["mg_infra_reality"],
         "sources":{
-            "trade":  ("Ministère du Commerce — Madagascar","https://www.commerce.gov.mg"),
-            "customs":("Direction Générale des Douanes — Madagascar","https://douanes.gov.mg"),
-            "market": ("JIRAMA — Jiro sy Rano Malagasy (national utility)","https://www.jirama.mg"),
+            "trade":  ("MinistÃ¨re du Commerce â€” Madagascar","https://www.commerce.gov.mg"),
+            "customs":("Direction GÃ©nÃ©rale des Douanes â€” Madagascar","https://douanes.gov.mg"),
+            "market": ("JIRAMA â€” Jiro sy Rano Malagasy (national utility)","https://www.jirama.mg"),
         },
         "tco_params": {
             "ICE_Capex":               98000,
@@ -1570,9 +1637,9 @@ TIER1 = {
             "source_url":  "https://www.mines-energie.gov.mg",
         },
         "segment_apps": {
-            "Urban FMCG (城市快消)":      {"volume": 700,  "ev_readiness": 2.5},
-            "Port Drayage (港口倒短)":    {"volume": 600,  "ev_readiness": 1.8},
-            "Long-Haul Mining (长途矿业)":{"volume": 6800, "ev_readiness": 0.1},
+            "Urban FMCG (åŸŽå¸‚å¿«æ¶ˆ)":      {"volume": 700,  "ev_readiness": 2.5},
+            "Port Drayage (æ¸¯å£å€’çŸ­)":    {"volume": 600,  "ev_readiness": 1.8},
+            "Long-Haul Mining (é•¿é€”çŸ¿ä¸š)":{"volume": 6800, "ev_readiness": 0.1},
         },
         "risk_radar": {
             "FX_Liquidity":        3.0,
@@ -1582,7 +1649,7 @@ TIER1 = {
             "Policy_Consistency":  3.5,
         },
         "action": (
-            "Do not pitch EV here under any circumstances — grid reliability (1.5/10) and a mining-led "
+            "Do not pitch EV here under any circumstances â€” grid reliability (1.5/10) and a mining-led "
             "demand profile make this a <b>diesel-only market</b>. Lead exclusively with rugged, "
             "high-payload diesel mining/haulage trucks targeting Ambatovy, Rio Tinto QMM, and Kraoma "
             "fleet renewal cycles; positioning EV messaging here will cost credibility with mining-sector "
@@ -1591,266 +1658,266 @@ TIER1 = {
         "gtm_playbook": {
             "product_matrix": (
                 "**Lead SKU: Rugged diesel mining/haulage rigid & tipper** for the Ambatovy/Rio Tinto "
-                "QMM/Kraoma inland-mine-to-port corridors — this is essentially 100% of the realistic "
+                "QMM/Kraoma inland-mine-to-port corridors â€” this is essentially 100% of the realistic "
                 "near-term opportunity (6,800 units/yr segment volume vs 0.1/10 EV readiness). "
-                "**Secondary SKU: diesel rigid for Toamasina/Tuléar port logistics** — supports the same "
-                "mining-export value chain. **There is no viable EV SKU to lead with in this market** — "
+                "**Secondary SKU: diesel rigid for Toamasina/TulÃ©ar port logistics** â€” supports the same "
+                "mining-export value chain. **There is no viable EV SKU to lead with in this market** â€” "
                 "even the highest-scoring segment (Urban FMCG, Antananarivo only) sits at just 2.5/10 "
                 "readiness, reflecting the capital's own unreliable grid."
             ),
             "supply_chain_mode": (
                 "CBU import at the standard ~20% duty, with a case-by-case push for Code Minier "
                 "investment-code duty relief when the buyer is a mine operator importing fleet as part "
-                "of a registered mining investment project — this can materially reduce the effective "
+                "of a registered mining investment project â€” this can materially reduce the effective "
                 "duty rate for the Ambatovy/QMM/Kraoma segment specifically. Price in USD given Ariary "
                 "volatility, and build extended lead times into delivery commitments given Madagascar's "
-                "port and inland logistics constraints — do not commit to delivery windows shorter than "
+                "port and inland logistics constraints â€” do not commit to delivery windows shorter than "
                 "regional peers can support."
             ),
             "target_persona": (
-                "**Primary:** Ambatovy / Rio Tinto QMM Fleet & Logistics Procurement Director — large, "
+                "**Primary:** Ambatovy / Rio Tinto QMM Fleet & Logistics Procurement Director â€” large, "
                 "durable multi-year framework volumes tied to mine-life fleet renewal cycles, decision "
                 "process runs through the Code Minier investment-project structure rather than standard "
                 "commercial import channels. **Secondary:** Independent graphite/gemstone export logistics "
-                "operators — smaller individual deal size but a broader base of relationships across the "
+                "operators â€” smaller individual deal size but a broader base of relationships across the "
                 "mineral-export corridor."
             ),
         },
     },
 }
 
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-# ══════════════════════════════════════════════════════════════════════════════
-# 5C. INTERNAL COMPETITIVE INTELLIGENCE DATABASE — Internal Use Only
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 5C. INTERNAL COMPETITIVE INTELLIGENCE DATABASE â€” Internal Use Only
 #     Strategic ground truth: we ONLY sell pure-electric commercial vehicles.
 #     Every country's competitor set therefore always includes exactly one
-#     "Ours (我司纯电)" row — even in markets like Madagascar where the fit is
+#     "Ours (æˆ‘å¸çº¯ç”µ)" row â€” even in markets like Madagascar where the fit is
 #     structurally poor, because seeing that mismatch on the positioning
 #     scatter IS the internal insight leadership needs.
 #
 #     Schema per competitor row:
-#       Model            — vehicle nameplate
-#       Brand_Type       — "Ours (我司纯电)" | "Chinese EV Rival" | "ICE Incumbent"
-#       Price_USD        — retail terminal price
-#       Length_mm        — vehicle length
-#       Battery_kWh      — None for diesel/ICE rows
-#       Payload_kg       — rated payload
-#       Channel_Strategy — dealer/network description
-#       Channel_Count    — approximate number of active sales/service points
+#       Model            â€” vehicle nameplate
+#       Brand_Type       â€” "Ours (æˆ‘å¸çº¯ç”µ)" | "Chinese EV Rival" | "ICE Incumbent"
+#       Price_USD        â€” retail terminal price
+#       Length_mm        â€” vehicle length
+#       Battery_kWh      â€” None for diesel/ICE rows
+#       Payload_kg       â€” rated payload
+#       Channel_Strategy â€” dealer/network description
+#       Channel_Count    â€” approximate number of active sales/service points
 #
 #     "vehicle_class" and "chinese_footprint" sit at the country level:
 #     vehicle_class names which LCV/Van segment this comparison set targets;
 #     chinese_footprint is the blunt internal-only paragraph on how Chinese
 #     rivals (Foton, Maxus/SAIC, DFSK, Sinotruk, etc.) are actually playing
-#     this market — written for the BD/channel team, not for a client deck.
-# ══════════════════════════════════════════════════════════════════════════════
+#     this market â€” written for the BD/channel team, not for a client deck.
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 INTERNAL_COMPETITOR_DATA = {
     "Nigeria": {
-        "vehicle_class": "e-LCV / Panel Van (城市快消轻卡·微面)",
+        "vehicle_class": "e-LCV / Panel Van (åŸŽå¸‚å¿«æ¶ˆè½»å¡Â·å¾®é¢)",
         "competitors": [
-            {"Model":"Our EV — X1 e-Van","Brand_Type":"Ours (我司纯电)","Price_USD":42000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"直营+2家意向经销商，网点建设中","Channel_Count":2},
-            {"Model":"Foton iBlue EV","Brand_Type":"Chinese EV Rival","Price_USD":38500,"Length_mm":5100,"Battery_kWh":70.0,"Payload_kg":1400,"Channel_Strategy":"依托Foton尼日利亚CKD组装网络","Channel_Count":12},
-            {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":40800,"Length_mm":5400,"Battery_kWh":80.0,"Payload_kg":1600,"Channel_Strategy":"SAIC西非代理商Coscharis渠道","Channel_Count":8},
-            {"Model":"Toyota Hiace (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":34000,"Length_mm":5380,"Battery_kWh":None,"Payload_kg":1500,"Channel_Strategy":"CFAO集团全国网络，油车心智垄断","Channel_Count":45},
+            {"Model":"Our EV â€” X1 e-Van","Brand_Type":"Ours (æˆ‘å¸çº¯ç”µ)","Price_USD":42000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"ç›´è¥+2å®¶æ„å‘ç»é”€å•†ï¼Œç½‘ç‚¹å»ºè®¾ä¸­","Channel_Count":2},
+            {"Model":"Foton iBlue EV","Brand_Type":"Chinese EV Rival","Price_USD":38500,"Length_mm":5100,"Battery_kWh":70.0,"Payload_kg":1400,"Channel_Strategy":"ä¾æ‰˜Fotonå°¼æ—¥åˆ©äºšCKDç»„è£…ç½‘ç»œ","Channel_Count":12},
+            {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":40800,"Length_mm":5400,"Battery_kWh":80.0,"Payload_kg":1600,"Channel_Strategy":"SAICè¥¿éžä»£ç†å•†Coscharisæ¸ é“","Channel_Count":8},
+            {"Model":"Toyota Hiace (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":34000,"Length_mm":5380,"Battery_kWh":None,"Payload_kg":1500,"Channel_Strategy":"CFAOé›†å›¢å…¨å›½ç½‘ç»œï¼Œæ²¹è½¦å¿ƒæ™ºåž„æ–­","Channel_Count":45},
         ],
         "chinese_footprint": (
-            "Foton 与 Maxus 已在尼日利亚建立CKD组装+本地渠道双重护城河：Foton 依托拉各斯周边组装线拿到0%CKD关税，"
-            "整车成本比我司CBU直接进口低约10%；Maxus 通过 SAIC 与 Coscharis 集团深度绑定，8个网点覆盖拉各斯-伊巴丹主干道。"
-            "两者定价均比我司低8-10%，且网点数量是我司的4-6倍。<b>正面打价格战必输</b> —— "
-            "应避其锋芒，主攻 Dangote/BUA 大客户直销框架协议，用USD计价CKD方案对冲奈拉贬值风险，"
-            "绕开渠道数量劣势，用大客户直签速度差换取先发优势。"
+            "Foton ä¸Ž Maxus å·²åœ¨å°¼æ—¥åˆ©äºšå»ºç«‹CKDç»„è£…+æœ¬åœ°æ¸ é“åŒé‡æŠ¤åŸŽæ²³ï¼šFoton ä¾æ‰˜æ‹‰å„æ–¯å‘¨è¾¹ç»„è£…çº¿æ‹¿åˆ°0%CKDå…³ç¨Žï¼Œ"
+            "æ•´è½¦æˆæœ¬æ¯”æˆ‘å¸CBUç›´æŽ¥è¿›å£ä½Žçº¦10%ï¼›Maxus é€šè¿‡ SAIC ä¸Ž Coscharis é›†å›¢æ·±åº¦ç»‘å®šï¼Œ8ä¸ªç½‘ç‚¹è¦†ç›–æ‹‰å„æ–¯-ä¼Šå·´ä¸¹ä¸»å¹²é“ã€‚"
+            "ä¸¤è€…å®šä»·å‡æ¯”æˆ‘å¸ä½Ž8-10%ï¼Œä¸”ç½‘ç‚¹æ•°é‡æ˜¯æˆ‘å¸çš„4-6å€ã€‚<b>æ­£é¢æ‰“ä»·æ ¼æˆ˜å¿…è¾“</b> â€”â€” "
+            "åº”é¿å…¶é”‹èŠ’ï¼Œä¸»æ”» Dangote/BUA å¤§å®¢æˆ·ç›´é”€æ¡†æž¶åè®®ï¼Œç”¨USDè®¡ä»·CKDæ–¹æ¡ˆå¯¹å†²å¥ˆæ‹‰è´¬å€¼é£Žé™©ï¼Œ"
+            "ç»•å¼€æ¸ é“æ•°é‡åŠ£åŠ¿ï¼Œç”¨å¤§å®¢æˆ·ç›´ç­¾é€Ÿåº¦å·®æ¢å–å…ˆå‘ä¼˜åŠ¿ã€‚"
         ),
     },
     "South Africa": {
-        "vehicle_class": "e-LCV / Panel Van (Cape Town / Gauteng 仓配轻卡)",
+        "vehicle_class": "e-LCV / Panel Van (Cape Town / Gauteng ä»“é…è½»å¡)",
         "competitors": [
-            {"Model":"SV-L1H1","Brand_Type":"Ours (我司纯电)","Price_USD":53619,"Length_mm":4990,"Battery_kWh":83.0,"Payload_kg":1245,"Channel_Strategy":"开普敦首店（我司南非首家直营门店）","Channel_Count":1},
-            {"Model":"Foton eView Panel Van","Brand_Type":"Chinese EV Rival","Price_USD":38500,"Length_mm":5380,"Battery_kWh":50.23,"Payload_kg":1150,"Channel_Strategy":"依托FAW南非组装厂配套渠道，全国铺开","Channel_Count":60},
-            {"Model":"Maxus eDeliver5","Brand_Type":"Chinese EV Rival","Price_USD":57390,"Length_mm":5400,"Battery_kWh":64.0,"Payload_kg":1190,"Channel_Strategy":"SAIC南非独家总代，仅少量旗舰点","Channel_Count":5},
-            {"Model":"Toyota Quantum Van (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":45232,"Length_mm":5380,"Battery_kWh":None,"Payload_kg":1155,"Channel_Strategy":"Toyota南非本土化生产近80年，网点密度全国第一","Channel_Count":200},
+            {"Model":"SV-L1H1","Brand_Type":"Ours (æˆ‘å¸çº¯ç”µ)","Price_USD":53619,"Length_mm":4990,"Battery_kWh":83.0,"Payload_kg":1245,"Channel_Strategy":"å¼€æ™®æ•¦é¦–åº—ï¼ˆæˆ‘å¸å—éžé¦–å®¶ç›´è¥é—¨åº—ï¼‰","Channel_Count":1},
+            {"Model":"Foton eView Panel Van","Brand_Type":"Chinese EV Rival","Price_USD":38500,"Length_mm":5380,"Battery_kWh":50.23,"Payload_kg":1150,"Channel_Strategy":"ä¾æ‰˜FAWå—éžç»„è£…åŽ‚é…å¥—æ¸ é“ï¼Œå…¨å›½é“ºå¼€","Channel_Count":60},
+            {"Model":"Maxus eDeliver5","Brand_Type":"Chinese EV Rival","Price_USD":57390,"Length_mm":5400,"Battery_kWh":64.0,"Payload_kg":1190,"Channel_Strategy":"SAICå—éžç‹¬å®¶æ€»ä»£ï¼Œä»…å°‘é‡æ——èˆ°ç‚¹","Channel_Count":5},
+            {"Model":"Toyota Quantum Van (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":45232,"Length_mm":5380,"Battery_kWh":None,"Payload_kg":1155,"Channel_Strategy":"Toyotaå—éžæœ¬åœŸåŒ–ç”Ÿäº§è¿‘80å¹´ï¼Œç½‘ç‚¹å¯†åº¦å…¨å›½ç¬¬ä¸€","Channel_Count":200},
         ],
         "chinese_footprint": (
-            "实测数据显示：Foton eView 定价（$38,500）比我司 SV-L1H1（$53,619）低约 <b>28%</b>，"
-            "且网点数量是我司的 60 倍（60+ vs 1家开普敦首店），是南非渠道渗透最深的中资EV玩家；"
-            "Maxus eDeliver5 走的是反向路线——定价比我司还高 7%，但网点仅5+，走精品旗舰路线，"
-            "证明南非EV市场并非只能靠低价取胜。Toyota Quantum 凭借近80年本土化生产与200+网点，"
-            "在电量/续航故事尚未被验证前仍是运营车队的默认选择。<b>我司真正的威胁不是价格战本身，"
-            "而是 Foton 的渠道密度</b>——应避免与 Foton 拼网点数量，转而对标 Maxus 的精品旗舰打法，"
-            "以开普敦首店为样板店，用整车尺寸(4990mm，全场最短)与83kWh大电量（全场最高）打"
-            "'小车身大电量'的差异化产品故事，锁定城市高频短途配送场景的车队直销客户。"
+            "å®žæµ‹æ•°æ®æ˜¾ç¤ºï¼šFoton eView å®šä»·ï¼ˆ$38,500ï¼‰æ¯”æˆ‘å¸ SV-L1H1ï¼ˆ$53,619ï¼‰ä½Žçº¦ <b>28%</b>ï¼Œ"
+            "ä¸”ç½‘ç‚¹æ•°é‡æ˜¯æˆ‘å¸çš„ 60 å€ï¼ˆ60+ vs 1å®¶å¼€æ™®æ•¦é¦–åº—ï¼‰ï¼Œæ˜¯å—éžæ¸ é“æ¸—é€æœ€æ·±çš„ä¸­èµ„EVçŽ©å®¶ï¼›"
+            "Maxus eDeliver5 èµ°çš„æ˜¯åå‘è·¯çº¿â€”â€”å®šä»·æ¯”æˆ‘å¸è¿˜é«˜ 7%ï¼Œä½†ç½‘ç‚¹ä»…5+ï¼Œèµ°ç²¾å“æ——èˆ°è·¯çº¿ï¼Œ"
+            "è¯æ˜Žå—éžEVå¸‚åœºå¹¶éžåªèƒ½é ä½Žä»·å–èƒœã€‚Toyota Quantum å‡­å€Ÿè¿‘80å¹´æœ¬åœŸåŒ–ç”Ÿäº§ä¸Ž200+ç½‘ç‚¹ï¼Œ"
+            "åœ¨ç”µé‡/ç»­èˆªæ•…äº‹å°šæœªè¢«éªŒè¯å‰ä»æ˜¯è¿è¥è½¦é˜Ÿçš„é»˜è®¤é€‰æ‹©ã€‚<b>æˆ‘å¸çœŸæ­£çš„å¨èƒä¸æ˜¯ä»·æ ¼æˆ˜æœ¬èº«ï¼Œ"
+            "è€Œæ˜¯ Foton çš„æ¸ é“å¯†åº¦</b>â€”â€”åº”é¿å…ä¸Ž Foton æ‹¼ç½‘ç‚¹æ•°é‡ï¼Œè½¬è€Œå¯¹æ ‡ Maxus çš„ç²¾å“æ——èˆ°æ‰“æ³•ï¼Œ"
+            "ä»¥å¼€æ™®æ•¦é¦–åº—ä¸ºæ ·æ¿åº—ï¼Œç”¨æ•´è½¦å°ºå¯¸(4990mmï¼Œå…¨åœºæœ€çŸ­)ä¸Ž83kWhå¤§ç”µé‡ï¼ˆå…¨åœºæœ€é«˜ï¼‰æ‰“"
+            "'å°è½¦èº«å¤§ç”µé‡'çš„å·®å¼‚åŒ–äº§å“æ•…äº‹ï¼Œé”å®šåŸŽå¸‚é«˜é¢‘çŸ­é€”é…é€åœºæ™¯çš„è½¦é˜Ÿç›´é”€å®¢æˆ·ã€‚"
         ),
     },
     "Morocco": {
-        "vehicle_class": "e-LCV / Panel Van (卡萨布兰卡城配)",
+        "vehicle_class": "e-LCV / Panel Van (å¡è¨å¸ƒå…°å¡åŸŽé…)",
         "competitors": [
-            {"Model":"Our EV — X1 e-Van","Brand_Type":"Ours (我司纯电)","Price_USD":39500,"Length_mm":5200,"Battery_kWh":78.0,"Payload_kg":1500,"Channel_Strategy":"卡萨布兰卡港区合作方，网点筹建中","Channel_Count":1},
+            {"Model":"Our EV â€” X1 e-Van","Brand_Type":"Ours (æˆ‘å¸çº¯ç”µ)","Price_USD":39500,"Length_mm":5200,"Battery_kWh":78.0,"Payload_kg":1500,"Channel_Strategy":"å¡è¨å¸ƒå…°å¡æ¸¯åŒºåˆä½œæ–¹ï¼Œç½‘ç‚¹ç­¹å»ºä¸­","Channel_Count":1},
 
-            {"Model":"DFSK C35 EV","Brand_Type":"Chinese EV Rival","Price_USD":33800,"Length_mm":4995,"Battery_kWh":58.0,"Payload_kg":1200,"Channel_Strategy":"东风小康与Auto Hall集团深度绑定分销","Channel_Count":22},
-            {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":41200,"Length_mm":5400,"Battery_kWh":80.0,"Payload_kg":1600,"Channel_Strategy":"SAIC北非独家进口商","Channel_Count":9},
-            {"Model":"Renault Trucks Master (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":36500,"Length_mm":5548,"Battery_kWh":None,"Payload_kg":1700,"Channel_Strategy":"欧盟AA协定2.5%关税，欧洲品牌心智垄断","Channel_Count":38},
+            {"Model":"DFSK C35 EV","Brand_Type":"Chinese EV Rival","Price_USD":33800,"Length_mm":4995,"Battery_kWh":58.0,"Payload_kg":1200,"Channel_Strategy":"ä¸œé£Žå°åº·ä¸ŽAuto Hallé›†å›¢æ·±åº¦ç»‘å®šåˆ†é”€","Channel_Count":22},
+            {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":41200,"Length_mm":5400,"Battery_kWh":80.0,"Payload_kg":1600,"Channel_Strategy":"SAICåŒ—éžç‹¬å®¶è¿›å£å•†","Channel_Count":9},
+            {"Model":"Renault Trucks Master (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":36500,"Length_mm":5548,"Battery_kWh":None,"Payload_kg":1700,"Channel_Strategy":"æ¬§ç›ŸAAåå®š2.5%å…³ç¨Žï¼Œæ¬§æ´²å“ç‰Œå¿ƒæ™ºåž„æ–­","Channel_Count":38},
         ],
         "chinese_footprint": (
-            "东风小康(DFSK)与摩洛哥最大汽车经销商集团 <b>Auto Hall</b> 已形成深度独家绑定，22个网点覆盖"
-            "卡萨布兰卡-拉巴特-丹吉尔主干道，且DFSK定价比我司低约15%，是当地中资EV份额最大的玩家；"
-            "SAIC/Maxus 走独立进口商路线，网点少但主攻高端车队直销。<b>Auto Hall渠道已被DFSK锁死，"
-            "正面抢渠道成本极高</b>——应转向OCP承包商车队直销+CKD合资路线，绕开经销商网络卡位战，"
-            "用2.5%欧盟关税税率(通过本地化认定)对冲价格劣势。"
+            "ä¸œé£Žå°åº·(DFSK)ä¸Žæ‘©æ´›å“¥æœ€å¤§æ±½è½¦ç»é”€å•†é›†å›¢ <b>Auto Hall</b> å·²å½¢æˆæ·±åº¦ç‹¬å®¶ç»‘å®šï¼Œ22ä¸ªç½‘ç‚¹è¦†ç›–"
+            "å¡è¨å¸ƒå…°å¡-æ‹‰å·´ç‰¹-ä¸¹å‰å°”ä¸»å¹²é“ï¼Œä¸”DFSKå®šä»·æ¯”æˆ‘å¸ä½Žçº¦15%ï¼Œæ˜¯å½“åœ°ä¸­èµ„EVä»½é¢æœ€å¤§çš„çŽ©å®¶ï¼›"
+            "SAIC/Maxus èµ°ç‹¬ç«‹è¿›å£å•†è·¯çº¿ï¼Œç½‘ç‚¹å°‘ä½†ä¸»æ”»é«˜ç«¯è½¦é˜Ÿç›´é”€ã€‚<b>Auto Hallæ¸ é“å·²è¢«DFSKé”æ­»ï¼Œ"
+            "æ­£é¢æŠ¢æ¸ é“æˆæœ¬æžé«˜</b>â€”â€”åº”è½¬å‘OCPæ‰¿åŒ…å•†è½¦é˜Ÿç›´é”€+CKDåˆèµ„è·¯çº¿ï¼Œç»•å¼€ç»é”€å•†ç½‘ç»œå¡ä½æˆ˜ï¼Œ"
+            "ç”¨2.5%æ¬§ç›Ÿå…³ç¨Žç¨ŽçŽ‡(é€šè¿‡æœ¬åœ°åŒ–è®¤å®š)å¯¹å†²ä»·æ ¼åŠ£åŠ¿ã€‚"
         ),
     },
     "Egypt": {
-        "vehicle_class": "e-LCV / Panel Van (开罗城配)",
+        "vehicle_class": "e-LCV / Panel Van (å¼€ç½—åŸŽé…)",
         "competitors": [
-            {"Model":"Our EV — X1 e-Van","Brand_Type":"Ours (我司纯电)","Price_USD":37000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"SCZone合作方，网点筹建中","Channel_Count":1},
-            {"Model":"Foton iBlue EV","Brand_Type":"Chinese EV Rival","Price_USD":32500,"Length_mm":5100,"Battery_kWh":68.0,"Payload_kg":1400,"Channel_Strategy":"依托GB Auto/MAN Trucks Egypt KD产能","Channel_Count":16},
-            {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":35800,"Length_mm":5400,"Battery_kWh":80.0,"Payload_kg":1600,"Channel_Strategy":"SAIC埃及独家代理","Channel_Count":7},
-            {"Model":"Sinotruk Homan (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":24000,"Length_mm":5600,"Battery_kWh":None,"Payload_kg":3000,"Channel_Strategy":"补贴柴油+40%CBU关税壁垒下的性价比之王","Channel_Count":30},
+            {"Model":"Our EV â€” X1 e-Van","Brand_Type":"Ours (æˆ‘å¸çº¯ç”µ)","Price_USD":37000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"SCZoneåˆä½œæ–¹ï¼Œç½‘ç‚¹ç­¹å»ºä¸­","Channel_Count":1},
+            {"Model":"Foton iBlue EV","Brand_Type":"Chinese EV Rival","Price_USD":32500,"Length_mm":5100,"Battery_kWh":68.0,"Payload_kg":1400,"Channel_Strategy":"ä¾æ‰˜GB Auto/MAN Trucks Egypt KDäº§èƒ½","Channel_Count":16},
+            {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":35800,"Length_mm":5400,"Battery_kWh":80.0,"Payload_kg":1600,"Channel_Strategy":"SAICåŸƒåŠç‹¬å®¶ä»£ç†","Channel_Count":7},
+            {"Model":"Sinotruk Homan (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":24000,"Length_mm":5600,"Battery_kWh":None,"Payload_kg":3000,"Channel_Strategy":"è¡¥è´´æŸ´æ²¹+40%CBUå…³ç¨Žå£åž’ä¸‹çš„æ€§ä»·æ¯”ä¹‹çŽ‹","Channel_Count":30},
         ],
         "chinese_footprint": (
-            "Foton 借道 GB Auto/MAN Trucks Egypt 现成KD产能实现5%关税入市，成本结构对我司CBU路线形成"
-            "近乎降维打击；补贴柴油(EGP 9.75/L)又让 Sinotruk 等传统油车在总成本上难以撼动。"
-            "<b>埃及是本轮12国中中资EV+本土柴油双重挤压最严重的市场</b>——若不能复制GB Auto式KD合资，"
-            "单纯CBU出口在此几乎无胜算，建议列为观察市场，资源优先投向SCZone物流承包商定向直销。"
+            "Foton å€Ÿé“ GB Auto/MAN Trucks Egypt çŽ°æˆKDäº§èƒ½å®žçŽ°5%å…³ç¨Žå…¥å¸‚ï¼Œæˆæœ¬ç»“æž„å¯¹æˆ‘å¸CBUè·¯çº¿å½¢æˆ"
+            "è¿‘ä¹Žé™ç»´æ‰“å‡»ï¼›è¡¥è´´æŸ´æ²¹(EGP 9.75/L)åˆè®© Sinotruk ç­‰ä¼ ç»Ÿæ²¹è½¦åœ¨æ€»æˆæœ¬ä¸Šéš¾ä»¥æ’¼åŠ¨ã€‚"
+            "<b>åŸƒåŠæ˜¯æœ¬è½®12å›½ä¸­ä¸­èµ„EV+æœ¬åœŸæŸ´æ²¹åŒé‡æŒ¤åŽ‹æœ€ä¸¥é‡çš„å¸‚åœº</b>â€”â€”è‹¥ä¸èƒ½å¤åˆ¶GB Autoå¼KDåˆèµ„ï¼Œ"
+            "å•çº¯CBUå‡ºå£åœ¨æ­¤å‡ ä¹Žæ— èƒœç®—ï¼Œå»ºè®®åˆ—ä¸ºè§‚å¯Ÿå¸‚åœºï¼Œèµ„æºä¼˜å…ˆæŠ•å‘SCZoneç‰©æµæ‰¿åŒ…å•†å®šå‘ç›´é”€ã€‚"
         ),
     },
     "Kenya": {
-        "vehicle_class": "e-LCV / Panel Van (蒙巴萨港区+内罗毕城配)",
+        "vehicle_class": "e-LCV / Panel Van (è’™å·´è¨æ¸¯åŒº+å†…ç½—æ¯•åŸŽé…)",
         "competitors": [
-            {"Model":"Our EV — X1 e-Van","Brand_Type":"Ours (我司纯电)","Price_USD":36000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"内罗毕合作方，网点筹建中","Channel_Count":1},
-            {"Model":"Foton iBlue EV","Brand_Type":"Chinese EV Rival","Price_USD":32800,"Length_mm":5100,"Battery_kWh":68.0,"Payload_kg":1400,"Channel_Strategy":"东非区域总代，内罗毕-蒙巴萨双网点","Channel_Count":9},
-            {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":35200,"Length_mm":5400,"Battery_kWh":80.0,"Payload_kg":1600,"Channel_Strategy":"SAIC肯尼亚独立进口商","Channel_Count":5},
-            {"Model":"Isuzu NQR (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":29500,"Length_mm":5985,"Battery_kWh":None,"Payload_kg":3500,"Channel_Strategy":"Isuzu东非组装厂+全国网络","Channel_Count":52},
+            {"Model":"Our EV â€” X1 e-Van","Brand_Type":"Ours (æˆ‘å¸çº¯ç”µ)","Price_USD":36000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"å†…ç½—æ¯•åˆä½œæ–¹ï¼Œç½‘ç‚¹ç­¹å»ºä¸­","Channel_Count":1},
+            {"Model":"Foton iBlue EV","Brand_Type":"Chinese EV Rival","Price_USD":32800,"Length_mm":5100,"Battery_kWh":68.0,"Payload_kg":1400,"Channel_Strategy":"ä¸œéžåŒºåŸŸæ€»ä»£ï¼Œå†…ç½—æ¯•-è’™å·´è¨åŒç½‘ç‚¹","Channel_Count":9},
+            {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":35200,"Length_mm":5400,"Battery_kWh":80.0,"Payload_kg":1600,"Channel_Strategy":"SAICè‚¯å°¼äºšç‹¬ç«‹è¿›å£å•†","Channel_Count":5},
+            {"Model":"Isuzu NQR (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":29500,"Length_mm":5985,"Battery_kWh":None,"Payload_kg":3500,"Channel_Strategy":"Isuzuä¸œéžç»„è£…åŽ‚+å…¨å›½ç½‘ç»œ","Channel_Count":52},
         ],
         "chinese_footprint": (
-            "Foton 在东非走区域总代模式，内罗毕-蒙巴萨双枢纽布局精准卡住港口物流与城配两大场景，"
-            "定价比我司低约9%；Isuzu 凭借本地组装历史仍是油车心智绝对霸主。<b>肯尼亚渠道竞争尚未固化"
-            "（Chinese EV网点均低于10个），是12国中少数仍可正面抢滩的市场</b>——建议以蒙巴萨港口"
-            "Drayage试点为切入点，用Kenya Ports Authority框架合同建立第一批直营网点，抢在Foton/Maxus"
-            "扩张前占据港区心智。"
+            "Foton åœ¨ä¸œéžèµ°åŒºåŸŸæ€»ä»£æ¨¡å¼ï¼Œå†…ç½—æ¯•-è’™å·´è¨åŒæž¢çº½å¸ƒå±€ç²¾å‡†å¡ä½æ¸¯å£ç‰©æµä¸ŽåŸŽé…ä¸¤å¤§åœºæ™¯ï¼Œ"
+            "å®šä»·æ¯”æˆ‘å¸ä½Žçº¦9%ï¼›Isuzu å‡­å€Ÿæœ¬åœ°ç»„è£…åŽ†å²ä»æ˜¯æ²¹è½¦å¿ƒæ™ºç»å¯¹éœ¸ä¸»ã€‚<b>è‚¯å°¼äºšæ¸ é“ç«žäº‰å°šæœªå›ºåŒ–"
+            "ï¼ˆChinese EVç½‘ç‚¹å‡ä½ŽäºŽ10ä¸ªï¼‰ï¼Œæ˜¯12å›½ä¸­å°‘æ•°ä»å¯æ­£é¢æŠ¢æ»©çš„å¸‚åœº</b>â€”â€”å»ºè®®ä»¥è’™å·´è¨æ¸¯å£"
+            "Drayageè¯•ç‚¹ä¸ºåˆ‡å…¥ç‚¹ï¼Œç”¨Kenya Ports Authorityæ¡†æž¶åˆåŒå»ºç«‹ç¬¬ä¸€æ‰¹ç›´è¥ç½‘ç‚¹ï¼ŒæŠ¢åœ¨Foton/Maxus"
+            "æ‰©å¼ å‰å æ®æ¸¯åŒºå¿ƒæ™ºã€‚"
         ),
     },
     "Ethiopia": {
-        "vehicle_class": "e-LCV / Panel Van (亚的斯亚贝巴城配 — 柴油已禁止进口)",
+        "vehicle_class": "e-LCV / Panel Van (äºšçš„æ–¯äºšè´å·´åŸŽé… â€” æŸ´æ²¹å·²ç¦æ­¢è¿›å£)",
         "competitors": [
-            {"Model":"Our EV — X1 e-Van","Brand_Type":"Ours (我司纯电)","Price_USD":33000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"亚的斯亚贝巴直营+代理商网络","Channel_Count":4},
-            {"Model":"BYD T3","Brand_Type":"Chinese EV Rival","Price_USD":29500,"Length_mm":4785,"Battery_kWh":50.0,"Payload_kg":1000,"Channel_Strategy":"BYD在埃塞市占率第一，全国经销网络最广","Channel_Count":26},
-            {"Model":"Foton EV Van","Brand_Type":"Chinese EV Rival","Price_USD":31200,"Length_mm":5100,"Battery_kWh":68.0,"Payload_kg":1400,"Channel_Strategy":"Foton EV埃塞第二大份额","Channel_Count":15},
-            {"Model":"Legacy ICE Fleet (进口已禁)","Brand_Type":"ICE Incumbent","Price_USD":22000,"Length_mm":5380,"Battery_kWh":None,"Payload_kg":1500,"Channel_Strategy":"存量约8万辆在役，无新增进口但仍占路权大头","Channel_Count":0},
+            {"Model":"Our EV â€” X1 e-Van","Brand_Type":"Ours (æˆ‘å¸çº¯ç”µ)","Price_USD":33000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"äºšçš„æ–¯äºšè´å·´ç›´è¥+ä»£ç†å•†ç½‘ç»œ","Channel_Count":4},
+            {"Model":"BYD T3","Brand_Type":"Chinese EV Rival","Price_USD":29500,"Length_mm":4785,"Battery_kWh":50.0,"Payload_kg":1000,"Channel_Strategy":"BYDåœ¨åŸƒå¡žå¸‚å çŽ‡ç¬¬ä¸€ï¼Œå…¨å›½ç»é”€ç½‘ç»œæœ€å¹¿","Channel_Count":26},
+            {"Model":"Foton EV Van","Brand_Type":"Chinese EV Rival","Price_USD":31200,"Length_mm":5100,"Battery_kWh":68.0,"Payload_kg":1400,"Channel_Strategy":"Foton EVåŸƒå¡žç¬¬äºŒå¤§ä»½é¢","Channel_Count":15},
+            {"Model":"Legacy ICE Fleet (è¿›å£å·²ç¦)","Brand_Type":"ICE Incumbent","Price_USD":22000,"Length_mm":5380,"Battery_kWh":None,"Payload_kg":1500,"Channel_Strategy":"å­˜é‡çº¦8ä¸‡è¾†åœ¨å½¹ï¼Œæ— æ–°å¢žè¿›å£ä½†ä»å è·¯æƒå¤§å¤´","Channel_Count":0},
         ],
         "chinese_footprint": (
-            "BYD 已凭借2022年石油车禁令窗口期抢先建成埃塞俄比亚最大的EV经销网络(26个网点)，"
-            "在新车注册份额上稳居第一；Foton EV紧随其后。<b>中资品牌是这场'政策红利战争'的最大赢家，"
-            "我司入场已属追赶者</b>——正面拼网点数量已无胜算，应聚焦BYD/Foton尚未覆盖的Addis周边区域"
-            "及政企直采(Ethiopian Roads Authority/Ethio Telecom)大宗订单，用差异化车型规格切入。"
+            "BYD å·²å‡­å€Ÿ2022å¹´çŸ³æ²¹è½¦ç¦ä»¤çª—å£æœŸæŠ¢å…ˆå»ºæˆåŸƒå¡žä¿„æ¯”äºšæœ€å¤§çš„EVç»é”€ç½‘ç»œ(26ä¸ªç½‘ç‚¹)ï¼Œ"
+            "åœ¨æ–°è½¦æ³¨å†Œä»½é¢ä¸Šç¨³å±…ç¬¬ä¸€ï¼›Foton EVç´§éšå…¶åŽã€‚<b>ä¸­èµ„å“ç‰Œæ˜¯è¿™åœº'æ”¿ç­–çº¢åˆ©æˆ˜äº‰'çš„æœ€å¤§èµ¢å®¶ï¼Œ"
+            "æˆ‘å¸å…¥åœºå·²å±žè¿½èµ¶è€…</b>â€”â€”æ­£é¢æ‹¼ç½‘ç‚¹æ•°é‡å·²æ— èƒœç®—ï¼Œåº”èšç„¦BYD/Fotonå°šæœªè¦†ç›–çš„Addiså‘¨è¾¹åŒºåŸŸ"
+            "åŠæ”¿ä¼ç›´é‡‡(Ethiopian Roads Authority/Ethio Telecom)å¤§å®—è®¢å•ï¼Œç”¨å·®å¼‚åŒ–è½¦åž‹è§„æ ¼åˆ‡å…¥ã€‚"
         ),
     },
     "Algeria": {
-        "vehicle_class": "e-LCV / Panel Van (阿尔及尔城配 — EV早期阶段)",
+        "vehicle_class": "e-LCV / Panel Van (é˜¿å°”åŠå°”åŸŽé… â€” EVæ—©æœŸé˜¶æ®µ)",
         "competitors": [
-            {"Model":"Our EV — X1 e-Van","Brand_Type":"Ours (我司纯电)","Price_USD":45000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"尚无本地网点，依赖跨境试销","Channel_Count":0},
-            {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":43500,"Length_mm":5400,"Battery_kWh":80.0,"Payload_kg":1600,"Channel_Strategy":"SAIC通过阿尔及尔独立进口商试水","Channel_Count":2},
-            {"Model":"Sinotruk Homan (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":26500,"Length_mm":5600,"Battery_kWh":None,"Payload_kg":3000,"Channel_Strategy":"补贴柴油+进口配额制下的实用主义之选","Channel_Count":18},
-            {"Model":"Renault Trucks Master (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":38000,"Length_mm":5548,"Battery_kWh":None,"Payload_kg":1700,"Channel_Strategy":"Renault Rouiba合资JV本地生产，政策优先扶持","Channel_Count":25},
+            {"Model":"Our EV â€” X1 e-Van","Brand_Type":"Ours (æˆ‘å¸çº¯ç”µ)","Price_USD":45000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"å°šæ— æœ¬åœ°ç½‘ç‚¹ï¼Œä¾èµ–è·¨å¢ƒè¯•é”€","Channel_Count":0},
+            {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":43500,"Length_mm":5400,"Battery_kWh":80.0,"Payload_kg":1600,"Channel_Strategy":"SAICé€šè¿‡é˜¿å°”åŠå°”ç‹¬ç«‹è¿›å£å•†è¯•æ°´","Channel_Count":2},
+            {"Model":"Sinotruk Homan (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":26500,"Length_mm":5600,"Battery_kWh":None,"Payload_kg":3000,"Channel_Strategy":"è¡¥è´´æŸ´æ²¹+è¿›å£é…é¢åˆ¶ä¸‹çš„å®žç”¨ä¸»ä¹‰ä¹‹é€‰","Channel_Count":18},
+            {"Model":"Renault Trucks Master (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":38000,"Length_mm":5548,"Battery_kWh":None,"Payload_kg":1700,"Channel_Strategy":"Renault Rouibaåˆèµ„JVæœ¬åœ°ç”Ÿäº§ï¼Œæ”¿ç­–ä¼˜å…ˆæ‰¶æŒ","Channel_Count":25},
         ],
         "chinese_footprint": (
-            "阿尔及利亚EV渗透率仅0.4%，中资品牌尚处试水阶段，Maxus通过独立进口商小规模布局，"
-            "尚未形成网络护城河。但补贴柴油(DZD 45/L)与进口许可证配额制才是真正的结构性壁垒——"
-            "<b>无论我司还是中资友商，在此市场的共同敌人都是政策壁垒本身，而非彼此</b>。建议暂缓渠道投入，"
-            "参照Renault Rouiba模式推进国家背书JV，3-4年设厂窗口期内不与中资EV正面竞争。"
+            "é˜¿å°”åŠåˆ©äºšEVæ¸—é€çŽ‡ä»…0.4%ï¼Œä¸­èµ„å“ç‰Œå°šå¤„è¯•æ°´é˜¶æ®µï¼ŒMaxusé€šè¿‡ç‹¬ç«‹è¿›å£å•†å°è§„æ¨¡å¸ƒå±€ï¼Œ"
+            "å°šæœªå½¢æˆç½‘ç»œæŠ¤åŸŽæ²³ã€‚ä½†è¡¥è´´æŸ´æ²¹(DZD 45/L)ä¸Žè¿›å£è®¸å¯è¯é…é¢åˆ¶æ‰æ˜¯çœŸæ­£çš„ç»“æž„æ€§å£åž’â€”â€”"
+            "<b>æ— è®ºæˆ‘å¸è¿˜æ˜¯ä¸­èµ„å‹å•†ï¼Œåœ¨æ­¤å¸‚åœºçš„å…±åŒæ•Œäººéƒ½æ˜¯æ”¿ç­–å£åž’æœ¬èº«ï¼Œè€Œéžå½¼æ­¤</b>ã€‚å»ºè®®æš‚ç¼“æ¸ é“æŠ•å…¥ï¼Œ"
+            "å‚ç…§Renault Rouibaæ¨¡å¼æŽ¨è¿›å›½å®¶èƒŒä¹¦JVï¼Œ3-4å¹´è®¾åŽ‚çª—å£æœŸå†…ä¸ä¸Žä¸­èµ„EVæ­£é¢ç«žäº‰ã€‚"
         ),
     },
     "Tunisia": {
-        "vehicle_class": "e-LCV / Panel Van (突尼斯城配 — 2026 EV政策红利市场)",
+        "vehicle_class": "e-LCV / Panel Van (çªå°¼æ–¯åŸŽé… â€” 2026 EVæ”¿ç­–çº¢åˆ©å¸‚åœº)",
         "competitors": [
-            {"Model":"Our EV — X1 e-Van","Brand_Type":"Ours (我司纯电)","Price_USD":34000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"突尼斯市直营，网点扩张中","Channel_Count":3},
-            {"Model":"Foton iBlue EV","Brand_Type":"Chinese EV Rival","Price_USD":31500,"Length_mm":5100,"Battery_kWh":68.0,"Payload_kg":1400,"Channel_Strategy":"Foton北非区域代理，突尼斯-苏塞双枢纽","Channel_Count":10},
-            {"Model":"DFSK C35 EV","Brand_Type":"Chinese EV Rival","Price_USD":28800,"Length_mm":4995,"Battery_kWh":58.0,"Payload_kg":1200,"Channel_Strategy":"东风小康低价走量策略，主攻小微车队","Channel_Count":13},
-            {"Model":"Mercedes-Benz Sprinter (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":48000,"Length_mm":5926,"Battery_kWh":None,"Payload_kg":1600,"Channel_Strategy":"欧洲品牌高端心智，但2026新政后总成本劣势凸显","Channel_Count":20},
+            {"Model":"Our EV â€” X1 e-Van","Brand_Type":"Ours (æˆ‘å¸çº¯ç”µ)","Price_USD":34000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"çªå°¼æ–¯å¸‚ç›´è¥ï¼Œç½‘ç‚¹æ‰©å¼ ä¸­","Channel_Count":3},
+            {"Model":"Foton iBlue EV","Brand_Type":"Chinese EV Rival","Price_USD":31500,"Length_mm":5100,"Battery_kWh":68.0,"Payload_kg":1400,"Channel_Strategy":"FotonåŒ—éžåŒºåŸŸä»£ç†ï¼Œçªå°¼æ–¯-è‹å¡žåŒæž¢çº½","Channel_Count":10},
+            {"Model":"DFSK C35 EV","Brand_Type":"Chinese EV Rival","Price_USD":28800,"Length_mm":4995,"Battery_kWh":58.0,"Payload_kg":1200,"Channel_Strategy":"ä¸œé£Žå°åº·ä½Žä»·èµ°é‡ç­–ç•¥ï¼Œä¸»æ”»å°å¾®è½¦é˜Ÿ","Channel_Count":13},
+            {"Model":"Mercedes-Benz Sprinter (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":48000,"Length_mm":5926,"Battery_kWh":None,"Payload_kg":1600,"Channel_Strategy":"æ¬§æ´²å“ç‰Œé«˜ç«¯å¿ƒæ™ºï¼Œä½†2026æ–°æ”¿åŽæ€»æˆæœ¬åŠ£åŠ¿å‡¸æ˜¾","Channel_Count":20},
         ],
         "chinese_footprint": (
-            "DFSK 以极致低价走量策略在突尼斯快速铺开13个网点，专攻价格敏感的小微车队市场；"
-            "Foton 则主打突尼斯市-苏塞双枢纽的中高端定位。<b>TND 151,000的政策套利窗口对所有EV玩家"
-            "一视同仁，真正的分水岭是渠道密度而非政策</b>——DFSK的网点数已是我司4倍以上，"
-            "必须加快在Délice Danone/Aramex等旗舰客户的直签速度，用大客户样板案例弥补渠道数量差距，"
-            "抢在DFSK/Foton把网点优势转化为品牌心智之前建立差异化定位。"
+            "DFSK ä»¥æžè‡´ä½Žä»·èµ°é‡ç­–ç•¥åœ¨çªå°¼æ–¯å¿«é€Ÿé“ºå¼€13ä¸ªç½‘ç‚¹ï¼Œä¸“æ”»ä»·æ ¼æ•æ„Ÿçš„å°å¾®è½¦é˜Ÿå¸‚åœºï¼›"
+            "Foton åˆ™ä¸»æ‰“çªå°¼æ–¯å¸‚-è‹å¡žåŒæž¢çº½çš„ä¸­é«˜ç«¯å®šä½ã€‚<b>TND 151,000çš„æ”¿ç­–å¥—åˆ©çª—å£å¯¹æ‰€æœ‰EVçŽ©å®¶"
+            "ä¸€è§†åŒä»ï¼ŒçœŸæ­£çš„åˆ†æ°´å²­æ˜¯æ¸ é“å¯†åº¦è€Œéžæ”¿ç­–</b>â€”â€”DFSKçš„ç½‘ç‚¹æ•°å·²æ˜¯æˆ‘å¸4å€ä»¥ä¸Šï¼Œ"
+            "å¿…é¡»åŠ å¿«åœ¨DÃ©lice Danone/Aramexç­‰æ——èˆ°å®¢æˆ·çš„ç›´ç­¾é€Ÿåº¦ï¼Œç”¨å¤§å®¢æˆ·æ ·æ¿æ¡ˆä¾‹å¼¥è¡¥æ¸ é“æ•°é‡å·®è·ï¼Œ"
+            "æŠ¢åœ¨DFSK/FotonæŠŠç½‘ç‚¹ä¼˜åŠ¿è½¬åŒ–ä¸ºå“ç‰Œå¿ƒæ™ºä¹‹å‰å»ºç«‹å·®å¼‚åŒ–å®šä½ã€‚"
         ),
     },
     "Rwanda": {
-        "vehicle_class": "e-Bus / e-LCV (基加利G2G公交+城配)",
+        "vehicle_class": "e-Bus / e-LCV (åŸºåŠ åˆ©G2Gå…¬äº¤+åŸŽé…)",
         "competitors": [
-            {"Model":"Our EV — X1 e-Van","Brand_Type":"Ours (我司纯电)","Price_USD":31000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"基加利直营，G2G投标资质已获批","Channel_Count":2},
-            {"Model":"BYD e-Bus","Brand_Type":"Chinese EV Rival","Price_USD":185000,"Length_mm":12000,"Battery_kWh":324.0,"Payload_kg":None,"Channel_Strategy":"BYD卢旺达公交标杆项目，RDB重点扶持","Channel_Count":6},
-            {"Model":"Yutong e-Bus","Brand_Type":"Chinese EV Rival","Price_USD":172000,"Length_mm":11800,"Battery_kWh":300.0,"Payload_kg":None,"Channel_Strategy":"Yutong基加利公交系统在役车型","Channel_Count":4},
-            {"Model":"Toyota Coaster (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":58000,"Length_mm":6990,"Battery_kWh":None,"Payload_kg":None,"Channel_Strategy":"存量柴油中巴，新规下逐步被置换","Channel_Count":15},
+            {"Model":"Our EV â€” X1 e-Van","Brand_Type":"Ours (æˆ‘å¸çº¯ç”µ)","Price_USD":31000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"åŸºåŠ åˆ©ç›´è¥ï¼ŒG2GæŠ•æ ‡èµ„è´¨å·²èŽ·æ‰¹","Channel_Count":2},
+            {"Model":"BYD e-Bus","Brand_Type":"Chinese EV Rival","Price_USD":185000,"Length_mm":12000,"Battery_kWh":324.0,"Payload_kg":None,"Channel_Strategy":"BYDå¢æ—ºè¾¾å…¬äº¤æ ‡æ†é¡¹ç›®ï¼ŒRDBé‡ç‚¹æ‰¶æŒ","Channel_Count":6},
+            {"Model":"Yutong e-Bus","Brand_Type":"Chinese EV Rival","Price_USD":172000,"Length_mm":11800,"Battery_kWh":300.0,"Payload_kg":None,"Channel_Strategy":"YutongåŸºåŠ åˆ©å…¬äº¤ç³»ç»Ÿåœ¨å½¹è½¦åž‹","Channel_Count":4},
+            {"Model":"Toyota Coaster (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":58000,"Length_mm":6990,"Battery_kWh":None,"Payload_kg":None,"Channel_Strategy":"å­˜é‡æŸ´æ²¹ä¸­å·´ï¼Œæ–°è§„ä¸‹é€æ­¥è¢«ç½®æ¢","Channel_Count":15},
         ],
         "chinese_footprint": (
-            "BYD 与 Yutong 已在基加利公交电动化项目中建立标杆地位，是 RDB/RURA G2G招标的重点扶持对象，"
-            "客车级网点(6个+4个)覆盖全部主干线。<b>大巴细分我司难以正面竞争，但e-LCV城配细分"
-            "中资尚未重兵投入</b>——应聚焦BRALIRWA/MTN等企业车队直销，避开BYD/Yutong主导的G2G大巴标段，"
-            "用Kigali Bus Services以外的商业车队证明TCO故事，反向争取G2G第二批标段话语权。"
+            "BYD ä¸Ž Yutong å·²åœ¨åŸºåŠ åˆ©å…¬äº¤ç”µåŠ¨åŒ–é¡¹ç›®ä¸­å»ºç«‹æ ‡æ†åœ°ä½ï¼Œæ˜¯ RDB/RURA G2Gæ‹›æ ‡çš„é‡ç‚¹æ‰¶æŒå¯¹è±¡ï¼Œ"
+            "å®¢è½¦çº§ç½‘ç‚¹(6ä¸ª+4ä¸ª)è¦†ç›–å…¨éƒ¨ä¸»å¹²çº¿ã€‚<b>å¤§å·´ç»†åˆ†æˆ‘å¸éš¾ä»¥æ­£é¢ç«žäº‰ï¼Œä½†e-LCVåŸŽé…ç»†åˆ†"
+            "ä¸­èµ„å°šæœªé‡å…µæŠ•å…¥</b>â€”â€”åº”èšç„¦BRALIRWA/MTNç­‰ä¼ä¸šè½¦é˜Ÿç›´é”€ï¼Œé¿å¼€BYD/Yutongä¸»å¯¼çš„G2Gå¤§å·´æ ‡æ®µï¼Œ"
+            "ç”¨Kigali Bus Servicesä»¥å¤–çš„å•†ä¸šè½¦é˜Ÿè¯æ˜ŽTCOæ•…äº‹ï¼Œåå‘äº‰å–G2Gç¬¬äºŒæ‰¹æ ‡æ®µè¯è¯­æƒã€‚"
         ),
     },
     "Djibouti": {
-        "vehicle_class": "e-Drayage Tractor (多拉雷港口倒短)",
+        "vehicle_class": "e-Drayage Tractor (å¤šæ‹‰é›·æ¸¯å£å€’çŸ­)",
         "competitors": [
-            {"Model":"Our EV — X1 e-Tractor","Brand_Type":"Ours (我司纯电)","Price_USD":58000,"Length_mm":6200,"Battery_kWh":150.0,"Payload_kg":25000,"Channel_Strategy":"DPFZA框架谈判中，尚无落地网点","Channel_Count":0},
-            {"Model":"Sinotruk e-Tractor","Brand_Type":"Chinese EV Rival","Price_USD":52000,"Length_mm":6100,"Battery_kWh":140.0,"Payload_kg":24000,"Channel_Strategy":"中国重汽通过埃塞-吉布提走廊项目试点","Channel_Count":1},
-            {"Model":"Isuzu FVR (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":41000,"Length_mm":6900,"Battery_kWh":None,"Payload_kg":22000,"Channel_Strategy":"SGTD港口在役柴油牵引车主力","Channel_Count":8},
+            {"Model":"Our EV â€” X1 e-Tractor","Brand_Type":"Ours (æˆ‘å¸çº¯ç”µ)","Price_USD":58000,"Length_mm":6200,"Battery_kWh":150.0,"Payload_kg":25000,"Channel_Strategy":"DPFZAæ¡†æž¶è°ˆåˆ¤ä¸­ï¼Œå°šæ— è½åœ°ç½‘ç‚¹","Channel_Count":0},
+            {"Model":"Sinotruk e-Tractor","Brand_Type":"Chinese EV Rival","Price_USD":52000,"Length_mm":6100,"Battery_kWh":140.0,"Payload_kg":24000,"Channel_Strategy":"ä¸­å›½é‡æ±½é€šè¿‡åŸƒå¡ž-å‰å¸ƒæèµ°å»Šé¡¹ç›®è¯•ç‚¹","Channel_Count":1},
+            {"Model":"Isuzu FVR (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":41000,"Length_mm":6900,"Battery_kWh":None,"Payload_kg":22000,"Channel_Strategy":"SGTDæ¸¯å£åœ¨å½¹æŸ´æ²¹ç‰µå¼•è½¦ä¸»åŠ›","Channel_Count":8},
         ],
         "chinese_footprint": (
-            "中国重汽(Sinotruk)依托埃塞-吉布提走廊既有工程项目关系，已在多拉雷港区展开e-Tractor试点，"
-            "虽仅1个网点但背靠中资承建的铁路/港口基建项目具备天然入场优势。<b>吉布提是纯增量市场"
-            "（港口柴油牵引车存量8台起步），谁先拿下DPFZA/SGTD框架协议谁就定义标准</b>——"
-            "应加快与DPFZA的框架谈判节奏，避免被Sinotruk的基建项目关系抢先锁定港口运营方入口。"
+            "ä¸­å›½é‡æ±½(Sinotruk)ä¾æ‰˜åŸƒå¡ž-å‰å¸ƒæèµ°å»Šæ—¢æœ‰å·¥ç¨‹é¡¹ç›®å…³ç³»ï¼Œå·²åœ¨å¤šæ‹‰é›·æ¸¯åŒºå±•å¼€e-Tractorè¯•ç‚¹ï¼Œ"
+            "è™½ä»…1ä¸ªç½‘ç‚¹ä½†èƒŒé ä¸­èµ„æ‰¿å»ºçš„é“è·¯/æ¸¯å£åŸºå»ºé¡¹ç›®å…·å¤‡å¤©ç„¶å…¥åœºä¼˜åŠ¿ã€‚<b>å‰å¸ƒææ˜¯çº¯å¢žé‡å¸‚åœº"
+            "ï¼ˆæ¸¯å£æŸ´æ²¹ç‰µå¼•è½¦å­˜é‡8å°èµ·æ­¥ï¼‰ï¼Œè°å…ˆæ‹¿ä¸‹DPFZA/SGTDæ¡†æž¶åè®®è°å°±å®šä¹‰æ ‡å‡†</b>â€”â€”"
+            "åº”åŠ å¿«ä¸ŽDPFZAçš„æ¡†æž¶è°ˆåˆ¤èŠ‚å¥ï¼Œé¿å…è¢«Sinotrukçš„åŸºå»ºé¡¹ç›®å…³ç³»æŠ¢å…ˆé”å®šæ¸¯å£è¿è¥æ–¹å…¥å£ã€‚"
         ),
     },
     "Mauritius": {
-        "vehicle_class": "e-LCV / e-Shuttle (度假村配送+接驳)",
+        "vehicle_class": "e-LCV / e-Shuttle (åº¦å‡æ‘é…é€+æŽ¥é©³)",
         "competitors": [
-            {"Model":"Our EV — X1 e-Van","Brand_Type":"Ours (我司纯电)","Price_USD":33000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"路易港直营，度假村集团直销中","Channel_Count":2},
-            {"Model":"BYD T3","Brand_Type":"Chinese EV Rival","Price_USD":27500,"Length_mm":4785,"Battery_kWh":50.0,"Payload_kg":1000,"Channel_Strategy":"BYD毛里求斯EV渗透率最高车型","Channel_Count":7},
-            {"Model":"Foton EV Shuttle","Brand_Type":"Chinese EV Rival","Price_USD":36000,"Length_mm":6500,"Battery_kWh":90.0,"Payload_kg":None,"Channel_Strategy":"Foton接驳巴士主攻度假村酒店集团","Channel_Count":3},
-            {"Model":"Toyota Hiace (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":30000,"Length_mm":5380,"Battery_kWh":None,"Payload_kg":1500,"Channel_Strategy":"存量油车仍占岛内车队大头","Channel_Count":18},
+            {"Model":"Our EV â€” X1 e-Van","Brand_Type":"Ours (æˆ‘å¸çº¯ç”µ)","Price_USD":33000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"è·¯æ˜“æ¸¯ç›´è¥ï¼Œåº¦å‡æ‘é›†å›¢ç›´é”€ä¸­","Channel_Count":2},
+            {"Model":"BYD T3","Brand_Type":"Chinese EV Rival","Price_USD":27500,"Length_mm":4785,"Battery_kWh":50.0,"Payload_kg":1000,"Channel_Strategy":"BYDæ¯›é‡Œæ±‚æ–¯EVæ¸—é€çŽ‡æœ€é«˜è½¦åž‹","Channel_Count":7},
+            {"Model":"Foton EV Shuttle","Brand_Type":"Chinese EV Rival","Price_USD":36000,"Length_mm":6500,"Battery_kWh":90.0,"Payload_kg":None,"Channel_Strategy":"FotonæŽ¥é©³å·´å£«ä¸»æ”»åº¦å‡æ‘é…’åº—é›†å›¢","Channel_Count":3},
+            {"Model":"Toyota Hiace (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":30000,"Length_mm":5380,"Battery_kWh":None,"Payload_kg":1500,"Channel_Strategy":"å­˜é‡æ²¹è½¦ä»å å²›å†…è½¦é˜Ÿå¤§å¤´","Channel_Count":18},
         ],
         "chinese_footprint": (
-            "BYD 凭借0%消费税优势与极具性价比的T3车型，已拿下毛里求斯EV渗透率最高的位置(7个网点)，"
-            "价格比我司低约17%；Foton则专攻度假村接驳巴士细分。<b>毛里求斯体量虽小，但BYD已建立"
-            "价格心智锚点</b>——正面拼低价性价比无优势，应聚焦Beachcomber/LUX*等旗舰度假村集团的"
-            "ESG合作叙事与整体解决方案(车辆+充电桩)打包能力，用服务与品牌溢价而非价格差异化取胜。"
+            "BYD å‡­å€Ÿ0%æ¶ˆè´¹ç¨Žä¼˜åŠ¿ä¸Žæžå…·æ€§ä»·æ¯”çš„T3è½¦åž‹ï¼Œå·²æ‹¿ä¸‹æ¯›é‡Œæ±‚æ–¯EVæ¸—é€çŽ‡æœ€é«˜çš„ä½ç½®(7ä¸ªç½‘ç‚¹)ï¼Œ"
+            "ä»·æ ¼æ¯”æˆ‘å¸ä½Žçº¦17%ï¼›Fotonåˆ™ä¸“æ”»åº¦å‡æ‘æŽ¥é©³å·´å£«ç»†åˆ†ã€‚<b>æ¯›é‡Œæ±‚æ–¯ä½“é‡è™½å°ï¼Œä½†BYDå·²å»ºç«‹"
+            "ä»·æ ¼å¿ƒæ™ºé”šç‚¹</b>â€”â€”æ­£é¢æ‹¼ä½Žä»·æ€§ä»·æ¯”æ— ä¼˜åŠ¿ï¼Œåº”èšç„¦Beachcomber/LUX*ç­‰æ——èˆ°åº¦å‡æ‘é›†å›¢çš„"
+            "ESGåˆä½œå™äº‹ä¸Žæ•´ä½“è§£å†³æ–¹æ¡ˆ(è½¦è¾†+å……ç”µæ¡©)æ‰“åŒ…èƒ½åŠ›ï¼Œç”¨æœåŠ¡ä¸Žå“ç‰Œæº¢ä»·è€Œéžä»·æ ¼å·®å¼‚åŒ–å–èƒœã€‚"
         ),
     },
     "Madagascar": {
-        "vehicle_class": "e-LCV (仅安塔那那利佛城配试点 — 全国以柴油矿卡为主)",
+        "vehicle_class": "e-LCV (ä»…å®‰å¡”é‚£é‚£åˆ©ä½›åŸŽé…è¯•ç‚¹ â€” å…¨å›½ä»¥æŸ´æ²¹çŸ¿å¡ä¸ºä¸»)",
         "competitors": [
-            {"Model":"Our EV — X1 e-Van","Brand_Type":"Ours (我司纯电)","Price_USD":36000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"仅安塔那那利佛试点，无矿区覆盖","Channel_Count":1},
-            {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":39500,"Length_mm":5400,"Battery_kWh":80.0,"Payload_kg":1600,"Channel_Strategy":"SAIC马达加斯加试探性小规模进口","Channel_Count":1},
-            {"Model":"Sinotruk Howo (Diesel Mining)","Brand_Type":"ICE Incumbent","Price_USD":68000,"Length_mm":8500,"Battery_kWh":None,"Payload_kg":30000,"Channel_Strategy":"中国重汽柴油矿卡是Ambatovy/QMM矿区绝对主力","Channel_Count":9},
-            {"Model":"Isuzu FTR (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":54000,"Length_mm":7200,"Battery_kWh":None,"Payload_kg":12000,"Channel_Strategy":"塔马塔夫-图莱亚尔港口柴油物流主力","Channel_Count":6},
+            {"Model":"Our EV â€” X1 e-Van","Brand_Type":"Ours (æˆ‘å¸çº¯ç”µ)","Price_USD":36000,"Length_mm":5200,"Battery_kWh":75.0,"Payload_kg":1500,"Channel_Strategy":"ä»…å®‰å¡”é‚£é‚£åˆ©ä½›è¯•ç‚¹ï¼Œæ— çŸ¿åŒºè¦†ç›–","Channel_Count":1},
+            {"Model":"Maxus EV90","Brand_Type":"Chinese EV Rival","Price_USD":39500,"Length_mm":5400,"Battery_kWh":80.0,"Payload_kg":1600,"Channel_Strategy":"SAICé©¬è¾¾åŠ æ–¯åŠ è¯•æŽ¢æ€§å°è§„æ¨¡è¿›å£","Channel_Count":1},
+            {"Model":"Sinotruk Howo (Diesel Mining)","Brand_Type":"ICE Incumbent","Price_USD":68000,"Length_mm":8500,"Battery_kWh":None,"Payload_kg":30000,"Channel_Strategy":"ä¸­å›½é‡æ±½æŸ´æ²¹çŸ¿å¡æ˜¯Ambatovy/QMMçŸ¿åŒºç»å¯¹ä¸»åŠ›","Channel_Count":9},
+            {"Model":"Isuzu FTR (Diesel)","Brand_Type":"ICE Incumbent","Price_USD":54000,"Length_mm":7200,"Battery_kWh":None,"Payload_kg":12000,"Channel_Strategy":"å¡”é©¬å¡”å¤«-å›¾èŽ±äºšå°”æ¸¯å£æŸ´æ²¹ç‰©æµä¸»åŠ›","Channel_Count":6},
         ],
         "chinese_footprint": (
-            "在电网覆盖率不足35%的马达加斯加，中资品牌的真正战场是<b>柴油矿卡</b>而非EV——"
-            "Sinotruk Howo 已凭借Code Minier投资法典下的关税减免深度绑定Ambatovy/QMM矿区柴油车队"
-            "9个服务网点，是这个市场事实上的基建级供应商。Maxus EV90虽有小规模试探性进口，"
-            "但在无电网支撑的矿区场景毫无竞争力。<b>我司作为纯电玩家在马达加斯加不存在结构性胜算</b>——"
-            "本国不应投入渠道资源，仅保留安塔那那利佛市区试点用于技术验证，资源应回流至Rwanda/Tunisia/Mauritius三个EV基建条件成熟的市场。"
+            "åœ¨ç”µç½‘è¦†ç›–çŽ‡ä¸è¶³35%çš„é©¬è¾¾åŠ æ–¯åŠ ï¼Œä¸­èµ„å“ç‰Œçš„çœŸæ­£æˆ˜åœºæ˜¯<b>æŸ´æ²¹çŸ¿å¡</b>è€ŒéžEVâ€”â€”"
+            "Sinotruk Howo å·²å‡­å€ŸCode MinieræŠ•èµ„æ³•å…¸ä¸‹çš„å…³ç¨Žå‡å…æ·±åº¦ç»‘å®šAmbatovy/QMMçŸ¿åŒºæŸ´æ²¹è½¦é˜Ÿ"
+            "9ä¸ªæœåŠ¡ç½‘ç‚¹ï¼Œæ˜¯è¿™ä¸ªå¸‚åœºäº‹å®žä¸Šçš„åŸºå»ºçº§ä¾›åº”å•†ã€‚Maxus EV90è™½æœ‰å°è§„æ¨¡è¯•æŽ¢æ€§è¿›å£ï¼Œ"
+            "ä½†åœ¨æ— ç”µç½‘æ”¯æ’‘çš„çŸ¿åŒºåœºæ™¯æ¯«æ— ç«žäº‰åŠ›ã€‚<b>æˆ‘å¸ä½œä¸ºçº¯ç”µçŽ©å®¶åœ¨é©¬è¾¾åŠ æ–¯åŠ ä¸å­˜åœ¨ç»“æž„æ€§èƒœç®—</b>â€”â€”"
+            "æœ¬å›½ä¸åº”æŠ•å…¥æ¸ é“èµ„æºï¼Œä»…ä¿ç•™å®‰å¡”é‚£é‚£åˆ©ä½›å¸‚åŒºè¯•ç‚¹ç”¨äºŽæŠ€æœ¯éªŒè¯ï¼Œèµ„æºåº”å›žæµè‡³Rwanda/Tunisia/Mauritiusä¸‰ä¸ªEVåŸºå»ºæ¡ä»¶æˆç†Ÿçš„å¸‚åœºã€‚"
         ),
     },
 }
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # 6. FULL 54-NATION MAP DATA
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 ALL_AFRICA = {
     "NGA":"Nigeria","ZAF":"South Africa","MAR":"Morocco","EGY":"Egypt",
     "KEN":"Kenya","ETH":"Ethiopia","DZA":"Algeria","TUN":"Tunisia","RWA":"Rwanda",
     "DJI":"Djibouti","MUS":"Mauritius","MDG":"Madagascar",
     "GHA":"Ghana","TZA":"Tanzania","UGA":"Uganda",
-    "SEN":"Senegal","CIV":"Côte d'Ivoire","CMR":"Cameroon","ZMB":"Zambia",
+    "SEN":"Senegal","CIV":"CÃ´te d'Ivoire","CMR":"Cameroon","ZMB":"Zambia",
     "ZWE":"Zimbabwe","MOZ":"Mozambique","MWI":"Malawi",
     "NAM":"Namibia","BWA":"Botswana","AGO":"Angola","LBY":"Libya",
     "SDN":"Sudan","SSD":"South Sudan","SOM":"Somalia","ERI":"Eritrea",
-    "BDI":"Burundi","COM":"Comoros","STP":"São Tomé",
+    "BDI":"Burundi","COM":"Comoros","STP":"SÃ£o TomÃ©",
     "SWZ":"Eswatini","LSO":"Lesotho","CPV":"Cabo Verde",
     "SLE":"Sierra Leone","LBR":"Liberia","GIN":"Guinea","GNB":"Guinea-Bissau",
     "GMB":"Gambia","GNQ":"Equatorial Guinea","GAB":"Gabon","COG":"Congo",
@@ -1860,48 +1927,48 @@ ALL_AFRICA = {
 }
 
 TIER2_MACRO = {
-    "GHA":{"gdp":75.5,"roads":72,"cv_imports":8200,"flag":"🇬🇭","region":"West Africa"},
-    "TZA":{"gdp":80.0,"roads":87,"cv_imports":9100,"flag":"🇹🇿","region":"East Africa"},
-    "UGA":{"gdp":51.0,"roads":21,"cv_imports":5400,"flag":"🇺🇬","region":"East Africa"},
-    "SEN":{"gdp":32.0,"roads":16,"cv_imports":4200,"flag":"🇸🇳","region":"West Africa"},
-    "CIV":{"gdp":73.0,"roads":81,"cv_imports":7800,"flag":"🇨🇮","region":"West Africa"},
-    "CMR":{"gdp":48.0,"roads":77,"cv_imports":5200,"flag":"🇨🇲","region":"Central Africa"},
-    "ZMB":{"gdp":29.0,"roads":40,"cv_imports":3800,"flag":"🇿🇲","region":"Southern Africa"},
-    "ZWE":{"gdp":28.0,"roads":97,"cv_imports":3200,"flag":"🇿🇼","region":"Southern Africa"},
-    "MOZ":{"gdp":18.0,"roads":31,"cv_imports":2800,"flag":"🇲🇿","region":"Southern Africa"},
-    "MWI":{"gdp":12.6,"roads":16,"cv_imports":1800,"flag":"🇲🇼","region":"Southern Africa"},
-    "NAM":{"gdp":12.8,"roads":48,"cv_imports":3400,"flag":"🇳🇦","region":"Southern Africa"},
-    "BWA":{"gdp":18.6,"roads":31,"cv_imports":2900,"flag":"🇧🇼","region":"Southern Africa"},
-    "AGO":{"gdp":102.0,"roads":76,"cv_imports":6800,"flag":"🇦🇴","region":"Southern Africa"},
-    "LBY":{"gdp":52.0,"roads":34,"cv_imports":4100,"flag":"🇱🇾","region":"North Africa"},
-    "SDN":{"gdp":45.0,"roads":24,"cv_imports":3600,"flag":"🇸🇩","region":"East Africa"},
-    "SSD":{"gdp":4.6,"roads":9,"cv_imports":800,"flag":"🇸🇸","region":"East Africa"},
-    "SOM":{"gdp":8.0,"roads":22,"cv_imports":1200,"flag":"🇸🇴","region":"East Africa"},
-    "ERI":{"gdp":2.1,"roads":14,"cv_imports":400,"flag":"🇪🇷","region":"East Africa"},
-    "BDI":{"gdp":3.1,"roads":14,"cv_imports":500,"flag":"🇧🇮","region":"East Africa"},
-    "COM":{"gdp":1.4,"roads":1,"cv_imports":120,"flag":"🇰🇲","region":"East Africa"},
-    "STP":{"gdp":0.6,"roads":0.3,"cv_imports":60,"flag":"🇸🇹","region":"Central Africa"},
-    "SWZ":{"gdp":4.8,"roads":4,"cv_imports":650,"flag":"🇸🇿","region":"Southern Africa"},
-    "LSO":{"gdp":2.9,"roads":6,"cv_imports":420,"flag":"🇱🇸","region":"Southern Africa"},
-    "CPV":{"gdp":2.2,"roads":1.5,"cv_imports":280,"flag":"🇨🇻","region":"West Africa"},
-    "SLE":{"gdp":4.0,"roads":11,"cv_imports":620,"flag":"🇸🇱","region":"West Africa"},
-    "LBR":{"gdp":3.8,"roads":10,"cv_imports":540,"flag":"🇱🇷","region":"West Africa"},
-    "GIN":{"gdp":16.0,"roads":44,"cv_imports":1800,"flag":"🇬🇳","region":"West Africa"},
-    "GNB":{"gdp":1.7,"roads":4,"cv_imports":200,"flag":"🇬🇼","region":"West Africa"},
-    "GMB":{"gdp":2.1,"roads":4,"cv_imports":320,"flag":"🇬🇲","region":"West Africa"},
-    "GNQ":{"gdp":10.7,"roads":3,"cv_imports":840,"flag":"🇬🇶","region":"Central Africa"},
-    "GAB":{"gdp":19.0,"roads":9,"cv_imports":1400,"flag":"🇬🇦","region":"Central Africa"},
-    "COG":{"gdp":12.0,"roads":17,"cv_imports":980,"flag":"🇨🇬","region":"Central Africa"},
-    "COD":{"gdp":65.0,"roads":152,"cv_imports":5800,"flag":"🇨🇩","region":"Central Africa"},
-    "CAF":{"gdp":2.5,"roads":24,"cv_imports":380,"flag":"🇨🇫","region":"Central Africa"},
-    "TCD":{"gdp":11.2,"roads":40,"cv_imports":1200,"flag":"🇹🇩","region":"Central Africa"},
-    "NER":{"gdp":16.5,"roads":19,"cv_imports":1400,"flag":"🇳🇪","region":"West Africa"},
-    "MLI":{"gdp":19.2,"roads":22,"cv_imports":1800,"flag":"🇲🇱","region":"West Africa"},
-    "BFA":{"gdp":20.4,"roads":15,"cv_imports":1600,"flag":"🇧🇫","region":"West Africa"},
-    "BEN":{"gdp":17.8,"roads":16,"cv_imports":2100,"flag":"🇧🇯","region":"West Africa"},
-    "TGO":{"gdp":9.0,"roads":11,"cv_imports":1200,"flag":"🇹🇬","region":"West Africa"},
-    "MRT":{"gdp":9.9,"roads":12,"cv_imports":800,"flag":"🇲🇷","region":"West Africa"},
-    "ESH":{"gdp":2.4,"roads":6,"cv_imports":180,"flag":"🏳","region":"North Africa"},
+    "GHA":{"gdp":75.5,"roads":72,"cv_imports":8200,"flag":"ðŸ‡¬ðŸ‡­","region":"West Africa"},
+    "TZA":{"gdp":80.0,"roads":87,"cv_imports":9100,"flag":"ðŸ‡¹ðŸ‡¿","region":"East Africa"},
+    "UGA":{"gdp":51.0,"roads":21,"cv_imports":5400,"flag":"ðŸ‡ºðŸ‡¬","region":"East Africa"},
+    "SEN":{"gdp":32.0,"roads":16,"cv_imports":4200,"flag":"ðŸ‡¸ðŸ‡³","region":"West Africa"},
+    "CIV":{"gdp":73.0,"roads":81,"cv_imports":7800,"flag":"ðŸ‡¨ðŸ‡®","region":"West Africa"},
+    "CMR":{"gdp":48.0,"roads":77,"cv_imports":5200,"flag":"ðŸ‡¨ðŸ‡²","region":"Central Africa"},
+    "ZMB":{"gdp":29.0,"roads":40,"cv_imports":3800,"flag":"ðŸ‡¿ðŸ‡²","region":"Southern Africa"},
+    "ZWE":{"gdp":28.0,"roads":97,"cv_imports":3200,"flag":"ðŸ‡¿ðŸ‡¼","region":"Southern Africa"},
+    "MOZ":{"gdp":18.0,"roads":31,"cv_imports":2800,"flag":"ðŸ‡²ðŸ‡¿","region":"Southern Africa"},
+    "MWI":{"gdp":12.6,"roads":16,"cv_imports":1800,"flag":"ðŸ‡²ðŸ‡¼","region":"Southern Africa"},
+    "NAM":{"gdp":12.8,"roads":48,"cv_imports":3400,"flag":"ðŸ‡³ðŸ‡¦","region":"Southern Africa"},
+    "BWA":{"gdp":18.6,"roads":31,"cv_imports":2900,"flag":"ðŸ‡§ðŸ‡¼","region":"Southern Africa"},
+    "AGO":{"gdp":102.0,"roads":76,"cv_imports":6800,"flag":"ðŸ‡¦ðŸ‡´","region":"Southern Africa"},
+    "LBY":{"gdp":52.0,"roads":34,"cv_imports":4100,"flag":"ðŸ‡±ðŸ‡¾","region":"North Africa"},
+    "SDN":{"gdp":45.0,"roads":24,"cv_imports":3600,"flag":"ðŸ‡¸ðŸ‡©","region":"East Africa"},
+    "SSD":{"gdp":4.6,"roads":9,"cv_imports":800,"flag":"ðŸ‡¸ðŸ‡¸","region":"East Africa"},
+    "SOM":{"gdp":8.0,"roads":22,"cv_imports":1200,"flag":"ðŸ‡¸ðŸ‡´","region":"East Africa"},
+    "ERI":{"gdp":2.1,"roads":14,"cv_imports":400,"flag":"ðŸ‡ªðŸ‡·","region":"East Africa"},
+    "BDI":{"gdp":3.1,"roads":14,"cv_imports":500,"flag":"ðŸ‡§ðŸ‡®","region":"East Africa"},
+    "COM":{"gdp":1.4,"roads":1,"cv_imports":120,"flag":"ðŸ‡°ðŸ‡²","region":"East Africa"},
+    "STP":{"gdp":0.6,"roads":0.3,"cv_imports":60,"flag":"ðŸ‡¸ðŸ‡¹","region":"Central Africa"},
+    "SWZ":{"gdp":4.8,"roads":4,"cv_imports":650,"flag":"ðŸ‡¸ðŸ‡¿","region":"Southern Africa"},
+    "LSO":{"gdp":2.9,"roads":6,"cv_imports":420,"flag":"ðŸ‡±ðŸ‡¸","region":"Southern Africa"},
+    "CPV":{"gdp":2.2,"roads":1.5,"cv_imports":280,"flag":"ðŸ‡¨ðŸ‡»","region":"West Africa"},
+    "SLE":{"gdp":4.0,"roads":11,"cv_imports":620,"flag":"ðŸ‡¸ðŸ‡±","region":"West Africa"},
+    "LBR":{"gdp":3.8,"roads":10,"cv_imports":540,"flag":"ðŸ‡±ðŸ‡·","region":"West Africa"},
+    "GIN":{"gdp":16.0,"roads":44,"cv_imports":1800,"flag":"ðŸ‡¬ðŸ‡³","region":"West Africa"},
+    "GNB":{"gdp":1.7,"roads":4,"cv_imports":200,"flag":"ðŸ‡¬ðŸ‡¼","region":"West Africa"},
+    "GMB":{"gdp":2.1,"roads":4,"cv_imports":320,"flag":"ðŸ‡¬ðŸ‡²","region":"West Africa"},
+    "GNQ":{"gdp":10.7,"roads":3,"cv_imports":840,"flag":"ðŸ‡¬ðŸ‡¶","region":"Central Africa"},
+    "GAB":{"gdp":19.0,"roads":9,"cv_imports":1400,"flag":"ðŸ‡¬ðŸ‡¦","region":"Central Africa"},
+    "COG":{"gdp":12.0,"roads":17,"cv_imports":980,"flag":"ðŸ‡¨ðŸ‡¬","region":"Central Africa"},
+    "COD":{"gdp":65.0,"roads":152,"cv_imports":5800,"flag":"ðŸ‡¨ðŸ‡©","region":"Central Africa"},
+    "CAF":{"gdp":2.5,"roads":24,"cv_imports":380,"flag":"ðŸ‡¨ðŸ‡«","region":"Central Africa"},
+    "TCD":{"gdp":11.2,"roads":40,"cv_imports":1200,"flag":"ðŸ‡¹ðŸ‡©","region":"Central Africa"},
+    "NER":{"gdp":16.5,"roads":19,"cv_imports":1400,"flag":"ðŸ‡³ðŸ‡ª","region":"West Africa"},
+    "MLI":{"gdp":19.2,"roads":22,"cv_imports":1800,"flag":"ðŸ‡²ðŸ‡±","region":"West Africa"},
+    "BFA":{"gdp":20.4,"roads":15,"cv_imports":1600,"flag":"ðŸ‡§ðŸ‡«","region":"West Africa"},
+    "BEN":{"gdp":17.8,"roads":16,"cv_imports":2100,"flag":"ðŸ‡§ðŸ‡¯","region":"West Africa"},
+    "TGO":{"gdp":9.0,"roads":11,"cv_imports":1200,"flag":"ðŸ‡¹ðŸ‡¬","region":"West Africa"},
+    "MRT":{"gdp":9.9,"roads":12,"cv_imports":800,"flag":"ðŸ‡²ðŸ‡·","region":"West Africa"},
+    "ESH":{"gdp":2.4,"roads":6,"cv_imports":180,"flag":"ðŸ³","region":"North Africa"},
 }
 
 ISO_TO_NAME = {d["iso"]: n for n, d in TIER1.items()}
@@ -1910,10 +1977,10 @@ for iso, name in ALL_AFRICA.items():
         ISO_TO_NAME[iso] = name
 ALL_ISO_LIST = list(dict.fromkeys(ISO_TO_NAME.keys()))
 
-# ══════════════════════════════════════════════════════════════════════════════
-# 7. NEWS FETCHER — wide net, smart filter, guaranteed no blank
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 7. NEWS FETCHER â€” wide net, smart filter, guaranteed no blank
 #    (logic unchanged; rendering destination moves to a bottom-page expander)
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 AUTHORITY_DOMAINS = [
     "reuters","bloomberg","ft.com","engineeringnews","businessday",
     "zawya","theafricareport","africanews","afdb","apanews",
@@ -1925,41 +1992,41 @@ NOISE_WORDS = {"rumor","rumour","unconfirmed","alleged","shocking","viral","leak
 
 FALLBACK_INSIGHTS = {
     "Tunisia": [
-        {"title":"Loi de Finances 2026 : les véhicules électriques bénéficient d'une exonération totale de droits de douane et d'une TVA réduite à 7% — un avantage TCO historique pour les flottes commerciales tunisiennes.",
-         "link":"https://www.finances.gov.tn","published":"2026-01-15","source":"Ministère des Finances Tunisie (Curated Insight)"},
-        {"title":"ANME confirms TND 10,000 direct subsidy per commercial BEV registered in Tunisia under the 2026 Energy Efficiency Programme — applications open Q1 2026.",
+        {"title":"Loi de Finances 2026 : les vÃ©hicules Ã©lectriques bÃ©nÃ©ficient d'une exonÃ©ration totale de droits de douane et d'une TVA rÃ©duite Ã  7% â€” un avantage TCO historique pour les flottes commerciales tunisiennes.",
+         "link":"https://www.finances.gov.tn","published":"2026-01-15","source":"MinistÃ¨re des Finances Tunisie (Curated Insight)"},
+        {"title":"ANME confirms TND 10,000 direct subsidy per commercial BEV registered in Tunisia under the 2026 Energy Efficiency Programme â€” applications open Q1 2026.",
          "link":"https://www.anme.tn","published":"2026-01-20","source":"ANME Tunisia (Curated Insight)"},
-        {"title":"CPG (Compagnie des Phosphates de Gafsa) issues tender for 120 heavy logistics vehicles for Gafsa–Sfax corridor — deadline Q2 2026.",
-         "link":"https://www.marchespublics.gov.tn","published":"2026-02-01","source":"Marchés Publics Tunisie (Curated Insight)"},
-        {"title":"STEG accelerates EV charging station rollout: 200 commercial charging points planned for Tunis–Sousse–Sfax corridor by end 2026.",
+        {"title":"CPG (Compagnie des Phosphates de Gafsa) issues tender for 120 heavy logistics vehicles for Gafsaâ€“Sfax corridor â€” deadline Q2 2026.",
+         "link":"https://www.marchespublics.gov.tn","published":"2026-02-01","source":"MarchÃ©s Publics Tunisie (Curated Insight)"},
+        {"title":"STEG accelerates EV charging station rollout: 200 commercial charging points planned for Tunisâ€“Sousseâ€“Sfax corridor by end 2026.",
          "link":"https://www.steg.com.tn","published":"2026-02-15","source":"STEG Tunisie (Curated Insight)"},
     ],
     "Algeria": [
-        {"title":"Sonatrach lance un appel d'offres pour 350 camions-citernes GNL pour la distribution de gaz naturel dans les wilayas du Sud — délai de soumission T2 2026.",
-         "link":"https://www.sonatrach.dz","published":"2026-01-28","source":"Sonatrach Algérie (Curated Insight)"},
-        {"title":"Ministry of Industry confirms Rouiba automotive cluster to receive DZD 8bn infrastructure upgrade — creates new CKD assembly capacity for Chinese commercial vehicle JV candidates.",
-         "link":"https://www.industrie.gov.dz","published":"2026-02-05","source":"Ministère de l'Industrie Algérie (Curated Insight)"},
+        {"title":"Sonatrach lance un appel d'offres pour 350 camions-citernes GNL pour la distribution de gaz naturel dans les wilayas du Sud â€” dÃ©lai de soumission T2 2026.",
+         "link":"https://www.sonatrach.dz","published":"2026-01-28","source":"Sonatrach AlgÃ©rie (Curated Insight)"},
+        {"title":"Ministry of Industry confirms Rouiba automotive cluster to receive DZD 8bn infrastructure upgrade â€” creates new CKD assembly capacity for Chinese commercial vehicle JV candidates.",
+         "link":"https://www.industrie.gov.dz","published":"2026-02-05","source":"MinistÃ¨re de l'Industrie AlgÃ©rie (Curated Insight)"},
     ],
     "Morocco": [
-        {"title":"OCP Group issues annual strategic logistics tender — phosphate distribution network expansion requires 180 additional heavy trucks for Khouribga contractor fleet refresh (2026–2028 cycle).",
+        {"title":"OCP Group issues annual strategic logistics tender â€” phosphate distribution network expansion requires 180 additional heavy trucks for Khouribga contractor fleet refresh (2026â€“2028 cycle).",
          "link":"https://www.ocpgroup.ma","published":"2026-01-12","source":"OCP Group (Curated Insight)"},
-        {"title":"AIVAM: le marché des véhicules utilitaires lourds au Maroc progresse de 8.5% en 2025 — la demande tirée par les grands chantiers d'infrastructure.",
+        {"title":"AIVAM: le marchÃ© des vÃ©hicules utilitaires lourds au Maroc progresse de 8.5% en 2025 â€” la demande tirÃ©e par les grands chantiers d'infrastructure.",
          "link":"http://www.aivam.ma","published":"2026-01-25","source":"AIVAM Maroc (Curated Insight)"},
     ],
     "Rwanda": [
-        {"title":"Rwanda Development Board (RDB) confirms: zero import duty and zero VAT on all electric commercial vehicles — most comprehensive EV fiscal package in Sub-Saharan Africa.",
+        {"title":"Rwanda Development Board (RDB) confirms: zero import duty and zero VAT on all electric commercial vehicles â€” most comprehensive EV fiscal package in Sub-Saharan Africa.",
          "link":"https://www.rdb.rw","published":"2026-01-10","source":"RDB Rwanda (Curated Insight)"},
-        {"title":"RURA Green Mobility Strategy 2023–2035: Rwanda targets 100% electric public transport and 70% EV commercial vehicle fleet by 2035 — policy-locked demand pipeline for fleet operators.",
+        {"title":"RURA Green Mobility Strategy 2023â€“2035: Rwanda targets 100% electric public transport and 70% EV commercial vehicle fleet by 2035 â€” policy-locked demand pipeline for fleet operators.",
          "link":"https://www.rura.rw","published":"2026-01-18","source":"RURA Rwanda (Curated Insight)"},
-        {"title":"Kigali Bus Services (KBS) issues RFP for 50 electric buses for Kigali metropolitan routes — delivery expected H2 2026. G2G procurement framework preferred.",
+        {"title":"Kigali Bus Services (KBS) issues RFP for 50 electric buses for Kigali metropolitan routes â€” delivery expected H2 2026. G2G procurement framework preferred.",
          "link":"https://www.kigalicity.gov.rw","published":"2026-02-03","source":"City of Kigali (Curated Insight)"},
-        {"title":"REG (Rwanda Energy Group) reports <2% grid outage rate in 2024 — Kigali's power reliability confirmed as best-in-class in Sub-Saharan Africa for commercial EV depot charging.",
+        {"title":"REG (Rwanda Energy Group) reports <2% grid outage rate in 2024 â€” Kigali's power reliability confirmed as best-in-class in Sub-Saharan Africa for commercial EV depot charging.",
          "link":"https://www.reg.rw","published":"2026-02-08","source":"REG Rwanda (Curated Insight)"},
-        {"title":"MINICOM Rwanda: EV commercial vehicle registrations grew 58% in 2025 — Yutong, BYD, and Foton lead market. e-LCV urban logistics segment fastest growing (+82% YoY).",
+        {"title":"MINICOM Rwanda: EV commercial vehicle registrations grew 58% in 2025 â€” Yutong, BYD, and Foton lead market. e-LCV urban logistics segment fastest growing (+82% YoY).",
          "link":"https://www.minicom.gov.rw","published":"2026-02-20","source":"MINICOM Rwanda (Curated Insight)"},
     ],
     "Djibouti": [
-        {"title":"DPFZA confirms Doraleh Multipurpose Port container throughput up 11% YoY as Ethiopian transit trade continues to grow — drayage fleet capacity cited as a bottleneck for 2026.",
+        {"title":"DPFZA confirms Doraleh Multipurpose Port container throughput up 11% YoY as Ethiopian transit trade continues to grow â€” drayage fleet capacity cited as a bottleneck for 2026.",
          "link":"https://www.dpfza.gov.dj","published":"2026-01-22","source":"DPFZA Djibouti (Curated Insight)"},
         {"title":"Ethio-Djibouti Railway freight volumes reach new record as port-to-rail handoff efficiency becomes the corridor's next investment priority.",
          "link":"https://www.edrailway.com","published":"2026-02-10","source":"Ethio-Djibouti Railway (Curated Insight)"},
@@ -1971,7 +2038,7 @@ FALLBACK_INSIGHTS = {
          "link":"https://energy.govmu.org","published":"2026-02-06","source":"Ministry of Energy Mauritius (Curated Insight)"},
     ],
     "Madagascar": [
-        {"title":"Ambatovy confirms multi-year mining haulage fleet renewal programme for the Moramanga–Toamasina corridor — diesel rigid and tipper trucks specified.",
+        {"title":"Ambatovy confirms multi-year mining haulage fleet renewal programme for the Moramangaâ€“Toamasina corridor â€” diesel rigid and tipper trucks specified.",
          "link":"https://www.ambatovy.com","published":"2026-01-30","source":"Ambatovy (Curated Insight)"},
         {"title":"JIRAMA reports continued grid capacity constraints outside Antananarivo, reinforcing captive diesel generation as the operating norm for inland mining and industrial sites.",
          "link":"https://www.jirama.mg","published":"2026-02-12","source":"JIRAMA Madagascar (Curated Insight)"},
@@ -1991,13 +2058,13 @@ def fetch_news(query: str, country: str = "", limit: int = 7) -> dict:
                 t = e.get("title","")
                 if not t or any(n in t.lower() for n in NOISE_WORDS):
                     continue
-                pub_str, pub_dt = "–", None
+                pub_str, pub_dt = "â€“", None
                 if hasattr(e,"published_parsed") and e.published_parsed:
                     pub_dt  = datetime(*e.published_parsed[:6])
                     pub_str = pub_dt.strftime("%Y-%m-%d")
                 out.append({"title":t,"link":e.get("link","#"),
                              "published":pub_str,"pub_dt":pub_dt,
-                             "source":e.get("source",{}).get("title","–")})
+                             "source":e.get("source",{}).get("title","â€“")})
             out.sort(key=lambda x: x["pub_dt"] or datetime.min, reverse=True)
             return out
         except Exception:
@@ -2040,27 +2107,27 @@ def _is_auth(item):
 def render_news_panel(query: str, country: str):
     """
     Renders the news list. This function itself is unchanged from prior
-    versions — what changes (Task 3) is WHERE it gets called: now always
+    versions â€” what changes (Task 3) is WHERE it gets called: now always
     inside a collapsed st.expander at the very bottom of the page.
     """
     with st.spinner(f"Fetching intelligence for {country}..."):
         result = fetch_news(query, country=country)
     items, is_auth, is_fb = result["items"], result["is_authority"], result["is_fallback"]
-    badge = ('<span class="news-badge">AUTHORITY · 30D</span>' if is_auth else
-             '<span class="news-fb-badge">GENERAL · 90D</span>' if not is_fb else
-             '<span class="news-fb-badge">MARKET INSIGHTS · CURATED</span>')
+    badge = ('<span class="news-badge">AUTHORITY Â· 30D</span>' if is_auth else
+             '<span class="news-fb-badge">GENERAL Â· 90D</span>' if not is_fb else
+             '<span class="news-fb-badge">MARKET INSIGHTS Â· CURATED</span>')
     st.markdown('<div class="news-wrap">', unsafe_allow_html=True)
     st.markdown(
-        f'<div class="news-hdr"><span class="news-hdr-title">📡 &nbsp;{country} — Market Intelligence</span>{badge}</div>',
+        f'<div class="news-hdr"><span class="news-hdr-title">ðŸ“¡ &nbsp;{country} â€” Market Intelligence</span>{badge}</div>',
         unsafe_allow_html=True)
     if not items:
-        st.markdown('<div class="news-empty">📭 No results found. Try refreshing.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="news-empty">ðŸ“­ No results found. Try refreshing.</div>', unsafe_allow_html=True)
     else:
         if is_fb:
             st.markdown(
                 '<div style="padding:8px 16px;background:#FFF8F5;border-bottom:1px solid #F0C4AC;'
                 'font-family:Inter;font-size:.72rem;color:#D04A02;">'
-                '⚡ Live news unavailable — showing curated market intelligence for this market.</div>',
+                'âš¡ Live news unavailable â€” showing curated market intelligence for this market.</div>',
                 unsafe_allow_html=True)
         for item in items:
             sc = "news-src" if _is_auth(item) else "news-fb-src"
@@ -2071,9 +2138,9 @@ def render_news_panel(query: str, country: str):
                 f'</div>',
                 unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # 8. DATA GENERATORS
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 @st.cache_data
 def gen_brand_df(country):
     cd = TIER1[country]["brand_share"]
@@ -2084,7 +2151,7 @@ def gen_brand_df(country):
         "Share_pct": [round(s/total*100,1) for s in cd["sales"]],
     })
 
-# ── South Africa exclusive data ───────────────────────────────────────────────
+# â”€â”€ South Africa exclusive data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @st.cache_data
 def gen_za_rail_road():
     return pd.DataFrame({
@@ -2095,7 +2162,7 @@ def gen_za_rail_road():
 
 @st.cache_data
 def gen_za_freight_category():
-    """Stats SA P7162 Road Freight Survey — revenue by commodity category."""
+    """Stats SA P7162 Road Freight Survey â€” revenue by commodity category."""
     return pd.DataFrame({
         "Category":       ["Mining & Quarrying","Manufactured Food & Beverages",
                            "Agriculture & Forestry","Retail & Wholesale Trade",
@@ -2108,7 +2175,7 @@ def gen_za_freight_category():
 
 @st.cache_data
 def gen_za_payload_income():
-    """Stats SA P7162 — Payload volume vs Freight income, the cost-squeeze story."""
+    """Stats SA P7162 â€” Payload volume vs Freight income, the cost-squeeze story."""
     np.random.seed(10)
     q = pd.date_range("2020-01-01","2026-04-01",freq="QS"); n=len(q)
     return pd.DataFrame({
@@ -2136,19 +2203,19 @@ def gen_za_province():
         "Share_pct": [45.1,18.4,14.6,7.6,5.1,3.8,2.5,1.9,1.0],
     })
 
-# ── Nigeria exclusive data ────────────────────────────────────────────────────
+# â”€â”€ Nigeria exclusive data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @st.cache_data
 def gen_ng_waterfall():
     return pd.DataFrame({
         "Label":   ["CBU Base Price","CBU Import Duty\n(35%)","CBU Port &\nClearance",
-                    "CBU Total Landed","CKD Base Price","CKD Import Duty\n(0% — EV Policy)",
+                    "CBU Total Landed","CKD Base Price","CKD Import Duty\n(0% â€” EV Policy)",
                     "CKD Assembly Cost","CKD Total Landed"],
         "Value":   [100000,35000,8000,143000,85000,0,12000,97000],
         "Measure": ["absolute","relative","relative","total",
                     "absolute","relative","relative","total"],
     })
 
-# ── Morocco exclusive data ────────────────────────────────────────────────────
+# â”€â”€ Morocco exclusive data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @st.cache_data
 def gen_ma_modal():
     return pd.DataFrame({
@@ -2156,12 +2223,12 @@ def gen_ma_modal():
         "Volume_Mt_yr":   [38.0,12.0,6.5],
         "Road_Accessible":[False,False,True],
         "Color":          ["#9BA3B2","#4C7FA8","#D04A02"],
-        "Note":           ["187 km pipeline Khouribga→Jorf Lasfar (not road-accessible)",
-                           "Rail Benguerir–Jorf Lasfar concentrate (not road-accessible)",
+        "Note":           ["187 km pipeline Khouribgaâ†’Jorf Lasfar (not road-accessible)",
+                           "Rail Benguerirâ€“Jorf Lasfar concentrate (not road-accessible)",
                            "Road: contractor logistics, finished fertiliser, reagent supply"],
     })
 
-# ── Ethiopia exclusive data ───────────────────────────────────────────────────
+# â”€â”€ Ethiopia exclusive data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @st.cache_data
 def gen_eth_ev():
     np.random.seed(4)
@@ -2170,7 +2237,7 @@ def gen_eth_ev():
                          np.linspace(3.0,92.0,n-ban)+np.random.normal(0,2,n-ban)]).clip(0,100)
     return pd.DataFrame({"Month":months,"EV_Share_pct":ev.round(1)})
 
-# ── Tunisia exclusive data ────────────────────────────────────────────────────
+# â”€â”€ Tunisia exclusive data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @st.cache_data
 def gen_tn_tco_waterfall():
     return pd.DataFrame({
@@ -2189,19 +2256,19 @@ def gen_tn_b2b_targets():
     return pd.DataFrame({
         "Sector":       ["FMCG & Food","FMCG & Food","Parcels & Express","Parcels & Express",
                          "Port & Industrial","Port & Industrial","Phosphate & Mining","Construction"],
-        "Company":      ["Délice Danone Tunisie","SOTUMAG (Groupe Poulina)",
+        "Company":      ["DÃ©lice Danone Tunisie","SOTUMAG (Groupe Poulina)",
                          "Aramex Tunisia","DHL Tunisia",
                          "Port de Sfax Operators","Tunisie Manutention (TM)",
-                         "CPG — Cie des Phosphates de Gafsa","CICO (Ciment d'Oum El Kélil)"],
-        "Fleet Size Est.":["120–160 units","80–110 units","60–90 units","40–60 units",
-                            "80–120 units","50–70 units","100–150 units","60–80 units"],
+                         "CPG â€” Cie des Phosphates de Gafsa","CICO (Ciment d'Oum El KÃ©lil)"],
+        "Fleet Size Est.":["120â€“160 units","80â€“110 units","60â€“90 units","40â€“60 units",
+                            "80â€“120 units","50â€“70 units","100â€“150 units","60â€“80 units"],
         "Decision Maker":["Fleet & Logistics Director","Supply Chain VP",
                           "Country Operations Manager","Fleet Manager MENA",
                           "Port Authority Procurement","General Manager",
                           "Direction des Achats","Directeur Technique"],
     })
 
-# ── Rwanda exclusive data ─────────────────────────────────────────────────────
+# â”€â”€ Rwanda exclusive data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 @st.cache_data
 def gen_rw_tariff_comparison():
     return pd.DataFrame({
@@ -2226,14 +2293,14 @@ def gen_rw_ev_adoption():
         "eLCV_EV":  [  8,  25,  65, 130, 230, 380],
     })
 
-# ══════════════════════════════════════════════════════════════════════════════
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # EXECUTIVE GOVERNANCE LAYER
 # These fields are merged into every TIER1 country record so all downstream
 # renderers consume one consistent country object.
 # CBU is the group-wide primary export mode. CKD is never the default verdict;
 # it is retained only as a staged risk-mitigation option where conditions justify it.
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 GOVERNANCE_DATA = {
     "Nigeria": {
         "strategic_guardrails": {
@@ -2246,7 +2313,7 @@ GOVERNANCE_DATA = {
         },
         "market_mechanics": {
             "market_access": "SON/NAFDAC requirements and Form M discipline matter, but foreign-exchange access is the real gate. A tariff advantage has no value if the buyer cannot obtain USD or clear the vehicle predictably.",
-            "channel_ecosystem": "Demand is concentrated in large industrial groups, distributors and public-linked fleets. Dealer reach matters for service, yet creditworthy anchor fleets—not fragmented retail—should determine market entry.",
+            "channel_ecosystem": "Demand is concentrated in large industrial groups, distributors and public-linked fleets. Dealer reach matters for service, yet creditworthy anchor fleetsâ€”not fragmented retailâ€”should determine market entry.",
             "value_pool": "The bankable EV pool sits in high-mileage, depot-return FMCG and industrial distribution. Long-haul economics remain exposed to charging availability, road quality and downtime.",
             "governance_test": "Approve only where payment currency, port plan, off-taker, charging responsibility and aftersales ownership are documented before shipment."
         },
@@ -2270,7 +2337,7 @@ GOVERNANCE_DATA = {
         },
         "market_mechanics": {
             "market_access": "Homologation and NRCS compliance are demanding but transparent. The larger structural barrier is the tariff architecture and the credibility gap faced by a new brand on residual value and aftersales.",
-            "channel_ecosystem": "The market is institutionally mature and network-led. Large fleet tenders are influenced by leasing companies, body builders, service coverage and total uptime—not solely by the vehicle buyer.",
+            "channel_ecosystem": "The market is institutionally mature and network-led. Large fleet tenders are influenced by leasing companies, body builders, service coverage and total uptimeâ€”not solely by the vehicle buyer.",
             "value_pool": "Urban logistics, municipal and ESG-accountable fleets can support early EV adoption; broad-market expansion requires financing and used-vehicle confidence.",
             "governance_test": "No national rollout before homologation, parts fill-rate, response-time SLA, residual-value assumptions and priority fleet pipeline pass executive review."
         },
@@ -2441,7 +2508,7 @@ GOVERNANCE_DATA = {
             "market_access": "Certification is comparatively pragmatic and the 2026 charging framework explicitly recognises GB/T, reducing technical uncertainty. Licensing and operator obligations still require local execution.",
             "channel_ecosystem": "Demand is small and concentrated around government, development organisations, bus operators and a limited group of formal fleets. Direct key-account governance is more effective than a broad dealer push.",
             "value_pool": "Kigali delivery, hospitality, institutional and scheduled fleet operations offer the clearest fit; national volume remains structurally limited.",
-            "governance_test": "Judge Rwanda on policy reference value and reproducible fleet use cases—not on absolute revenue contribution."
+            "governance_test": "Judge Rwanda on policy reference value and reproducible fleet use casesâ€”not on absolute revenue contribution."
         },
         "farizon_alignment": {
             "portfolio_rule": "CBU is decisively preferred for this low-volume policy showcase. CKD would add complexity without a sufficient scale base.",
@@ -2514,11 +2581,11 @@ GOVERNANCE_DATA = {
             "governance_test": "No EV deployment without captive charging, route inspection, recovery capability and a named technical operator."
         },
         "farizon_alignment": {
-            "portfolio_rule": "CBU remains the primary export mode. Use product segmentation—not a countrywide CBU rejection—to control risk; CKD has no near-term scale rationale.",
+            "portfolio_rule": "CBU remains the primary export mode. Use product segmentationâ€”not a countrywide CBU rejectionâ€”to control risk; CKD has no near-term scale rationale.",
             "models": [
                 {"model": "V6E", "role": "Controlled urban/industrial compound duty", "mode": "Highly selective CBU", "logic": "Only where charging, roads and service are captive."},
                 {"model": "F1E", "role": "Closed mining or utility operations", "mode": "Project-specific CBU", "logic": "Proceed after terrain, payload and energy-infrastructure validation."},
-                {"model": "ICE/rugged portfolio", "role": "Mining and poor-road operations", "mode": "CBU primary", "logic": "Infrastructure reality—not ideology—determines the near-term powertrain mix."}
+                {"model": "ICE/rugged portfolio", "role": "Mining and poor-road operations", "mode": "CBU primary", "logic": "Infrastructure realityâ€”not ideologyâ€”determines the near-term powertrain mix."}
             ]
         }
     }
@@ -2542,101 +2609,101 @@ if _missing_governance:
 # keys. Switching language never changes country scores, chart data or formulas.
 V15_GOV_ZH = {
     "Nigeria": {
-        "red": ["禁止无担保的奈拉计价CBU应收账款。", "未确认终端车队、硬通货结算与港口方案前，禁止投放投机性库存。", "未具备封闭线路和专属充电前，禁止把重型纯电车型作为全国方案。"],
-        "green": "允许面向有美元资金支持的城市及工业车队开展受控批次CBU业务。",
-        "mechanics": ["SON与Form M合规可管理，但美元可得性决定进口能否兑现。", "大型工业集团和物流运营商掌握可融资需求，分散渠道库存风险较高。", "真实价值池集中在高里程、回场充电的城市快消和工业配送。"],
-        "gate": "只有付款币种、港口方案、终端用户、充电与售后责任全部明确后，才扩大CBU投入。",
-        "portfolio": "以受控CBU作为主进入路径；只有形成可重复销量和合作伙伴治理后，才评估CKD。",
+        "red": ["ç¦æ­¢æ— æ‹…ä¿çš„å¥ˆæ‹‰è®¡ä»·CBUåº”æ”¶è´¦æ¬¾ã€‚", "æœªç¡®è®¤ç»ˆç«¯è½¦é˜Ÿã€ç¡¬é€šè´§ç»“ç®—ä¸Žæ¸¯å£æ–¹æ¡ˆå‰ï¼Œç¦æ­¢æŠ•æ”¾æŠ•æœºæ€§åº“å­˜ã€‚", "æœªå…·å¤‡å°é—­çº¿è·¯å’Œä¸“å±žå……ç”µå‰ï¼Œç¦æ­¢æŠŠé‡åž‹çº¯ç”µè½¦åž‹ä½œä¸ºå…¨å›½æ–¹æ¡ˆã€‚"],
+        "green": "å…è®¸é¢å‘æœ‰ç¾Žå…ƒèµ„é‡‘æ”¯æŒçš„åŸŽå¸‚åŠå·¥ä¸šè½¦é˜Ÿå¼€å±•å—æŽ§æ‰¹æ¬¡CBUä¸šåŠ¡ã€‚",
+        "mechanics": ["SONä¸ŽForm Måˆè§„å¯ç®¡ç†ï¼Œä½†ç¾Žå…ƒå¯å¾—æ€§å†³å®šè¿›å£èƒ½å¦å…‘çŽ°ã€‚", "å¤§åž‹å·¥ä¸šé›†å›¢å’Œç‰©æµè¿è¥å•†æŽŒæ¡å¯èžèµ„éœ€æ±‚ï¼Œåˆ†æ•£æ¸ é“åº“å­˜é£Žé™©è¾ƒé«˜ã€‚", "çœŸå®žä»·å€¼æ± é›†ä¸­åœ¨é«˜é‡Œç¨‹ã€å›žåœºå……ç”µçš„åŸŽå¸‚å¿«æ¶ˆå’Œå·¥ä¸šé…é€ã€‚"],
+        "gate": "åªæœ‰ä»˜æ¬¾å¸ç§ã€æ¸¯å£æ–¹æ¡ˆã€ç»ˆç«¯ç”¨æˆ·ã€å……ç”µä¸Žå”®åŽè´£ä»»å…¨éƒ¨æ˜Žç¡®åŽï¼Œæ‰æ‰©å¤§CBUæŠ•å…¥ã€‚",
+        "portfolio": "ä»¥å—æŽ§CBUä½œä¸ºä¸»è¿›å…¥è·¯å¾„ï¼›åªæœ‰å½¢æˆå¯é‡å¤é”€é‡å’Œåˆä½œä¼™ä¼´æ²»ç†åŽï¼Œæ‰è¯„ä¼°CKDã€‚",
     },
     "South Africa": {
-        "red": ["禁止把南非视为纯电CBU关税友好市场。", "未建立全国级备件、质保和技术响应体系前，禁止全国铺开。", "禁止把ESG意愿直接等同于采购订单。"],
-        "green": "允许面向城市物流、市政和优质企业车队开展CBU标杆项目。",
-        "mechanics": ["NRCS与认证规则透明但严格，纯电CBU存在关税劣势。", "租赁公司、上装企业和服务网络共同影响车队采购。", "城市物流和承担ESG责任的车队是最现实的早期价值池。"],
-        "gate": "认证、备件满足率、服务时效、残值假设和重点车队管道必须同时通过验证。",
-        "portfolio": "CBU用于产品与品牌验证；形成可重复车队需求后，再把CKD/本地代工作为关税与规模备选。",
+        "red": ["ç¦æ­¢æŠŠå—éžè§†ä¸ºçº¯ç”µCBUå…³ç¨Žå‹å¥½å¸‚åœºã€‚", "æœªå»ºç«‹å…¨å›½çº§å¤‡ä»¶ã€è´¨ä¿å’ŒæŠ€æœ¯å“åº”ä½“ç³»å‰ï¼Œç¦æ­¢å…¨å›½é“ºå¼€ã€‚", "ç¦æ­¢æŠŠESGæ„æ„¿ç›´æŽ¥ç­‰åŒäºŽé‡‡è´­è®¢å•ã€‚"],
+        "green": "å…è®¸é¢å‘åŸŽå¸‚ç‰©æµã€å¸‚æ”¿å’Œä¼˜è´¨ä¼ä¸šè½¦é˜Ÿå¼€å±•CBUæ ‡æ†é¡¹ç›®ã€‚",
+        "mechanics": ["NRCSä¸Žè®¤è¯è§„åˆ™é€æ˜Žä½†ä¸¥æ ¼ï¼Œçº¯ç”µCBUå­˜åœ¨å…³ç¨ŽåŠ£åŠ¿ã€‚", "ç§Ÿèµå…¬å¸ã€ä¸Šè£…ä¼ä¸šå’ŒæœåŠ¡ç½‘ç»œå…±åŒå½±å“è½¦é˜Ÿé‡‡è´­ã€‚", "åŸŽå¸‚ç‰©æµå’Œæ‰¿æ‹…ESGè´£ä»»çš„è½¦é˜Ÿæ˜¯æœ€çŽ°å®žçš„æ—©æœŸä»·å€¼æ± ã€‚"],
+        "gate": "è®¤è¯ã€å¤‡ä»¶æ»¡è¶³çŽ‡ã€æœåŠ¡æ—¶æ•ˆã€æ®‹å€¼å‡è®¾å’Œé‡ç‚¹è½¦é˜Ÿç®¡é“å¿…é¡»åŒæ—¶é€šè¿‡éªŒè¯ã€‚",
+        "portfolio": "CBUç”¨äºŽäº§å“ä¸Žå“ç‰ŒéªŒè¯ï¼›å½¢æˆå¯é‡å¤è½¦é˜Ÿéœ€æ±‚åŽï¼Œå†æŠŠCKD/æœ¬åœ°ä»£å·¥ä½œä¸ºå…³ç¨Žä¸Žè§„æ¨¡å¤‡é€‰ã€‚",
     },
     "Morocco": {
-        "red": ["禁止把OCP简单视为直接购车主体。", "禁止把矿业曝光度直接推导为全国电动化成熟度。", "未设定服务与客户开发指标前，禁止授予经销商无条件独家权。"],
-        "green": "允许在城市物流和承运商运营的封闭工业线路开展CBU示范。",
-        "mechanics": ["欧洲导向的技术标准要求严格的认证资料和配置纪律。", "工业集团、承运商与成熟经销商共同控制市场入口。", "实际拥有并运营车辆的承运商比名义项目发起方更重要。"],
-        "gate": "必须识别真实资产所有者、招标路径、线路、充电场地和服务运营者。",
-        "portfolio": "先以CBU建立产品和客户标杆；只有持续销量达到门槛后，才讨论本地化。",
+        "red": ["ç¦æ­¢æŠŠOCPç®€å•è§†ä¸ºç›´æŽ¥è´­è½¦ä¸»ä½“ã€‚", "ç¦æ­¢æŠŠçŸ¿ä¸šæ›å…‰åº¦ç›´æŽ¥æŽ¨å¯¼ä¸ºå…¨å›½ç”µåŠ¨åŒ–æˆç†Ÿåº¦ã€‚", "æœªè®¾å®šæœåŠ¡ä¸Žå®¢æˆ·å¼€å‘æŒ‡æ ‡å‰ï¼Œç¦æ­¢æŽˆäºˆç»é”€å•†æ— æ¡ä»¶ç‹¬å®¶æƒã€‚"],
+        "green": "å…è®¸åœ¨åŸŽå¸‚ç‰©æµå’Œæ‰¿è¿å•†è¿è¥çš„å°é—­å·¥ä¸šçº¿è·¯å¼€å±•CBUç¤ºèŒƒã€‚",
+        "mechanics": ["æ¬§æ´²å¯¼å‘çš„æŠ€æœ¯æ ‡å‡†è¦æ±‚ä¸¥æ ¼çš„è®¤è¯èµ„æ–™å’Œé…ç½®çºªå¾‹ã€‚", "å·¥ä¸šé›†å›¢ã€æ‰¿è¿å•†ä¸Žæˆç†Ÿç»é”€å•†å…±åŒæŽ§åˆ¶å¸‚åœºå…¥å£ã€‚", "å®žé™…æ‹¥æœ‰å¹¶è¿è¥è½¦è¾†çš„æ‰¿è¿å•†æ¯”åä¹‰é¡¹ç›®å‘èµ·æ–¹æ›´é‡è¦ã€‚"],
+        "gate": "å¿…é¡»è¯†åˆ«çœŸå®žèµ„äº§æ‰€æœ‰è€…ã€æ‹›æ ‡è·¯å¾„ã€çº¿è·¯ã€å……ç”µåœºåœ°å’ŒæœåŠ¡è¿è¥è€…ã€‚",
+        "portfolio": "å…ˆä»¥CBUå»ºç«‹äº§å“å’Œå®¢æˆ·æ ‡æ†ï¼›åªæœ‰æŒç»­é”€é‡è¾¾åˆ°é—¨æ§›åŽï¼Œæ‰è®¨è®ºæœ¬åœ°åŒ–ã€‚",
     },
     "Egypt": {
-        "red": ["禁止任何无担保的CBU信用敞口。", "禁止在柴油补贴环境下宣称电动车天然具备TCO优势。", "禁止把CKD讨论变成否定CBU进入的理由。"],
-        "green": "允许面向跨国企业、公共支持或硬通货车队开展有付款保障的项目型CBU。",
-        "mechanics": ["进口审批与外汇分配共同构成准入门槛。", "代理商、银行、组装企业和公共机构共同塑造市场。", "有硬通货保障的封闭城市车队比广泛零售更可执行。"],
-        "gate": "必须具备有保障结算、信用保护、明确进口责任、库存上限和服务方案。",
-        "portfolio": "CBU是受控进入模式；CKD仅在需求、伙伴治理与质量体系成熟后作为外汇和关税对冲。",
+        "red": ["ç¦æ­¢ä»»ä½•æ— æ‹…ä¿çš„CBUä¿¡ç”¨æ•žå£ã€‚", "ç¦æ­¢åœ¨æŸ´æ²¹è¡¥è´´çŽ¯å¢ƒä¸‹å®£ç§°ç”µåŠ¨è½¦å¤©ç„¶å…·å¤‡TCOä¼˜åŠ¿ã€‚", "ç¦æ­¢æŠŠCKDè®¨è®ºå˜æˆå¦å®šCBUè¿›å…¥çš„ç†ç”±ã€‚"],
+        "green": "å…è®¸é¢å‘è·¨å›½ä¼ä¸šã€å…¬å…±æ”¯æŒæˆ–ç¡¬é€šè´§è½¦é˜Ÿå¼€å±•æœ‰ä»˜æ¬¾ä¿éšœçš„é¡¹ç›®åž‹CBUã€‚",
+        "mechanics": ["è¿›å£å®¡æ‰¹ä¸Žå¤–æ±‡åˆ†é…å…±åŒæž„æˆå‡†å…¥é—¨æ§›ã€‚", "ä»£ç†å•†ã€é“¶è¡Œã€ç»„è£…ä¼ä¸šå’Œå…¬å…±æœºæž„å…±åŒå¡‘é€ å¸‚åœºã€‚", "æœ‰ç¡¬é€šè´§ä¿éšœçš„å°é—­åŸŽå¸‚è½¦é˜Ÿæ¯”å¹¿æ³›é›¶å”®æ›´å¯æ‰§è¡Œã€‚"],
+        "gate": "å¿…é¡»å…·å¤‡æœ‰ä¿éšœç»“ç®—ã€ä¿¡ç”¨ä¿æŠ¤ã€æ˜Žç¡®è¿›å£è´£ä»»ã€åº“å­˜ä¸Šé™å’ŒæœåŠ¡æ–¹æ¡ˆã€‚",
+        "portfolio": "CBUæ˜¯å—æŽ§è¿›å…¥æ¨¡å¼ï¼›CKDä»…åœ¨éœ€æ±‚ã€ä¼™ä¼´æ²»ç†ä¸Žè´¨é‡ä½“ç³»æˆç†ŸåŽä½œä¸ºå¤–æ±‡å’Œå…³ç¨Žå¯¹å†²ã€‚",
     },
     "Kenya": {
-        "red": ["禁止把内罗毕试点曝光度等同于全国成熟度。", "未达到服务里程碑前，禁止授予全国独家代理。", "禁止为分散中小企业需求提供无担保融资。"],
-        "green": "允许向具备场站充电和正式合同的内罗毕、蒙巴萨核心车队投放CBU。",
-        "mechanics": ["标准和进口流程可管理，但税费与落地成本需持续更新。", "日系品牌和成熟经销商构成市场信任基准。", "城市快消、快递和受控港口物流是主要价值池。"],
-        "gate": "必须具备核心车队、场站电力研究、备件计划和经销商服务能力。",
-        "portfolio": "CBU是默认进入和扩张路径，本地化只在重复车队需求形成后考虑。",
+        "red": ["ç¦æ­¢æŠŠå†…ç½—æ¯•è¯•ç‚¹æ›å…‰åº¦ç­‰åŒäºŽå…¨å›½æˆç†Ÿåº¦ã€‚", "æœªè¾¾åˆ°æœåŠ¡é‡Œç¨‹ç¢‘å‰ï¼Œç¦æ­¢æŽˆäºˆå…¨å›½ç‹¬å®¶ä»£ç†ã€‚", "ç¦æ­¢ä¸ºåˆ†æ•£ä¸­å°ä¼ä¸šéœ€æ±‚æä¾›æ— æ‹…ä¿èžèµ„ã€‚"],
+        "green": "å…è®¸å‘å…·å¤‡åœºç«™å……ç”µå’Œæ­£å¼åˆåŒçš„å†…ç½—æ¯•ã€è’™å·´è¨æ ¸å¿ƒè½¦é˜ŸæŠ•æ”¾CBUã€‚",
+        "mechanics": ["æ ‡å‡†å’Œè¿›å£æµç¨‹å¯ç®¡ç†ï¼Œä½†ç¨Žè´¹ä¸Žè½åœ°æˆæœ¬éœ€æŒç»­æ›´æ–°ã€‚", "æ—¥ç³»å“ç‰Œå’Œæˆç†Ÿç»é”€å•†æž„æˆå¸‚åœºä¿¡ä»»åŸºå‡†ã€‚", "åŸŽå¸‚å¿«æ¶ˆã€å¿«é€’å’Œå—æŽ§æ¸¯å£ç‰©æµæ˜¯ä¸»è¦ä»·å€¼æ± ã€‚"],
+        "gate": "å¿…é¡»å…·å¤‡æ ¸å¿ƒè½¦é˜Ÿã€åœºç«™ç”µåŠ›ç ”ç©¶ã€å¤‡ä»¶è®¡åˆ’å’Œç»é”€å•†æœåŠ¡èƒ½åŠ›ã€‚",
+        "portfolio": "CBUæ˜¯é»˜è®¤è¿›å…¥å’Œæ‰©å¼ è·¯å¾„ï¼Œæœ¬åœ°åŒ–åªåœ¨é‡å¤è½¦é˜Ÿéœ€æ±‚å½¢æˆåŽè€ƒè™‘ã€‚",
     },
     "Ethiopia": {
-        "red": ["禁止把燃油车进口限制等同于存量车队已经电动化。", "禁止形成无保障的比尔或美元转换敞口。", "禁止在服务与充电走廊之外盲目投放。"],
-        "green": "允许向有机构资金支持的亚的斯亚贝巴车队和固定线路投放CBU。",
-        "mechanics": ["电动车政策有利，但外汇执行决定实际进口能力。", "公共机构、大型集团和发展金融项目主导可兑现需求。", "短期价值集中在亚的斯亚贝巴与固定机构线路。"],
-        "gate": "发运前必须确认硬通货资金、线路电力、备件和进口许可。",
-        "portfolio": "利用当前政策窗口以CBU进入；本地化仅作为长期产业选项。",
+        "red": ["ç¦æ­¢æŠŠç‡ƒæ²¹è½¦è¿›å£é™åˆ¶ç­‰åŒäºŽå­˜é‡è½¦é˜Ÿå·²ç»ç”µåŠ¨åŒ–ã€‚", "ç¦æ­¢å½¢æˆæ— ä¿éšœçš„æ¯”å°”æˆ–ç¾Žå…ƒè½¬æ¢æ•žå£ã€‚", "ç¦æ­¢åœ¨æœåŠ¡ä¸Žå……ç”µèµ°å»Šä¹‹å¤–ç›²ç›®æŠ•æ”¾ã€‚"],
+        "green": "å…è®¸å‘æœ‰æœºæž„èµ„é‡‘æ”¯æŒçš„äºšçš„æ–¯äºšè´å·´è½¦é˜Ÿå’Œå›ºå®šçº¿è·¯æŠ•æ”¾CBUã€‚",
+        "mechanics": ["ç”µåŠ¨è½¦æ”¿ç­–æœ‰åˆ©ï¼Œä½†å¤–æ±‡æ‰§è¡Œå†³å®šå®žé™…è¿›å£èƒ½åŠ›ã€‚", "å…¬å…±æœºæž„ã€å¤§åž‹é›†å›¢å’Œå‘å±•é‡‘èžé¡¹ç›®ä¸»å¯¼å¯å…‘çŽ°éœ€æ±‚ã€‚", "çŸ­æœŸä»·å€¼é›†ä¸­åœ¨äºšçš„æ–¯äºšè´å·´ä¸Žå›ºå®šæœºæž„çº¿è·¯ã€‚"],
+        "gate": "å‘è¿å‰å¿…é¡»ç¡®è®¤ç¡¬é€šè´§èµ„é‡‘ã€çº¿è·¯ç”µåŠ›ã€å¤‡ä»¶å’Œè¿›å£è®¸å¯ã€‚",
+        "portfolio": "åˆ©ç”¨å½“å‰æ”¿ç­–çª—å£ä»¥CBUè¿›å…¥ï¼›æœ¬åœ°åŒ–ä»…ä½œä¸ºé•¿æœŸäº§ä¸šé€‰é¡¹ã€‚",
     },
     "Algeria": {
-        "red": ["没有书面进口许可时，禁止投机性CBU发运。", "未取得治理权和质量责任前，禁止承诺本地化。", "禁止因监管不确定性把CKD设为进入前提。"],
-        "green": "允许在进口许可明确且需求有保障的机构项目中选择性开展CBU。",
-        "mechanics": ["行政配额、进口许可与产业政策主导准入。", "持证进口商、产业伙伴和公共关联买家集中掌握需求。", "公用事业和封闭工业项目比经销商库存更可治理。"],
-        "gate": "必须具备书面进口权、付款保障、服务责任和合作伙伴控制条款。",
-        "portfolio": "许可允许时，CBU仍是受控验证路径；CKD是经过正式门槛评估后的后续选项。",
+        "red": ["æ²¡æœ‰ä¹¦é¢è¿›å£è®¸å¯æ—¶ï¼Œç¦æ­¢æŠ•æœºæ€§CBUå‘è¿ã€‚", "æœªå–å¾—æ²»ç†æƒå’Œè´¨é‡è´£ä»»å‰ï¼Œç¦æ­¢æ‰¿è¯ºæœ¬åœ°åŒ–ã€‚", "ç¦æ­¢å› ç›‘ç®¡ä¸ç¡®å®šæ€§æŠŠCKDè®¾ä¸ºè¿›å…¥å‰æã€‚"],
+        "green": "å…è®¸åœ¨è¿›å£è®¸å¯æ˜Žç¡®ä¸”éœ€æ±‚æœ‰ä¿éšœçš„æœºæž„é¡¹ç›®ä¸­é€‰æ‹©æ€§å¼€å±•CBUã€‚",
+        "mechanics": ["è¡Œæ”¿é…é¢ã€è¿›å£è®¸å¯ä¸Žäº§ä¸šæ”¿ç­–ä¸»å¯¼å‡†å…¥ã€‚", "æŒè¯è¿›å£å•†ã€äº§ä¸šä¼™ä¼´å’Œå…¬å…±å…³è”ä¹°å®¶é›†ä¸­æŽŒæ¡éœ€æ±‚ã€‚", "å…¬ç”¨äº‹ä¸šå’Œå°é—­å·¥ä¸šé¡¹ç›®æ¯”ç»é”€å•†åº“å­˜æ›´å¯æ²»ç†ã€‚"],
+        "gate": "å¿…é¡»å…·å¤‡ä¹¦é¢è¿›å£æƒã€ä»˜æ¬¾ä¿éšœã€æœåŠ¡è´£ä»»å’Œåˆä½œä¼™ä¼´æŽ§åˆ¶æ¡æ¬¾ã€‚",
+        "portfolio": "è®¸å¯å…è®¸æ—¶ï¼ŒCBUä»æ˜¯å—æŽ§éªŒè¯è·¯å¾„ï¼›CKDæ˜¯ç»è¿‡æ­£å¼é—¨æ§›è¯„ä¼°åŽçš„åŽç»­é€‰é¡¹ã€‚",
     },
     "Tunisia": {
-        "red": ["未确认UN-ECE型式认证材料被接受前，禁止发运。", "禁止把财政激励直接等同于市场需求。", "禁止为追求低价降低欧洲标准合规配置。"],
-        "green": "允许以合规CBU进入城市配送和回场车队，把突尼斯作为认证与标准标杆。",
-        "mechanics": ["UN-ECE认证门槛高，但通过后具备防御性。", "市场信任集中在成熟进口商与欧洲品牌。", "城市物流、服务车队和企业运营商是主要价值池。"],
-        "gate": "必须使用已认证配置，并由具备技术能力的渠道承担备件、诊断和质保。",
-        "portfolio": "中等容量、标准导向的市场天然适合CBU，短期没有CKD必要性。",
+        "red": ["æœªç¡®è®¤UN-ECEåž‹å¼è®¤è¯ææ–™è¢«æŽ¥å—å‰ï¼Œç¦æ­¢å‘è¿ã€‚", "ç¦æ­¢æŠŠè´¢æ”¿æ¿€åŠ±ç›´æŽ¥ç­‰åŒäºŽå¸‚åœºéœ€æ±‚ã€‚", "ç¦æ­¢ä¸ºè¿½æ±‚ä½Žä»·é™ä½Žæ¬§æ´²æ ‡å‡†åˆè§„é…ç½®ã€‚"],
+        "green": "å…è®¸ä»¥åˆè§„CBUè¿›å…¥åŸŽå¸‚é…é€å’Œå›žåœºè½¦é˜Ÿï¼ŒæŠŠçªå°¼æ–¯ä½œä¸ºè®¤è¯ä¸Žæ ‡å‡†æ ‡æ†ã€‚",
+        "mechanics": ["UN-ECEè®¤è¯é—¨æ§›é«˜ï¼Œä½†é€šè¿‡åŽå…·å¤‡é˜²å¾¡æ€§ã€‚", "å¸‚åœºä¿¡ä»»é›†ä¸­åœ¨æˆç†Ÿè¿›å£å•†ä¸Žæ¬§æ´²å“ç‰Œã€‚", "åŸŽå¸‚ç‰©æµã€æœåŠ¡è½¦é˜Ÿå’Œä¼ä¸šè¿è¥å•†æ˜¯ä¸»è¦ä»·å€¼æ± ã€‚"],
+        "gate": "å¿…é¡»ä½¿ç”¨å·²è®¤è¯é…ç½®ï¼Œå¹¶ç”±å…·å¤‡æŠ€æœ¯èƒ½åŠ›çš„æ¸ é“æ‰¿æ‹…å¤‡ä»¶ã€è¯Šæ–­å’Œè´¨ä¿ã€‚",
+        "portfolio": "ä¸­ç­‰å®¹é‡ã€æ ‡å‡†å¯¼å‘çš„å¸‚åœºå¤©ç„¶é€‚åˆCBUï¼ŒçŸ­æœŸæ²¡æœ‰CKDå¿…è¦æ€§ã€‚",
     },
     "Rwanda": {
-        "red": ["禁止把政策开放和零关税误判为巨大市场容量。", "禁止把业务建立在单一政府或公交项目上。", "未确认充电与服务覆盖前，禁止基加利以外的分散零售。"],
-        "green": "允许利用GB/T认可，在基加利开展轻库存CBU标杆车队。",
-        "mechanics": ["认证务实，GB/T认可显著降低技术不确定性。", "政府、发展机构、公交和少数正式车队集中掌握需求。", "基加利配送、酒店和机构车队是主要价值池。"],
-        "gate": "以政策标杆价值和可重复车队场景判断市场，而不是以绝对营收判断。",
-        "portfolio": "低容量政策样板市场应坚持CBU，CKD会增加不必要复杂度。",
+        "red": ["ç¦æ­¢æŠŠæ”¿ç­–å¼€æ”¾å’Œé›¶å…³ç¨Žè¯¯åˆ¤ä¸ºå·¨å¤§å¸‚åœºå®¹é‡ã€‚", "ç¦æ­¢æŠŠä¸šåŠ¡å»ºç«‹åœ¨å•ä¸€æ”¿åºœæˆ–å…¬äº¤é¡¹ç›®ä¸Šã€‚", "æœªç¡®è®¤å……ç”µä¸ŽæœåŠ¡è¦†ç›–å‰ï¼Œç¦æ­¢åŸºåŠ åˆ©ä»¥å¤–çš„åˆ†æ•£é›¶å”®ã€‚"],
+        "green": "å…è®¸åˆ©ç”¨GB/Tè®¤å¯ï¼Œåœ¨åŸºåŠ åˆ©å¼€å±•è½»åº“å­˜CBUæ ‡æ†è½¦é˜Ÿã€‚",
+        "mechanics": ["è®¤è¯åŠ¡å®žï¼ŒGB/Tè®¤å¯æ˜¾è‘—é™ä½ŽæŠ€æœ¯ä¸ç¡®å®šæ€§ã€‚", "æ”¿åºœã€å‘å±•æœºæž„ã€å…¬äº¤å’Œå°‘æ•°æ­£å¼è½¦é˜Ÿé›†ä¸­æŽŒæ¡éœ€æ±‚ã€‚", "åŸºåŠ åˆ©é…é€ã€é…’åº—å’Œæœºæž„è½¦é˜Ÿæ˜¯ä¸»è¦ä»·å€¼æ± ã€‚"],
+        "gate": "ä»¥æ”¿ç­–æ ‡æ†ä»·å€¼å’Œå¯é‡å¤è½¦é˜Ÿåœºæ™¯åˆ¤æ–­å¸‚åœºï¼Œè€Œä¸æ˜¯ä»¥ç»å¯¹è¥æ”¶åˆ¤æ–­ã€‚",
+        "portfolio": "ä½Žå®¹é‡æ”¿ç­–æ ·æ¿å¸‚åœºåº”åšæŒCBUï¼ŒCKDä¼šå¢žåŠ ä¸å¿…è¦å¤æ‚åº¦ã€‚",
     },
     "Djibouti": {
-        "red": ["禁止仅依据国内注册量判断吉布提机会。", "未经高温、载荷和线路验证，禁止开放走廊电动牵引车投放。", "未厘清港口特许权、运营商和车队所有权前，禁止扩大投入。"],
-        "green": "允许与明确码头或物流运营商开展具备专属充电的CBU港口倒短试点。",
-        "mechanics": ["港口特许权、运营许可和场地电力比零售法规更重要。", "少数港口、码头和走廊运营商控制可兑现需求。", "短距离高频港到堆场、港到铁路循环构成独特价值池。"],
-        "gate": "必须具备线路数据、充电场地权利、高温验证和明确运营责任。",
-        "portfolio": "以CBU项目交付为主，当前国内容量不足以支持CKD。",
+        "red": ["ç¦æ­¢ä»…ä¾æ®å›½å†…æ³¨å†Œé‡åˆ¤æ–­å‰å¸ƒææœºä¼šã€‚", "æœªç»é«˜æ¸©ã€è½½è·å’Œçº¿è·¯éªŒè¯ï¼Œç¦æ­¢å¼€æ”¾èµ°å»Šç”µåŠ¨ç‰µå¼•è½¦æŠ•æ”¾ã€‚", "æœªåŽ˜æ¸…æ¸¯å£ç‰¹è®¸æƒã€è¿è¥å•†å’Œè½¦é˜Ÿæ‰€æœ‰æƒå‰ï¼Œç¦æ­¢æ‰©å¤§æŠ•å…¥ã€‚"],
+        "green": "å…è®¸ä¸Žæ˜Žç¡®ç å¤´æˆ–ç‰©æµè¿è¥å•†å¼€å±•å…·å¤‡ä¸“å±žå……ç”µçš„CBUæ¸¯å£å€’çŸ­è¯•ç‚¹ã€‚",
+        "mechanics": ["æ¸¯å£ç‰¹è®¸æƒã€è¿è¥è®¸å¯å’Œåœºåœ°ç”µåŠ›æ¯”é›¶å”®æ³•è§„æ›´é‡è¦ã€‚", "å°‘æ•°æ¸¯å£ã€ç å¤´å’Œèµ°å»Šè¿è¥å•†æŽ§åˆ¶å¯å…‘çŽ°éœ€æ±‚ã€‚", "çŸ­è·ç¦»é«˜é¢‘æ¸¯åˆ°å †åœºã€æ¸¯åˆ°é“è·¯å¾ªçŽ¯æž„æˆç‹¬ç‰¹ä»·å€¼æ± ã€‚"],
+        "gate": "å¿…é¡»å…·å¤‡çº¿è·¯æ•°æ®ã€å……ç”µåœºåœ°æƒåˆ©ã€é«˜æ¸©éªŒè¯å’Œæ˜Žç¡®è¿è¥è´£ä»»ã€‚",
+        "portfolio": "ä»¥CBUé¡¹ç›®äº¤ä»˜ä¸ºä¸»ï¼Œå½“å‰å›½å†…å®¹é‡ä¸è¶³ä»¥æ”¯æŒCKDã€‚",
     },
     "Mauritius": {
-        "red": ["禁止在结构性小市场进行规模化投机库存。", "禁止通过服务能力薄弱的伙伴进入。", "禁止忽略气旋、海岸腐蚀和充电连续性。"],
-        "green": "允许以CBU开展高质量、可见的优质车队标杆，并严格控制库存。",
-        "mechanics": ["进口规则透明，海岛耐久与质保执行才是真正门槛。", "成熟经销商、酒店、物流和公共机构集中掌握需求。", "酒店、机场、市政和优质企业车队同时重视品牌可见度与运营成本。"],
-        "gate": "优先保证标杆质量、出勤率和品牌声誉，库存必须与合同需求挂钩。",
-        "portfolio": "CBU是明确主模式，市场容量不足以支持CKD复杂度。",
+        "red": ["ç¦æ­¢åœ¨ç»“æž„æ€§å°å¸‚åœºè¿›è¡Œè§„æ¨¡åŒ–æŠ•æœºåº“å­˜ã€‚", "ç¦æ­¢é€šè¿‡æœåŠ¡èƒ½åŠ›è–„å¼±çš„ä¼™ä¼´è¿›å…¥ã€‚", "ç¦æ­¢å¿½ç•¥æ°”æ—‹ã€æµ·å²¸è…èš€å’Œå……ç”µè¿žç»­æ€§ã€‚"],
+        "green": "å…è®¸ä»¥CBUå¼€å±•é«˜è´¨é‡ã€å¯è§çš„ä¼˜è´¨è½¦é˜Ÿæ ‡æ†ï¼Œå¹¶ä¸¥æ ¼æŽ§åˆ¶åº“å­˜ã€‚",
+        "mechanics": ["è¿›å£è§„åˆ™é€æ˜Žï¼Œæµ·å²›è€ä¹…ä¸Žè´¨ä¿æ‰§è¡Œæ‰æ˜¯çœŸæ­£é—¨æ§›ã€‚", "æˆç†Ÿç»é”€å•†ã€é…’åº—ã€ç‰©æµå’Œå…¬å…±æœºæž„é›†ä¸­æŽŒæ¡éœ€æ±‚ã€‚", "é…’åº—ã€æœºåœºã€å¸‚æ”¿å’Œä¼˜è´¨ä¼ä¸šè½¦é˜ŸåŒæ—¶é‡è§†å“ç‰Œå¯è§åº¦ä¸Žè¿è¥æˆæœ¬ã€‚"],
+        "gate": "ä¼˜å…ˆä¿è¯æ ‡æ†è´¨é‡ã€å‡ºå‹¤çŽ‡å’Œå“ç‰Œå£°èª‰ï¼Œåº“å­˜å¿…é¡»ä¸ŽåˆåŒéœ€æ±‚æŒ‚é’©ã€‚",
+        "portfolio": "CBUæ˜¯æ˜Žç¡®ä¸»æ¨¡å¼ï¼Œå¸‚åœºå®¹é‡ä¸è¶³ä»¥æ”¯æŒCKDå¤æ‚åº¦ã€‚",
     },
     "Madagascar": {
-        "red": ["禁止向基础设施与服务无法覆盖的分散客户销售电动车。", "禁止把电动车描述为全国性解决方案。", "没有核心运营商、服务方案和付款保障时，禁止发运专用车辆。"],
-        "green": "不能否定CBU；允许面向矿业、公用事业和受控园区投放符合工况的CBU产品。",
-        "mechanics": ["道路、电网、备件与救援比形式认证构成更大门槛。", "矿业企业、公用事业、NGO和少数大型运营商集中掌握正式需求。", "矿业与基建是核心价值池，电动车仅适用于封闭园区。"],
-        "gate": "电动车项目必须具备专属充电、线路勘察、救援能力和明确技术运营者。",
-        "portfolio": "CBU仍是主出口模式，通过产品和场景分层控制风险，而不是否定整个国家。",
+        "red": ["ç¦æ­¢å‘åŸºç¡€è®¾æ–½ä¸ŽæœåŠ¡æ— æ³•è¦†ç›–çš„åˆ†æ•£å®¢æˆ·é”€å”®ç”µåŠ¨è½¦ã€‚", "ç¦æ­¢æŠŠç”µåŠ¨è½¦æè¿°ä¸ºå…¨å›½æ€§è§£å†³æ–¹æ¡ˆã€‚", "æ²¡æœ‰æ ¸å¿ƒè¿è¥å•†ã€æœåŠ¡æ–¹æ¡ˆå’Œä»˜æ¬¾ä¿éšœæ—¶ï¼Œç¦æ­¢å‘è¿ä¸“ç”¨è½¦è¾†ã€‚"],
+        "green": "ä¸èƒ½å¦å®šCBUï¼›å…è®¸é¢å‘çŸ¿ä¸šã€å…¬ç”¨äº‹ä¸šå’Œå—æŽ§å›­åŒºæŠ•æ”¾ç¬¦åˆå·¥å†µçš„CBUäº§å“ã€‚",
+        "mechanics": ["é“è·¯ã€ç”µç½‘ã€å¤‡ä»¶ä¸Žæ•‘æ´æ¯”å½¢å¼è®¤è¯æž„æˆæ›´å¤§é—¨æ§›ã€‚", "çŸ¿ä¸šä¼ä¸šã€å…¬ç”¨äº‹ä¸šã€NGOå’Œå°‘æ•°å¤§åž‹è¿è¥å•†é›†ä¸­æŽŒæ¡æ­£å¼éœ€æ±‚ã€‚", "çŸ¿ä¸šä¸ŽåŸºå»ºæ˜¯æ ¸å¿ƒä»·å€¼æ± ï¼Œç”µåŠ¨è½¦ä»…é€‚ç”¨äºŽå°é—­å›­åŒºã€‚"],
+        "gate": "ç”µåŠ¨è½¦é¡¹ç›®å¿…é¡»å…·å¤‡ä¸“å±žå……ç”µã€çº¿è·¯å‹˜å¯Ÿã€æ•‘æ´èƒ½åŠ›å’Œæ˜Žç¡®æŠ€æœ¯è¿è¥è€…ã€‚",
+        "portfolio": "CBUä»æ˜¯ä¸»å‡ºå£æ¨¡å¼ï¼Œé€šè¿‡äº§å“å’Œåœºæ™¯åˆ†å±‚æŽ§åˆ¶é£Žé™©ï¼Œè€Œä¸æ˜¯å¦å®šæ•´ä¸ªå›½å®¶ã€‚",
     },
 }
 
 
 
-# 8B. CORE v13.0 GENERATORS — TCO w/ Interest + Residual Value, Segment Apps,
+# 8B. CORE v13.0 GENERATORS â€” TCO w/ Interest + Residual Value, Segment Apps,
 #     Risk Radar, Gate Index
 #     Battle 2 upgrade: gen_tco_60month_df / calc_tco_breakeven / chart_tco_breakeven
 #     now ALSO accept interest_rate_override, ice_residual_override, and
-#     ev_residual_override — so the "极限扩容" sandbox sliders (financing rate,
+#     ev_residual_override â€” so the "æžé™æ‰©å®¹" sandbox sliders (financing rate,
 #     residual value %) redraw the curve live, exactly like the existing
 #     diesel-price / charging-tariff / consumption / monthly-km overrides.
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 @st.cache_data
 def gen_tco_60month_df(
     country: str,
@@ -2790,8 +2857,8 @@ def calc_tco_breakeven(
 @st.cache_data
 def gen_segment_apps_df(country: str) -> pd.DataFrame:
     """
-    The three application scenarios: Urban FMCG (城市快消) / Port Drayage
-    (港口倒短) / Long-Haul Mining (长途矿业).
+    The three application scenarios: Urban FMCG (åŸŽå¸‚å¿«æ¶ˆ) / Port Drayage
+    (æ¸¯å£å€’çŸ­) / Long-Haul Mining (é•¿é€”çŸ¿ä¸š).
     """
     seg = TIER1[country]["segment_apps"]
     rows = []
@@ -2802,7 +2869,7 @@ def gen_segment_apps_df(country: str) -> pd.DataFrame:
 
 @st.cache_data
 def gen_risk_radar_df(country: str) -> pd.DataFrame:
-    """Operational risk radar — 5 dimensions, 0-10 scale."""
+    """Operational risk radar â€” 5 dimensions, 0-10 scale."""
     r = TIER1[country]["risk_radar"]
     labels_map = {
         "FX_Liquidity":       "FX Liquidity",
@@ -2834,9 +2901,9 @@ def calc_gate_index(country: str) -> float:
     score_0_10 = sum(r[k] * w for k, w in weights.items())
     return round(score_0_10 * 10, 1)  # scale to 0-100
 
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # 9. CHART BUILDERS
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 def chart_brand(df, country):
     colors = [PwC_COLORS[i] if i<3 else "#C0C8D8" for i in range(len(df))]
     fig = go.Figure(go.Bar(
@@ -2844,7 +2911,7 @@ def chart_brand(df, country):
         text=[f"{p}%" for p in df["Share_pct"]], textposition="outside",
         textfont=dict(size=11,color="#2D3142",family="Inter"),
         marker=dict(color=colors,line=dict(color="white",width=1.5)),
-        hovertemplate="<b>%{x}</b><br>%{y:,} units · %{text}<extra></extra>"))
+        hovertemplate="<b>%{x}</b><br>%{y:,} units Â· %{text}<extra></extra>"))
     return _apply(fig,{"yaxis":{**CHART_BASE["yaxis"],"title":"Units","range":[0,df["Units"].max()*1.22]},
                         "xaxis":{**CHART_BASE["xaxis"],"title":"Brand"},"showlegend":False,"bargap":.38})
 
@@ -2940,13 +3007,13 @@ def chart_tco_breakeven(
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         x=df["Month"], y=df["ICE_Cumulative_Cost"],
-        name=f"ICE — Cumulative TCO (diesel ${diesel_price_live:.2f}/L)",
+        name=f"ICE â€” Cumulative TCO (diesel ${diesel_price_live:.2f}/L)",
         mode="lines", line=dict(color="#21325B", width=2.5),
         hovertemplate="<b>Month %{x}</b><br>ICE Cumulative: <b>$%{y:,.0f}</b><extra></extra>",
     ))
     fig.add_trace(go.Scatter(
         x=df["Month"], y=df["EV_Cumulative_Cost"],
-        name=f"EV — Cumulative TCO (charging ${charging_tariff_live:.3f}/kWh)",
+        name=f"EV â€” Cumulative TCO (charging ${charging_tariff_live:.3f}/kWh)",
         mode="lines", line=dict(color="#D04A02", width=2.5),
         hovertemplate="<b>Month %{x}</b><br>EV Cumulative: <b>$%{y:,.0f}</b><extra></extra>",
     ))
@@ -2955,7 +3022,7 @@ def chart_tco_breakeven(
     fig.add_vline(x=60, line_dash="dash", line_color="#9BA3B2", line_width=1.2)
     fig.add_annotation(
         x=60, y=df["ICE_Cumulative_Cost"].max()*1.0,
-        text=f"↓ Residual cashback at exit:<br>ICE −${ice_resid:,.0f} · EV −${ev_resid:,.0f}",
+        text=f"â†“ Residual cashback at exit:<br>ICE âˆ’${ice_resid:,.0f} Â· EV âˆ’${ev_resid:,.0f}",
         showarrow=False, yanchor="top", xanchor="right", xshift=-4,
         bgcolor="rgba(255,255,255,0.92)", bordercolor="#9BA3B2",
         font=dict(size=9, color="#5A6070", family="Inter"),
@@ -2972,14 +3039,14 @@ def chart_tco_breakeven(
         ))
         fig.add_annotation(
             x=breakeven_month, y=df["EV_Cumulative_Cost"].max()*0.10,
-            text=f"🟢 Break-even: Month {breakeven_month:.1f}",
+            text=f"ðŸŸ¢ Break-even: Month {breakeven_month:.1f}",
             showarrow=False, bgcolor="rgba(26,140,91,0.1)", bordercolor="#1A8C5B",
             font=dict(size=10, color="#1A8C5B", family="Inter"),
         )
     else:
         fig.add_annotation(
             x=28, y=df["EV_Cumulative_Cost"].max()*0.82,
-            text="⚠ No TCO parity within 60 months\nat current financing, energy & residual rates",
+            text="âš  No TCO parity within 60 months\nat current financing, energy & residual rates",
             showarrow=False, bgcolor="rgba(208,74,2,0.1)", bordercolor="#D04A02",
             font=dict(size=10, color="#D04A02", family="Inter"),
         )
@@ -2993,7 +3060,7 @@ def chart_tco_breakeven(
 
 
 def chart_risk_radar(df: pd.DataFrame, country: str) -> go.Figure:
-    """Operational risk radar chart — 5 dimensions on 0-10 scale."""
+    """Operational risk radar chart â€” 5 dimensions on 0-10 scale."""
     categories = df["Dimension"].tolist()
     values = df["Score"].tolist()
     categories_closed = categories + [categories[0]]
@@ -3022,15 +3089,15 @@ def chart_risk_radar(df: pd.DataFrame, country: str) -> go.Figure:
     return fig
 
 
-# ── South Africa exclusive chart ──────────────────────────────────────────────
+# â”€â”€ South Africa exclusive chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def chart_za_scissors():
     df = gen_za_rail_road()
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["Year"],y=df["Rail_Mt"],name="Transnet Rail (Mt) ←",
+    fig.add_trace(go.Scatter(x=df["Year"],y=df["Rail_Mt"],name="Transnet Rail (Mt) â†",
         mode="lines+markers",yaxis="y1",line=dict(color="#D04A02",width=2.5),marker=dict(size=6,color="#D04A02"),
         fill="tozeroy",fillcolor="rgba(208,74,2,0.07)",
         hovertemplate="<b>%{x}</b><br>Rail: %{y:.0f} Mt<extra></extra>"))
-    fig.add_trace(go.Scatter(x=df["Year"],y=df["HCV_Units"],name="HCV Road Sales (units) →",
+    fig.add_trace(go.Scatter(x=df["Year"],y=df["HCV_Units"],name="HCV Road Sales (units) â†’",
         mode="lines+markers",yaxis="y2",line=dict(color="#21325B",width=2.5),marker=dict(size=6,color="#21325B"),
         hovertemplate="<b>%{x}</b><br>HCV: %{y:,} units<extra></extra>"))
     fig.add_annotation(x=2018,y=228,text="Rail peak 2018:\n228 Mt",
@@ -3043,7 +3110,7 @@ def chart_za_scissors():
 
 
 def chart_za_freight_cat(df):
-    """Stats SA P7162 — horizontal bar of freight revenue by commodity category."""
+    """Stats SA P7162 â€” horizontal bar of freight revenue by commodity category."""
     ds = df.sort_values("Revenue_ZAR_bn")
     fig = go.Figure(go.Bar(
         x=ds["Revenue_ZAR_bn"], y=ds["Category"], orientation="h",
@@ -3060,21 +3127,21 @@ def chart_za_freight_cat(df):
 
 
 def chart_za_payload_income(df):
-    """Stats SA P7162 — Payload vs Income dual-axis, the cost-squeeze story."""
+    """Stats SA P7162 â€” Payload vs Income dual-axis, the cost-squeeze story."""
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=df["Quarter"], y=df["Payload_Mt"], name="Payload (Mt) ←",
+        x=df["Quarter"], y=df["Payload_Mt"], name="Payload (Mt) â†",
         mode="lines+markers", yaxis="y1", line=dict(color="#D04A02", width=2.5),
         marker=dict(size=4, color="#D04A02"), fill="tozeroy", fillcolor="rgba(208,74,2,0.07)",
         hovertemplate="<b>%{x|Q%q %Y}</b><br>%{y:.0f} Mt<extra></extra>"))
     fig.add_trace(go.Scatter(
-        x=df["Quarter"], y=df["Income_ZAR_bn"], name="Freight Income (Rbn) →",
+        x=df["Quarter"], y=df["Income_ZAR_bn"], name="Freight Income (Rbn) â†’",
         mode="lines+markers", yaxis="y2", line=dict(color="#21325B", width=2.5),
         marker=dict(size=4, color="#21325B"),
         hovertemplate="<b>%{x|Q%q %Y}</b><br>R%{y:.1f}bn<extra></extra>"))
     fig.add_annotation(
         x=df["Quarter"].iloc[-4], y=df["Payload_Mt"].iloc[-4],
-        text="▼ Volume falling\n▲ Revenue rising\n= Cost squeeze",
+        text="â–¼ Volume falling\nâ–² Revenue rising\n= Cost squeeze",
         showarrow=True, arrowhead=2, arrowcolor="#D04A02",
         bgcolor="rgba(208,74,2,0.08)", bordercolor="#D04A02",
         font=dict(size=9, color="#D04A02", family="Inter"), ax=-80, ay=-50)
@@ -3087,7 +3154,7 @@ def chart_za_payload_income(df):
 
 
 def chart_za_channel(df):
-    """NAAMSA — HCV sales channel donut."""
+    """NAAMSA â€” HCV sales channel donut."""
     fig = go.Figure(go.Pie(
         labels=df["Channel"], values=df["Share_pct"], hole=.58,
         marker=dict(colors=df["Color"].tolist(), line=dict(color="white", width=2)),
@@ -3103,7 +3170,7 @@ def chart_za_channel(df):
 
 
 def chart_za_province(df):
-    """NAAMSA — HCV sales by province bar chart."""
+    """NAAMSA â€” HCV sales by province bar chart."""
     colors = ["#D04A02" if i==0 else "#21325B" if i==1 else "#295BA5" if i==2
               else "#8BA7C4" for i in range(len(df))]
     fig = go.Figure(go.Bar(
@@ -3119,7 +3186,7 @@ def chart_za_province(df):
     })
 
 
-# ── Nigeria exclusive chart ───────────────────────────────────────────────────
+# â”€â”€ Nigeria exclusive chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def chart_ng_waterfall(df):
     fig=go.Figure(go.Waterfall(orientation="v",measure=df["Measure"].tolist(),
         x=df["Label"].tolist(),y=df["Value"].tolist(),
@@ -3129,7 +3196,7 @@ def chart_ng_waterfall(df):
         increasing=dict(marker_color="#D04A02"),decreasing=dict(marker_color="#1A8C5B"),
         totals=dict(marker_color="#21325B"),
         hovertemplate="<b>%{x}</b><br>$%{y:,.0f}<extra></extra>"))
-    fig.add_annotation(x=7,y=97000,text="💡 CKD saves ~$46k/unit\nvs CBU",
+    fig.add_annotation(x=7,y=97000,text="ðŸ’¡ CKD saves ~$46k/unit\nvs CBU",
         showarrow=True,arrowhead=2,arrowcolor="#1A8C5B",bgcolor="rgba(26,140,91,0.1)",
         bordercolor="#1A8C5B",font=dict(size=10,color="#1A8C5B",family="Inter"),ax=-90,ay=-50)
     return _apply(fig,{"yaxis":{**CHART_BASE["yaxis"],"title":"Cost (USD)"},
@@ -3137,7 +3204,7 @@ def chart_ng_waterfall(df):
                         "margin":dict(l=60,r=20,t=30,b=70),"height":420})
 
 
-# ── Morocco exclusive chart ───────────────────────────────────────────────────
+# â”€â”€ Morocco exclusive chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def chart_ma_modal(df):
     colors=["#C0C8D8" if not r else "#D04A02" for r in df["Road_Accessible"]]
     fig=go.Figure(go.Bar(x=df["Volume_Mt_yr"],y=df["Modal"],orientation="h",
@@ -3147,7 +3214,7 @@ def chart_ma_modal(df):
         customdata=df["Note"],
         hovertemplate="<b>%{y}</b><br>%{x:.1f} Mt/yr<br>%{customdata}<extra></extra>"))
     fig.add_annotation(x=6.5,y="Road HCV\n(Contractor / Finished Goods)",
-        text="● Road-accessible",showarrow=False,xanchor="left",xshift=8,
+        text="â— Road-accessible",showarrow=False,xanchor="left",xshift=8,
         font=dict(size=10,color="#D04A02",family="Inter"))
     return _apply(fig,{"xaxis":{**CHART_BASE["xaxis"],"title":"Estimated Volume (Mt/year)",
                                  "range":[0,df["Volume_Mt_yr"].max()*1.35]},
@@ -3155,14 +3222,14 @@ def chart_ma_modal(df):
                         "showlegend":False,"margin":dict(l=200,r=20,t=20,b=50),"height":300})
 
 
-# ── Ethiopia exclusive chart ──────────────────────────────────────────────────
+# â”€â”€ Ethiopia exclusive chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def chart_eth_ev(df):
     fig=go.Figure()
     fig.add_trace(go.Scatter(x=df["Month"],y=df["EV_Share_pct"],name="EV Market Share (%)",
         mode="lines",line=dict(color="#D04A02",width=2.5),fill="tozeroy",fillcolor="rgba(208,74,2,0.12)",
         hovertemplate="<b>%{x|%b %Y}</b><br>%{y:.1f}%<extra></extra>"))
     fig.add_vline(x=pd.Timestamp("2022-07-01"),line_dash="dash",line_color="#21325B",line_width=1.5)
-    fig.add_annotation(x=pd.Timestamp("2022-07-01"),y=50,text="⚡ Petroleum ban\nenacted Jul 2022",
+    fig.add_annotation(x=pd.Timestamp("2022-07-01"),y=50,text="âš¡ Petroleum ban\nenacted Jul 2022",
         showarrow=False,xanchor="left",xshift=8,bgcolor="rgba(33,50,91,0.08)",bordercolor="#21325B",
         font=dict(size=9,color="#21325B",family="Inter"))
     return _apply(fig,{"xaxis":{**CHART_BASE["xaxis"],"title":"Month"},
@@ -3170,12 +3237,12 @@ def chart_eth_ev(df):
                         "showlegend":False,"height":380})
 
 
-# ── Tunisia exclusive chart ───────────────────────────────────────────────────
+# â”€â”€ Tunisia exclusive chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def chart_tn_tco_waterfall(df):
     fig=go.Figure(go.Waterfall(orientation="v",measure=df["Measure"].tolist(),
         x=df["Label"].tolist(),y=df["Value"].tolist(),
-        text=["FREE ✓" if v==0 else f"TND {v:,.0f}" if m=="total" else
-              f"−TND {abs(v):,.0f}" if v<0 else f"+TND {v:,.0f}"
+        text=["FREE âœ“" if v==0 else f"TND {v:,.0f}" if m=="total" else
+              f"âˆ’TND {abs(v):,.0f}" if v<0 else f"+TND {v:,.0f}"
               for v,m in zip(df["Value"],df["Measure"])],
         textposition="outside",textfont=dict(size=9,family="Inter",color="#2D3142"),
         connector=dict(line=dict(color="#E2E5EB",width=1,dash="dot")),
@@ -3183,7 +3250,7 @@ def chart_tn_tco_waterfall(df):
         totals=dict(marker_color="#21325B"),
         hovertemplate="<b>%{x}</b><br>TND %{y:,.0f}<extra></extra>"))
     fig.add_annotation(x="BEV Total\nLanded Cost",y=311000,
-        text="💡 BEV saves\n~TND 151,000\nvs Diesel",showarrow=True,arrowhead=2,
+        text="ðŸ’¡ BEV saves\n~TND 151,000\nvs Diesel",showarrow=True,arrowhead=2,
         arrowcolor="#1A8C5B",bgcolor="rgba(26,140,91,0.1)",bordercolor="#1A8C5B",
         font=dict(size=10,color="#1A8C5B",family="Inter"),ax=-90,ay=-60)
     fig.add_vline(x=4.5,line_dash="dash",line_color="#9BA3B2",line_width=1)
@@ -3192,12 +3259,12 @@ def chart_tn_tco_waterfall(df):
                         "showlegend":False,"margin":dict(l=60,r=20,t=50,b=90),"height":460})
 
 
-# ── Rwanda exclusive charts ───────────────────────────────────────────────────
+# â”€â”€ Rwanda exclusive charts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 def chart_rw_tariff_comparison(df):
     fig = go.Figure(go.Waterfall(
         orientation="v", measure=df["Measure"].tolist(),
         x=df["Label"].tolist(), y=df["Value_USD"].tolist(),
-        text=["FREE ✓" if v==0 else f"${v:,.0f}" if m=="total" else f"+${v:,.0f}"
+        text=["FREE âœ“" if v==0 else f"${v:,.0f}" if m=="total" else f"+${v:,.0f}"
               for v, m in zip(df["Value_USD"], df["Measure"])],
         textposition="outside", textfont=dict(size=10, family="Inter", color="#2D3142"),
         connector=dict(line=dict(color="#E2E5EB", width=1, dash="dot")),
@@ -3207,7 +3274,7 @@ def chart_rw_tariff_comparison(df):
     ))
     fig.add_annotation(
         x="EV Total\nLanded Cost", y=80000,
-        text="✅ EV saves $34,400\nper unit vs ICE (43%)",
+        text="âœ… EV saves $34,400\nper unit vs ICE (43%)",
         showarrow=True, arrowhead=2, arrowcolor="#1A8C5B",
         bgcolor="rgba(26,140,91,0.1)", bordercolor="#1A8C5B",
         font=dict(size=10, color="#1A8C5B", family="Inter"), ax=-100, ay=-50,
@@ -3220,19 +3287,19 @@ def chart_rw_tariff_comparison(df):
 
 def chart_rw_ev_adoption(df):
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df["Year"], y=df["Bus_ICE"], name="Public Buses — ICE",
+    fig.add_trace(go.Scatter(x=df["Year"], y=df["Bus_ICE"], name="Public Buses â€” ICE",
         mode="lines", stackgroup="buses", line=dict(color="#9BA3B2", width=0),
         fillcolor="rgba(155,163,178,0.35)",
         hovertemplate="<b>%{x}</b><br>Bus ICE: <b>%{y}</b> units<extra></extra>"))
-    fig.add_trace(go.Scatter(x=df["Year"], y=df["Bus_EV"], name="Public Buses — EV",
+    fig.add_trace(go.Scatter(x=df["Year"], y=df["Bus_EV"], name="Public Buses â€” EV",
         mode="lines", stackgroup="buses", line=dict(color="#21325B", width=0),
         fillcolor="rgba(33,50,91,0.55)",
         hovertemplate="<b>%{x}</b><br>Bus EV: <b>%{y}</b> units<extra></extra>"))
-    fig.add_trace(go.Scatter(x=df["Year"], y=df["eLCV_ICE"], name="Urban LCV — ICE",
+    fig.add_trace(go.Scatter(x=df["Year"], y=df["eLCV_ICE"], name="Urban LCV â€” ICE",
         mode="lines", stackgroup="lcv", line=dict(color="#C0C8D8", width=0),
         fillcolor="rgba(192,200,216,0.30)",
         hovertemplate="<b>%{x}</b><br>LCV ICE: <b>%{y}</b> units<extra></extra>"))
-    fig.add_trace(go.Scatter(x=df["Year"], y=df["eLCV_EV"], name="Urban LCV — EV",
+    fig.add_trace(go.Scatter(x=df["Year"], y=df["eLCV_EV"], name="Urban LCV â€” EV",
         mode="lines", stackgroup="lcv", line=dict(color="#D04A02", width=0),
         fillcolor="rgba(208,74,2,0.45)",
         hovertemplate="<b>%{x}</b><br>LCV EV: <b>%{y}</b> units<extra></extra>"))
@@ -3242,16 +3309,16 @@ def chart_rw_ev_adoption(df):
         "legend":{**CHART_BASE["legend"],"y":-0.25}, "height":380,
     })
 
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # 10. UI HELPER FUNCTIONS
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 def _chdr(label, title, sub, src_name, src_url):
     st.markdown(f"""
 <div class="chart-card">
     <div class="chart-label">{label}</div>
     <div class="chart-title">{title}</div>
     <div class="chart-sub">{sub}</div>
-    <div class="source-link">📌 <a href="{src_url}" target="_blank">{src_name}</a></div>
+    <div class="source-link">ðŸ“Œ <a href="{src_url}" target="_blank">{src_name}</a></div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -3281,150 +3348,150 @@ def _kpi_row(cdata):
             dc = "normal" if "+" in delta else "inverse" if "-" in delta else "off"
             st.metric(key, val, delta, delta_color=dc, help=lbl)
     src = list(cdata["sources"].values())[0]
-    st.caption(f"Source: [{src[0]}]({src[1]}) · Simulated data unless otherwise stated.")
+    st.caption(f"Source: [{src[0]}]({src[1]}) Â· Simulated data unless otherwise stated.")
 
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # 11. MASTER NARRATIVE-FLOW RENDERER
 #     One function drives all 12 countries top-to-bottom:
-#       Level 1 → KPIs + Risk Radar + Gate Index + FX Alert
-#       Level 2 → Segment Heatmap (L) + immutable macro TCO baseline (R)
-#       Level 3 → Brand Share (L) + Country-Exclusive Chart (R)
-#       Level 4 → Evidence & Confidence
+#       Level 1 â†’ KPIs + Risk Radar + Gate Index + FX Alert
+#       Level 2 â†’ Segment Heatmap (L) + immutable macro TCO baseline (R)
+#       Level 3 â†’ Brand Share (L) + Country-Exclusive Chart (R)
+#       Level 4 â†’ Evidence & Confidence
 #     V15 adds Signals, Guardrails and Farizon Alignment without deleting
 #     any country-exclusive analytical chart.
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 def _exclusive_chart_nigeria():
     CUSTOMS = "https://customs.gov.ng"
     NADDC = "https://naddc.gov.ng"
-    _chdr("Exclusive · Nigeria Customs / NADDC",
+    _chdr("Exclusive Â· Nigeria Customs / NADDC",
           "CBU vs. CKD/SKD Import Cost Waterfall",
           "Per-unit landed cost (30t HCV, base $100k). CKD route saves ~$46k under 2023 EV/assembly tariff.",
           "Nigeria Customs Service", CUSTOMS)
     st.plotly_chart(chart_ng_waterfall(gen_ng_waterfall()), use_container_width=True, config=PLOTLY_CFG, key="ng_excl")
-    st.caption(f"Source: [Nigeria Customs]({CUSTOMS}) · [NADDC]({NADDC}) · Figures illustrative.")
+    st.caption(f"Source: [Nigeria Customs]({CUSTOMS}) Â· [NADDC]({NADDC}) Â· Figures illustrative.")
 
 def _exclusive_chart_morocco():
     OCP = "https://www.ocpgroup.ma/investor-relations"
     AIVAM = "http://www.aivam.ma"
-    _chdr("Exclusive · OCP Group",
-          "Phosphate Transport Modal Split — Pipeline vs Rail vs Road",
+    _chdr("Exclusive Â· OCP Group",
+          "Phosphate Transport Modal Split â€” Pipeline vs Rail vs Road",
           "Orange = road-accessible segment only. Pipeline/rail serve the primary ore trunk and are structurally closed to HCVs.",
           "OCP Group Investor Relations", OCP)
     st.plotly_chart(chart_ma_modal(gen_ma_modal()), use_container_width=True, config=PLOTLY_CFG, key="ma_excl")
-    st.caption(f"Source: [OCP Group IR]({OCP}) · [AIVAM]({AIVAM}) · Estimated volumes.")
+    st.caption(f"Source: [OCP Group IR]({OCP}) Â· [AIVAM]({AIVAM}) Â· Estimated volumes.")
 
 def _exclusive_chart_egypt():
     src = TIER1["Egypt"]["sources"]["trade"]
-    _chdr("Market Context · EOS",
+    _chdr("Market Context Â· EOS",
           "Subsidised Diesel Erodes EV Cost Case",
-          "At EGP 9.75/L subsidised diesel, the ICE energy cost floor is structurally low — "
+          "At EGP 9.75/L subsidised diesel, the ICE energy cost floor is structurally low â€” "
           "the KD tariff route (5% vs 40% CBU) is the only realistic lever, not EV TCO.",
           src[0], src[1])
     st.info(
         "**No standalone chart for this slot.** Egypt's commercial story is the **KD tariff "
-        "waterfall**, already quantified in Level 2's TCO panel — energy subsidy keeps ICE "
+        "waterfall**, already quantified in Level 2's TCO panel â€” energy subsidy keeps ICE "
         "structurally cheap to run, so the differentiator is assembly tariff, not fuel cost.",
-        icon="ℹ️"
+        icon="â„¹ï¸"
     )
 
 def _exclusive_chart_kenya():
     src = TIER1["Kenya"]["sources"]["trade"]
-    _chdr("Market Context · KEBS / Kenya Railways",
+    _chdr("Market Context Â· KEBS / Kenya Railways",
           "SGR Is a Complement, Not a Competitor, to Road HCV",
-          "SGR volumes grew 1.2→5.8 Mt (2018-23) but operate Mombasa–Nairobi only (472 km). "
+          "SGR volumes grew 1.2â†’5.8 Mt (2018-23) but operate Mombasaâ€“Nairobi only (472 km). "
           "Last-mile to Kampala, Kigali, and Juba remains structurally road-dependent.",
           src[0], src[1])
     st.success(
-        "**Net read:** EAC cross-border freight — the majority of Kenyan HCV demand — is "
+        "**Net read:** EAC cross-border freight â€” the majority of Kenyan HCV demand â€” is "
         "untouched by SGR. Port drayage at Mombasa is the best near-term EV pilot route.",
-        icon="✅"
+        icon="âœ…"
     )
 
 def _exclusive_chart_ethiopia():
     ERCA = "https://www.erca.gov.et"
     MOTI = "https://www.moti.gov.et"
-    _chdr("Exclusive · MoTI / ERCA",
-          "EV Market Share Trajectory — Post Petroleum Import Ban",
+    _chdr("Exclusive Â· MoTI / ERCA",
+          "EV Market Share Trajectory â€” Post Petroleum Import Ban",
           "From <3% to >85% EV share in 30 months following the July 2022 petroleum import ban.",
           "Ministry of Trade & Industry Ethiopia", MOTI)
     st.plotly_chart(chart_eth_ev(gen_eth_ev()), use_container_width=True, config=PLOTLY_CFG, key="eth_excl")
-    st.caption(f"Source: [MoTI Ethiopia]({MOTI}) · [ERCA]({ERCA}) · Simulated data.")
+    st.caption(f"Source: [MoTI Ethiopia]({MOTI}) Â· [ERCA]({ERCA}) Â· Simulated data.")
 
 def _exclusive_chart_tunisia():
     FIN = "https://www.finances.gov.tn"
     ANME = "https://www.anme.tn"
-    _chdr("Exclusive · Loi de Finances 2026 / ANME",
+    _chdr("Exclusive Â· Loi de Finances 2026 / ANME",
           "All-in Landed Cost Waterfall: Diesel HCV vs. BEV",
           "CIF base TND 300,000. BEV: 0% customs + 0% excise + 7% TVA + TND 10,000 ANME subsidy.",
-          "Ministère des Finances Tunisie", FIN)
+          "MinistÃ¨re des Finances Tunisie", FIN)
     st.plotly_chart(chart_tn_tco_waterfall(gen_tn_tco_waterfall()), use_container_width=True, config=PLOTLY_CFG, key="tn_excl")
-    st.caption(f"Source: [Loi de Finances 2026]({FIN}) · [ANME]({ANME}) · Exchange rate TND/USD 3.14 (BCT Q1 2026).")
+    st.caption(f"Source: [Loi de Finances 2026]({FIN}) Â· [ANME]({ANME}) Â· Exchange rate TND/USD 3.14 (BCT Q1 2026).")
 
 def _exclusive_chart_algeria():
     src = TIER1["Algeria"]["sources"]["trade"]
-    _chdr("Market Context · Ministère du Commerce",
-          "Renault Rouiba JV — The Only Proven Entry Template",
+    _chdr("Market Context Â· MinistÃ¨re du Commerce",
+          "Renault Rouiba JV â€” The Only Proven Entry Template",
           "30% CBU tariff + import licence quotas make direct CV import commercially unviable. "
           "Renault's JV assembly plant in Rouiba is the only durable precedent.",
           src[0], src[1])
     st.warning(
         "**Net read:** This is a JV-or-nothing market. Budget 3-4 years from MOU to first "
         "unit production; do not pursue CBU export here.",
-        icon="⚠️"
+        icon="âš ï¸"
     )
 
 def _exclusive_chart_rwanda():
     RDB = "https://www.rdb.rw"
     RURA = "https://www.rura.rw"
-    _chdr("Exclusive · RURA / MINICOM",
-          "Kigali EV Fleet Adoption — Buses & Urban LCV (Stacked Area)",
-          "2022–2025 actuals; 2026–2027 RURA Green Mobility forecast. Orange = EV, Grey = ICE.",
-          "RURA — Green Mobility Annual Report 2024", RURA)
+    _chdr("Exclusive Â· RURA / MINICOM",
+          "Kigali EV Fleet Adoption â€” Buses & Urban LCV (Stacked Area)",
+          "2022â€“2025 actuals; 2026â€“2027 RURA Green Mobility forecast. Orange = EV, Grey = ICE.",
+          "RURA â€” Green Mobility Annual Report 2024", RURA)
     st.plotly_chart(chart_rw_ev_adoption(gen_rw_ev_adoption()), use_container_width=True, config=PLOTLY_CFG, key="rw_excl")
-    st.caption(f"Source: [RURA]({RURA}) · [RDB]({RDB}) · 2026-27 figures are policy targets, not confirmed actuals.")
+    st.caption(f"Source: [RURA]({RURA}) Â· [RDB]({RDB}) Â· 2026-27 figures are policy targets, not confirmed actuals.")
 
 def _exclusive_chart_djibouti():
     src = TIER1["Djibouti"]["sources"]["trade"]
-    _chdr("Market Context · DPFZA",
+    _chdr("Market Context Â· DPFZA",
           "Djibouti Is a Corridor, Not a Domestic Market",
           "Over 95% of Ethiopia's seaborne trade transits Djibouti. The relevant fleet metric is "
           "port-to-rail drayage truck-days, not domestic vehicle registrations.",
           src[0], src[1])
     st.success(
-        "**Net read:** Port Drayage scores 7.8/10 EV readiness — the best drayage-specific score "
-        "outside South Africa — because the Doraleh port-to-rail leg is short, fixed, and "
+        "**Net read:** Port Drayage scores 7.8/10 EV readiness â€” the best drayage-specific score "
+        "outside South Africa â€” because the Doraleh port-to-rail leg is short, fixed, and "
         "depot-return every night. Anchor the account on DPFZA/SGTD, not retail CBU sales.",
-        icon="✅"
+        icon="âœ…"
     )
 
 def _exclusive_chart_mauritius():
     src = TIER1["Mauritius"]["sources"]["trade"]
-    _chdr("Market Context · Ministry of Energy Mauritius",
+    _chdr("Market Context Â· Ministry of Energy Mauritius",
           "Island-Wide Sub-60km Radius Eliminates the Range Objection",
           "Mauritius's entire road network is under 2,000km. With 0% BEV excise duty, this is a "
           "showcase market for pure-EV hospitality and light-distribution fleets.",
           src[0], src[1])
     st.success(
-        "**Net read:** Urban FMCG scores 8.8/10 EV readiness — the highest outside Rwanda/Tunisia. "
+        "**Net read:** Urban FMCG scores 8.8/10 EV readiness â€” the highest outside Rwanda/Tunisia. "
         "Fund a small resort-fleet pilot with Beachcomber/LUX*/Constance and reuse the case study "
         "across every coastal tourism market in the portfolio.",
-        icon="✅"
+        icon="âœ…"
     )
 
 def _exclusive_chart_madagascar():
     src = TIER1["Madagascar"]["sources"]["market"]
-    _chdr("Market Context · JIRAMA",
-          "Grid Reliability <35% — This Is a Diesel-Only Market",
+    _chdr("Market Context Â· JIRAMA",
+          "Grid Reliability <35% â€” This Is a Diesel-Only Market",
           "National electrification is under 35% and unreliable outside Antananarivo. Core CV "
           "demand is mining/mineral-export haulage on unpaved roads, running on captive diesel "
           "generation, not grid power.",
           src[0], src[1])
     st.warning(
-        "**Net read:** Long-Haul Mining scores just 0.1/10 EV readiness — the lowest of any "
+        "**Net read:** Long-Haul Mining scores just 0.1/10 EV readiness â€” the lowest of any "
         "segment in any of the 12 markets. Lead exclusively with rugged diesel mining/haulage "
         "trucks for Ambatovy, Rio Tinto QMM, and Kraoma.",
-        icon="⚠️"
+        icon="âš ï¸"
     )
 
 
@@ -3445,13 +3512,13 @@ EXCLUSIVE_CHART_REGISTRY = {
 
 def _render_market_risk_tab(country: str, cdata: dict):
     """
-    Tab 1 content: 市场与风控全景.
+    Tab 1 content: å¸‚åœºä¸Žé£ŽæŽ§å…¨æ™¯.
     Level 1 + Level 2 + Level 3. Level 2's TCO sandbox is the Battle 2
-    rebuild: session_state-backed sliders, a 🔒/🔓 lock toggle (default
-    locked = baseline curve only), a 🔄 Reset-to-Default button, and
+    rebuild: session_state-backed sliders, a ðŸ”’/ðŸ”“ lock toggle (default
+    locked = baseline curve only), a ðŸ”„ Reset-to-Default button, and
     dramatically widened slider ranges across all 8 tunable factors.
     """
-    _level_hdr(1, "Decision Overview · 决策全景", "KPIs, market access gate, and FX risk screen")
+    _level_hdr(1, "Decision Overview Â· å†³ç­–å…¨æ™¯", "KPIs, market access gate, and FX risk screen")
     _kpi_row(cdata)
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -3461,8 +3528,8 @@ def _render_market_risk_tab(country: str, cdata: dict):
 
     radar_col, gate_col = st.columns([3, 1], gap="large")
     with radar_col:
-        _chdr("Market Access Radar", f"5-Dimension Operational Risk Profile — {country}",
-              "FX Liquidity · Tariff Advantage · Port Efficiency · Grid Stability · Policy Consistency (0-10 scale)",
+        _chdr("Market Access Radar", f"5-Dimension Operational Risk Profile â€” {country}",
+              "FX Liquidity Â· Tariff Advantage Â· Port Efficiency Â· Grid Stability Â· Policy Consistency (0-10 scale)",
               cdata["sources"]["trade"][0], cdata["sources"]["trade"][1])
         st.plotly_chart(chart_risk_radar(gen_risk_radar_df(country), country),
                         use_container_width=True, config=PLOTLY_CFG, key=f"{country}_radar")
@@ -3476,41 +3543,41 @@ def _render_market_risk_tab(country: str, cdata: dict):
     </div>
 </div>
 """, unsafe_allow_html=True)
-        st.caption("Weighted: FX 30% · Policy 25% · Tariff 20% · Port 15% · Grid 10%")
+        st.caption("Weighted: FX 30% Â· Policy 25% Â· Tariff 20% Â· Port 15% Â· Grid 10%")
 
     if fx_score <= 3:
         st.error(
-            f"🚨 **FATAL RISK ALERT — FX Liquidity Score: {fx_score:.1f}/10**\n\n"
+            f"ðŸš¨ **FATAL RISK ALERT â€” FX Liquidity Score: {fx_score:.1f}/10**\n\n"
             f"USD/hard-currency access in **{country}** is severely constrained. Any deal structure "
             f"that assumes smooth profit repatriation or stable local-currency pricing carries "
             f"material risk of capital trapping or margin erosion. Structure contracts in "
             f"USD-indexed terms with FX hedging clauses before proceeding.",
-            icon="🚨"
+            icon="ðŸš¨"
         )
 
-    _level_hdr(2, "Commercial Monetisation · 商业变现", "Where EV wins by application, and when it pays for itself")
+    _level_hdr(2, "Commercial Monetisation Â· å•†ä¸šå˜çŽ°", "Where EV wins by application, and when it pays for itself")
     seg_col, tco_col = st.columns(2, gap="large")
     with seg_col:
         _chdr("Application Segment Heatmap", "EV Readiness by Use Case",
-              "Urban FMCG · Port Drayage · Long-Haul Mining — volume and electrification readiness",
+              "Urban FMCG Â· Port Drayage Â· Long-Haul Mining â€” volume and electrification readiness",
               cdata["sources"]["trade"][0], cdata["sources"]["trade"][1])
         st.plotly_chart(chart_segment_apps_heatmap(gen_segment_apps_df(country)),
                         use_container_width=True, config=PLOTLY_CFG, key=f"{country}_segheat")
         seg_df = gen_segment_apps_df(country)
         st.caption(
-            "Volumes: " + " · ".join(f"{r['Application'].split('(')[0].strip()}: {r['Volume']:,}/yr"
+            "Volumes: " + " Â· ".join(f"{r['Application'].split('(')[0].strip()}: {r['Volume']:,}/yr"
                                      for _, r in seg_df.iterrows())
         )
     with tco_col:
         p = cdata["tco_params"]
         _chdr(
-            tr("60-Month Market TCO Baseline", "60个月市场TCO基准"),
-            tr("ICE vs. EV Cumulative Cost", "燃油与纯电累计成本"),
+            tr("60-Month Market TCO Baseline", "60ä¸ªæœˆå¸‚åœºTCOåŸºå‡†"),
+            tr("ICE vs. EV Cumulative Cost", "ç‡ƒæ²¹ä¸Žçº¯ç”µç´¯è®¡æˆæœ¬"),
             tr(
-                f"Controlled baseline · ICE ${p['ICE_Capex']:,.0f} vs EV ${p['EV_Capex']:,.0f} · "
-                f"interest {p['Interest_Rate']*100:.0f}% · residual ICE {p['ICE_Residual_Pct']:.0%} / EV {p['EV_Residual_Pct']:.0%}",
-                f"受控基准 · 燃油车 ${p['ICE_Capex']:,.0f} 对比纯电 ${p['EV_Capex']:,.0f} · "
-                f"利率 {p['Interest_Rate']*100:.0f}% · 五年残值 燃油 {p['ICE_Residual_Pct']:.0%} / 纯电 {p['EV_Residual_Pct']:.0%}",
+                f"Controlled baseline Â· ICE ${p['ICE_Capex']:,.0f} vs EV ${p['EV_Capex']:,.0f} Â· "
+                f"interest {p['Interest_Rate']*100:.0f}% Â· residual ICE {p['ICE_Residual_Pct']:.0%} / EV {p['EV_Residual_Pct']:.0%}",
+                f"å—æŽ§åŸºå‡† Â· ç‡ƒæ²¹è½¦ ${p['ICE_Capex']:,.0f} å¯¹æ¯”çº¯ç”µ ${p['EV_Capex']:,.0f} Â· "
+                f"åˆ©çŽ‡ {p['Interest_Rate']*100:.0f}% Â· äº”å¹´æ®‹å€¼ ç‡ƒæ²¹ {p['ICE_Residual_Pct']:.0%} / çº¯ç”µ {p['EV_Residual_Pct']:.0%}",
             ),
             p["source_name"], p["source_url"],
         )
@@ -3522,31 +3589,31 @@ def _render_market_risk_tab(country: str, cdata: dict):
         )
         breakeven_month, _ = calc_tco_breakeven(country)
         if breakeven_month is None:
-            be_text = tr("Not reached within 60 months", "60个月内未达到平衡")
+            be_text = tr("Not reached within 60 months", "60ä¸ªæœˆå†…æœªè¾¾åˆ°å¹³è¡¡")
         else:
             be_text = tr(
                 f"Month {breakeven_month:.1f} ({breakeven_month/12:.1f} years)",
-                f"第 {breakeven_month:.1f} 个月（{breakeven_month/12:.1f} 年）",
+                f"ç¬¬ {breakeven_month:.1f} ä¸ªæœˆï¼ˆ{breakeven_month/12:.1f} å¹´ï¼‰",
             )
         ice_per_km = p["Diesel_Price_per_L"] * p["ICE_Consumption_L_per_100km"] / 100
         ev_per_km = p["Charging_Tariff_per_kWh"] * p["EV_Consumption_kWh_per_100km"] / 100
         st.caption(
             tr(
-                f"Baseline parity: {be_text} · ICE ${ice_per_km:.3f}/km · EV ${ev_per_km:.3f}/km",
-                f"基准平衡点：{be_text} · 燃油 ${ice_per_km:.3f}/公里 · 纯电 ${ev_per_km:.3f}/公里",
+                f"Baseline parity: {be_text} Â· ICE ${ice_per_km:.3f}/km Â· EV ${ev_per_km:.3f}/km",
+                f"åŸºå‡†å¹³è¡¡ç‚¹ï¼š{be_text} Â· ç‡ƒæ²¹ ${ice_per_km:.3f}/å…¬é‡Œ Â· çº¯ç”µ ${ev_per_km:.3f}/å…¬é‡Œ",
             )
         )
         st.info(
             tr(
                 "Approved country benchmark. This is not a customer quotation and cannot be overwritten on the page.",
-                "这是受控的国家市场基准，不是客户报价，页面端不能覆盖底层假设。",
+                "è¿™æ˜¯å—æŽ§çš„å›½å®¶å¸‚åœºåŸºå‡†ï¼Œä¸æ˜¯å®¢æˆ·æŠ¥ä»·ï¼Œé¡µé¢ç«¯ä¸èƒ½è¦†ç›–åº•å±‚å‡è®¾ã€‚",
             )
         )
 
-    _level_hdr(3, "Market Depth · 市场深度", "Brand competitive set and country-specific structural story")
+    _level_hdr(3, "Market Depth Â· å¸‚åœºæ·±åº¦", "Brand competitive set and country-specific structural story")
 
     if country == "South Africa":
-        # South Africa keeps its full 4-chart Stats SA / NAAMSA depth panel —
+        # South Africa keeps its full 4-chart Stats SA / NAAMSA depth panel â€”
         # explicitly preserved at the user's request rather than collapsed
         # into a single exclusive chart like the other markets.
         src = cdata["sources"]["trade"]
@@ -3555,13 +3622,13 @@ def _render_market_risk_tab(country: str, cdata: dict):
 
         row1_l, row1_r = st.columns(2, gap="large")
         with row1_l:
-            _chdr("Competitive Set", f"Brand Market Share — {country}",
+            _chdr("Competitive Set", f"Brand Market Share â€” {country}",
                   "Top 5 brands by annual CV unit sales", src[0], src[1])
             st.plotly_chart(chart_brand(gen_brand_df(country), country),
                             use_container_width=True, config=PLOTLY_CFG, key=f"{country}_brand")
         with row1_r:
-            _chdr("Exclusive · Transnet / NAAMSA",
-                  "Rail Collapse → Road HCV Demand Transfer",
+            _chdr("Exclusive Â· Transnet / NAAMSA",
+                  "Rail Collapse â†’ Road HCV Demand Transfer",
                   "Rail freight down 46% from 2018 peak; HCV road sales absorb displaced demand",
                   "Transnet Annual Report",
                   "https://www.transnet.net/InvestorCentre/Pages/AnnualReports.aspx")
@@ -3570,36 +3637,36 @@ def _render_market_risk_tab(country: str, cdata: dict):
         st.markdown("<br>", unsafe_allow_html=True)
         row2_l, row2_r = st.columns(2, gap="large")
         with row2_l:
-            _chdr("Exclusive · Stats SA P7162", "Road Freight Revenue by Commodity Category",
-                  "Mining & Quarrying dominates at 35.4% of total freight revenue", "Stats SA — P7162", STATSSA)
+            _chdr("Exclusive Â· Stats SA P7162", "Road Freight Revenue by Commodity Category",
+                  "Mining & Quarrying dominates at 35.4% of total freight revenue", "Stats SA â€” P7162", STATSSA)
             st.plotly_chart(chart_za_freight_cat(gen_za_freight_category()),
                             use_container_width=True, config=PLOTLY_CFG, key="za_freight_cat")
         with row2_r:
-            _chdr("Exclusive · Stats SA P7162", "Payload Volume vs. Freight Income — The Cost Squeeze",
+            _chdr("Exclusive Â· Stats SA P7162", "Payload Volume vs. Freight Income â€” The Cost Squeeze",
                   "Diverging trends illustrate per-km cost inflation burden on fleet operators",
-                  "Stats SA — P7162", STATSSA)
+                  "Stats SA â€” P7162", STATSSA)
             st.plotly_chart(chart_za_payload_income(gen_za_payload_income()),
                             use_container_width=True, config=PLOTLY_CFG, key="za_payload_income")
 
         st.markdown("<br>", unsafe_allow_html=True)
         row3_l, row3_r = st.columns(2, gap="large")
         with row3_l:
-            _chdr("Exclusive · NAAMSA", "HCV Sales by Channel",
+            _chdr("Exclusive Â· NAAMSA", "HCV Sales by Channel",
                   "Dealer retail dominates; corporate fleet growing", "NAAMSA", NAAMSA)
             st.plotly_chart(chart_za_channel(gen_za_channel()),
                             use_container_width=True, config=PLOTLY_CFG, key="za_channel")
         with row3_r:
-            _chdr("Exclusive · NAAMSA", "HCV Sales by Province",
-                  "Gauteng accounts for 45.1% — industrial heartland concentration", "NAAMSA", NAAMSA)
+            _chdr("Exclusive Â· NAAMSA", "HCV Sales by Province",
+                  "Gauteng accounts for 45.1% â€” industrial heartland concentration", "NAAMSA", NAAMSA)
             st.plotly_chart(chart_za_province(gen_za_province()),
                             use_container_width=True, config=PLOTLY_CFG, key="za_province")
-        st.caption(f"Sources: [Stats SA P7162]({STATSSA}) · [NAAMSA]({NAAMSA}) · Simulated data modelled on actual report structures.")
+        st.caption(f"Sources: [Stats SA P7162]({STATSSA}) Â· [NAAMSA]({NAAMSA}) Â· Simulated data modelled on actual report structures.")
 
     else:
         brand_col, excl_col = st.columns(2, gap="large")
         with brand_col:
             src = cdata["sources"]["trade"]
-            _chdr("Competitive Set", f"Brand Market Share — {country}",
+            _chdr("Competitive Set", f"Brand Market Share â€” {country}",
                   "Top 5 brands by annual CV unit sales", src[0], src[1])
             st.plotly_chart(chart_brand(gen_brand_df(country), country),
                             use_container_width=True, config=PLOTLY_CFG, key=f"{country}_brand")
@@ -3611,35 +3678,35 @@ def _render_market_risk_tab(country: str, cdata: dict):
 
 def _render_due_diligence_tab(country: str, cdata: dict):
     """
-    Tab 2 content: 尽调交叉验证.
+    Tab 2 content: å°½è°ƒäº¤å‰éªŒè¯.
     Single-column Triangulation expanders followed by the Strategic Action box.
     """
-    _level_hdr(4, "Due Diligence & Action · 尽调研判与行动",
-               "Single-column verdict — converted directly into a sales instruction")
+    _level_hdr(4, "Due Diligence & Action Â· å°½è°ƒç ”åˆ¤ä¸Žè¡ŒåŠ¨",
+               "Single-column verdict â€” converted directly into a sales instruction")
     tri_keys = cdata.get("tri_keys", [])
     if not tri_keys:
-        st.info("No Due Diligence triangulation modules registered for this market yet.", icon="ℹ️")
+        st.info("No Due Diligence triangulation modules registered for this market yet.", icon="â„¹ï¸")
     for tk in tri_keys:
         t = TRIANGULATION.get(tk, {})
         if not t:
             continue
-        with st.expander(f"🔍  {t['title']}", expanded=False):
+        with st.expander(f"ðŸ”  {t['title']}", expanded=False):
             render_triangulation(tk)
 
     render_strategic_action(cdata)
 
 
 BRAND_TYPE_COLORS = {
-    "Ours (我司纯电)":   "#D04A02",
+    "Ours (æˆ‘å¸çº¯ç”µ)":   "#D04A02",
     "Chinese EV Rival":  "#21325B",
     "ICE Incumbent":     "#9BA3B2",
 }
-BRAND_TYPE_ORDER = ["Ours (我司纯电)", "Chinese EV Rival", "ICE Incumbent"]
+BRAND_TYPE_ORDER = ["Ours (æˆ‘å¸çº¯ç”µ)", "Chinese EV Rival", "ICE Incumbent"]
 
 
 def _init_competitor_session_state(country: str) -> str:
     """
-    Battle 4 — Step 1: session_state initialisation.
+    Battle 4 â€” Step 1: session_state initialisation.
     Checks whether st.session_state already holds a working copy of this
     country's competitor table; if not, deep-copies the default rows out
     of INTERNAL_COMPETITOR_DATA into a fresh DataFrame and stores it under
@@ -3656,25 +3723,25 @@ def _init_competitor_session_state(country: str) -> str:
 
 def _render_competitive_intel_tab(country: str, cdata: dict):
     """
-    Tab 4 content: 🕵️ Internal Competitive Intel (内部竞品靶向分析).
-    INTERNAL USE ONLY — never shown in a client-facing deck.
+    Tab 4 content: ðŸ•µï¸ Internal Competitive Intel (å†…éƒ¨ç«žå“é¶å‘åˆ†æž).
+    INTERNAL USE ONLY â€” never shown in a client-facing deck.
 
     Layout (per spec):
-      Top row, left  → 🔒/🔓 lock toggle + Reset button + st.data_editor
-                        (Module B: 核心参数红蓝对决)
-      Top row, right → live plotly.express positioning scatter
-                        (Module A: 产品价格卡位矩阵) — redraws instantly
+      Top row, left  â†’ ðŸ”’/ðŸ”“ lock toggle + Reset button + st.data_editor
+                        (Module B: æ ¸å¿ƒå‚æ•°çº¢è“å¯¹å†³)
+      Top row, right â†’ live plotly.express positioning scatter
+                        (Module A: äº§å“ä»·æ ¼å¡ä½çŸ©é˜µ) â€” redraws instantly
                         whenever the left-hand editor is touched, because
                         both read from the same st.session_state DataFrame.
-      Bottom          → Chinese rivals channel-footprint insight card
-                        (Module C: 中资同行渠道渗透底牌)
+      Bottom          â†’ Chinese rivals channel-footprint insight card
+                        (Module C: ä¸­èµ„åŒè¡Œæ¸ é“æ¸—é€åº•ç‰Œ)
     """
     st.markdown(f"""
 <div class="intel-banner">
-    <div class="intel-banner-title">🕵️ {country} — Internal Competitive Intelligence
-        <span class="intel-badge">🔒 Internal Use Only</span>
+    <div class="intel-banner-title">ðŸ•µï¸ {country} â€” Internal Competitive Intelligence
+        <span class="intel-badge">ðŸ”’ Internal Use Only</span>
     </div>
-    <div class="intel-banner-sub">内部竞品靶向分析 · 严禁对外分享 · 我司战略底线：仅销售纯电商用车 (Pure-EV Only)</div>
+    <div class="intel-banner-sub">å†…éƒ¨ç«žå“é¶å‘åˆ†æž Â· ä¸¥ç¦å¯¹å¤–åˆ†äº« Â· æˆ‘å¸æˆ˜ç•¥åº•çº¿ï¼šä»…é”€å”®çº¯ç”µå•†ç”¨è½¦ (Pure-EV Only)</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -3684,7 +3751,7 @@ def _render_competitive_intel_tab(country: str, cdata: dict):
             f"**No internal competitive dataset authored for {country} yet.** "
             "Request the BD/Channel Intelligence team to populate this market before "
             "using it for account planning.",
-            icon="ℹ️"
+            icon="â„¹ï¸"
         )
         return
 
@@ -3693,8 +3760,8 @@ def _render_competitive_intel_tab(country: str, cdata: dict):
     editor_col, chart_col = st.columns([1.05, 1], gap="large")
 
     with editor_col:
-        _chdr("Module B · 内部专用", "核心参数红蓝对决 (Spec-to-Spec Showdown)",
-              f"车型类别：{intel['vehicle_class']} — 我司车型 vs 中国友商 vs 当地油车霸主",
+        _chdr("Module B Â· å†…éƒ¨ä¸“ç”¨", "æ ¸å¿ƒå‚æ•°çº¢è“å¯¹å†³ (Spec-to-Spec Showdown)",
+              f"è½¦åž‹ç±»åˆ«ï¼š{intel['vehicle_class']} â€” æˆ‘å¸è½¦åž‹ vs ä¸­å›½å‹å•† vs å½“åœ°æ²¹è½¦éœ¸ä¸»",
               "Internal BD Intelligence", "#")
 
         lock_key = f"comp_unlocked_{country}"
@@ -3703,14 +3770,14 @@ def _render_competitive_intel_tab(country: str, cdata: dict):
         lock_l, lock_r = st.columns([3, 2])
         with lock_l:
             st.toggle(
-                "🔓 解锁竞品底价与参数编辑 (Unlock Data Editing)" if not st.session_state[lock_key]
-                else "🔒 点击重新锁定 (Click to Re-lock)",
+                "ðŸ”“ è§£é”ç«žå“åº•ä»·ä¸Žå‚æ•°ç¼–è¾‘ (Unlock Data Editing)" if not st.session_state[lock_key]
+                else "ðŸ”’ ç‚¹å‡»é‡æ–°é”å®š (Click to Re-lock)",
                 key=lock_key,
-                help="默认锁定，仅供展示；解锁后可双击单元格直接修改 Price_USD / Battery_kWh 等竞品参数，"
-                     "右侧卡位散点图会实时重绘。",
+                help="é»˜è®¤é”å®šï¼Œä»…ä¾›å±•ç¤ºï¼›è§£é”åŽå¯åŒå‡»å•å…ƒæ ¼ç›´æŽ¥ä¿®æ”¹ Price_USD / Battery_kWh ç­‰ç«žå“å‚æ•°ï¼Œ"
+                     "å³ä¾§å¡ä½æ•£ç‚¹å›¾ä¼šå®žæ—¶é‡ç»˜ã€‚",
             )
         with lock_r:
-            if st.button("🔄 恢复默认出厂数据", key=f"comp_reset_{country}", use_container_width=True):
+            if st.button("ðŸ”„ æ¢å¤é»˜è®¤å‡ºåŽ‚æ•°æ®", key=f"comp_reset_{country}", use_container_width=True):
                 base_rows = INTERNAL_COMPETITOR_DATA.get(country, {}).get("competitors", [])
                 st.session_state[skey] = pd.DataFrame(copy.deepcopy(base_rows))
                 st.rerun()
@@ -3718,9 +3785,9 @@ def _render_competitive_intel_tab(country: str, cdata: dict):
         locked = not st.session_state[lock_key]
         banner_cls = "tco-lock-banner" if locked else "tco-lock-banner unlocked"
         banner_txt = (
-            "🔒 <b>数据已锁定</b> — 仅供展示，防止误触修改竞品底价。解锁后方可编辑。"
+            "ðŸ”’ <b>æ•°æ®å·²é”å®š</b> â€” ä»…ä¾›å±•ç¤ºï¼Œé˜²æ­¢è¯¯è§¦ä¿®æ”¹ç«žå“åº•ä»·ã€‚è§£é”åŽæ–¹å¯ç¼–è¾‘ã€‚"
             if locked else
-            "🔓 <b>数据已解锁</b> — 双击任意单元格可直接修改数值，右侧散点图将实时联动。"
+            "ðŸ”“ <b>æ•°æ®å·²è§£é”</b> â€” åŒå‡»ä»»æ„å•å…ƒæ ¼å¯ç›´æŽ¥ä¿®æ”¹æ•°å€¼ï¼Œå³ä¾§æ•£ç‚¹å›¾å°†å®žæ—¶è”åŠ¨ã€‚"
         )
         st.markdown(f'<div class="{banner_cls}" style="font-size:.74rem;color:#5A6070;">{banner_txt}</div>',
                     unsafe_allow_html=True)
@@ -3733,33 +3800,33 @@ def _render_competitive_intel_tab(country: str, cdata: dict):
             disabled=locked,
             hide_index=True,
             column_config={
-                "Model": st.column_config.TextColumn("Model / 车型", width="medium"),
+                "Model": st.column_config.TextColumn("Model / è½¦åž‹", width="medium"),
                 "Brand_Type": st.column_config.SelectboxColumn(
-                    "Brand_Type / 阵营", options=BRAND_TYPE_ORDER, width="medium"),
-                "Price_USD": st.column_config.NumberColumn("Price_USD / 终端价", format="$%d"),
-                "Length_mm": st.column_config.NumberColumn("Length_mm / 车长", format="%d mm"),
-                "Battery_kWh": st.column_config.NumberColumn("Battery_kWh / 电量", format="%.1f kWh"),
-                "Payload_kg": st.column_config.NumberColumn("Payload_kg / 载重", format="%d kg"),
-                "Channel_Strategy": st.column_config.TextColumn("Channel_Strategy / 渠道布局", width="large"),
-                "Channel_Count": st.column_config.NumberColumn("Channel_Count / 网点数", format="%d"),
+                    "Brand_Type / é˜µè¥", options=BRAND_TYPE_ORDER, width="medium"),
+                "Price_USD": st.column_config.NumberColumn("Price_USD / ç»ˆç«¯ä»·", format="$%d"),
+                "Length_mm": st.column_config.NumberColumn("Length_mm / è½¦é•¿", format="%d mm"),
+                "Battery_kWh": st.column_config.NumberColumn("Battery_kWh / ç”µé‡", format="%.1f kWh"),
+                "Payload_kg": st.column_config.NumberColumn("Payload_kg / è½½é‡", format="%d kg"),
+                "Channel_Strategy": st.column_config.TextColumn("Channel_Strategy / æ¸ é“å¸ƒå±€", width="large"),
+                "Channel_Count": st.column_config.NumberColumn("Channel_Count / ç½‘ç‚¹æ•°", format="%d"),
             },
         )
-        # 写回 session_state，确保右侧散点图读取的是编辑后的最新数据
+        # å†™å›ž session_stateï¼Œç¡®ä¿å³ä¾§æ•£ç‚¹å›¾è¯»å–çš„æ˜¯ç¼–è¾‘åŽçš„æœ€æ–°æ•°æ®
         st.session_state[skey] = edited_df
 
         st.caption(
-            "💡 Battery_kWh 留空 = 传统燃油车（我司战略底线：只卖纯电，此列永远非空）。"
-            " Price_USD / Battery_kWh 等数值仅解锁后可编辑，用于现场压力测试竞品降价情形。"
+            "ðŸ’¡ Battery_kWh ç•™ç©º = ä¼ ç»Ÿç‡ƒæ²¹è½¦ï¼ˆæˆ‘å¸æˆ˜ç•¥åº•çº¿ï¼šåªå–çº¯ç”µï¼Œæ­¤åˆ—æ°¸è¿œéžç©ºï¼‰ã€‚"
+            " Price_USD / Battery_kWh ç­‰æ•°å€¼ä»…è§£é”åŽå¯ç¼–è¾‘ï¼Œç”¨äºŽçŽ°åœºåŽ‹åŠ›æµ‹è¯•ç«žå“é™ä»·æƒ…å½¢ã€‚"
         )
 
     with chart_col:
-        _chdr("Module A · 内部专用", "产品价格卡位矩阵 (Product Positioning Scatter Map)",
-              "X = Length_mm 车长 · Y = Price_USD 终端价 · 气泡颜色 = 品牌阵营 · 气泡大小 = 载重(kg)",
+        _chdr("Module A Â· å†…éƒ¨ä¸“ç”¨", "äº§å“ä»·æ ¼å¡ä½çŸ©é˜µ (Product Positioning Scatter Map)",
+              "X = Length_mm è½¦é•¿ Â· Y = Price_USD ç»ˆç«¯ä»· Â· æ°”æ³¡é¢œè‰² = å“ç‰Œé˜µè¥ Â· æ°”æ³¡å¤§å° = è½½é‡(kg)",
               "Internal BD Intelligence", "#")
 
         df_plot = st.session_state[skey].copy()
         if df_plot.empty:
-            st.info("No competitor rows to plot.", icon="ℹ️")
+            st.info("No competitor rows to plot.", icon="â„¹ï¸")
         else:
             df_plot["Payload_Plot"] = df_plot["Payload_kg"].fillna(df_plot["Payload_kg"].median() or 1500)
             df_plot["Battery_Label"] = df_plot["Battery_kWh"].apply(
@@ -3791,9 +3858,9 @@ def _render_competitive_intel_tab(country: str, cdata: dict):
             })
             st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CFG, key=f"{country}_comp_scatter")
 
-            # ── 实时卡位判定 / live positioning verdict ──
-            ours = df_plot[df_plot["Brand_Type"] == "Ours (我司纯电)"]
-            rivals = df_plot[df_plot["Brand_Type"] != "Ours (我司纯电)"]
+            # â”€â”€ å®žæ—¶å¡ä½åˆ¤å®š / live positioning verdict â”€â”€
+            ours = df_plot[df_plot["Brand_Type"] == "Ours (æˆ‘å¸çº¯ç”µ)"]
+            rivals = df_plot[df_plot["Brand_Type"] != "Ours (æˆ‘å¸çº¯ç”µ)"]
             if not ours.empty and not rivals.empty:
                 our_price = float(ours["Price_USD"].iloc[0])
                 our_length = float(ours["Length_mm"].iloc[0])
@@ -3804,34 +3871,34 @@ def _render_competitive_intel_tab(country: str, cdata: dict):
 
                 if price_delta_pct > 5 and length_delta_pct <= 0:
                     st.error(
-                        f"🔴 **高价低配预警**：我方定价比友商均值高 **{price_delta_pct:+.1f}%**，"
-                        f"但车长反而 {length_delta_pct:+.1f}%（更短或相当）—— 正被挤压在'高价低配'象限，"
-                        f"需重新审视定价或差异化配置故事。",
-                        icon="🔴"
+                        f"ðŸ”´ **é«˜ä»·ä½Žé…é¢„è­¦**ï¼šæˆ‘æ–¹å®šä»·æ¯”å‹å•†å‡å€¼é«˜ **{price_delta_pct:+.1f}%**ï¼Œ"
+                        f"ä½†è½¦é•¿åè€Œ {length_delta_pct:+.1f}%ï¼ˆæ›´çŸ­æˆ–ç›¸å½“ï¼‰â€”â€” æ­£è¢«æŒ¤åŽ‹åœ¨'é«˜ä»·ä½Žé…'è±¡é™ï¼Œ"
+                        f"éœ€é‡æ–°å®¡è§†å®šä»·æˆ–å·®å¼‚åŒ–é…ç½®æ•…äº‹ã€‚",
+                        icon="ðŸ”´"
                     )
                 elif price_delta_pct <= 0:
                     st.success(
-                        f"🟢 **性价比护城河**：我方定价比友商均值低 **{price_delta_pct:.1f}%**，"
-                        f"车长 {length_delta_pct:+.1f}%，具备正面卡位竞争力。",
-                        icon="🟢"
+                        f"ðŸŸ¢ **æ€§ä»·æ¯”æŠ¤åŸŽæ²³**ï¼šæˆ‘æ–¹å®šä»·æ¯”å‹å•†å‡å€¼ä½Ž **{price_delta_pct:.1f}%**ï¼Œ"
+                        f"è½¦é•¿ {length_delta_pct:+.1f}%ï¼Œå…·å¤‡æ­£é¢å¡ä½ç«žäº‰åŠ›ã€‚",
+                        icon="ðŸŸ¢"
                     )
                 else:
                     st.warning(
-                        f"🟡 **定价中性**：我方定价高于友商均值 {price_delta_pct:+.1f}%，车长 {length_delta_pct:+.1f}%，"
-                        f"卡位尚可但需关注渠道网点数量差距（见下方中资渠道渗透洞察）。",
-                        icon="🟡"
+                        f"ðŸŸ¡ **å®šä»·ä¸­æ€§**ï¼šæˆ‘æ–¹å®šä»·é«˜äºŽå‹å•†å‡å€¼ {price_delta_pct:+.1f}%ï¼Œè½¦é•¿ {length_delta_pct:+.1f}%ï¼Œ"
+                        f"å¡ä½å°šå¯ä½†éœ€å…³æ³¨æ¸ é“ç½‘ç‚¹æ•°é‡å·®è·ï¼ˆè§ä¸‹æ–¹ä¸­èµ„æ¸ é“æ¸—é€æ´žå¯Ÿï¼‰ã€‚",
+                        icon="ðŸŸ¡"
                     )
 
     st.markdown("<br>", unsafe_allow_html=True)
-    _sdiv("Module C · 内部专用", "中资同行渠道渗透底牌 (Chinese Brands Footprint)")
+    _sdiv("Module C Â· å†…éƒ¨ä¸“ç”¨", "ä¸­èµ„åŒè¡Œæ¸ é“æ¸—é€åº•ç‰Œ (Chinese Brands Footprint)")
     st.markdown(f"""
 <div class="footprint-card">
-    <div class="footprint-card-title">🀄 Chinese Rivals Playbook — {country}</div>
+    <div class="footprint-card-title">ðŸ€„ Chinese Rivals Playbook â€” {country}</div>
     <div class="footprint-card-body">{intel['chinese_footprint']}</div>
 </div>
 """, unsafe_allow_html=True)
     st.caption(
-        "📌 本模块数据为内部模拟情报，仅供招商/BD团队制定狙击策略参考，严禁出现在任何对外客户材料中。"
+        "ðŸ“Œ æœ¬æ¨¡å—æ•°æ®ä¸ºå†…éƒ¨æ¨¡æ‹Ÿæƒ…æŠ¥ï¼Œä»…ä¾›æ‹›å•†/BDå›¢é˜Ÿåˆ¶å®šç‹™å‡»ç­–ç•¥å‚è€ƒï¼Œä¸¥ç¦å‡ºçŽ°åœ¨ä»»ä½•å¯¹å¤–å®¢æˆ·ææ–™ä¸­ã€‚"
     )
 
 
@@ -3842,45 +3909,45 @@ def _render_signals_tab(country: str, cdata: dict):
     zh = V15_GOV_ZH[country] if V15_LANG == "zh" else None
     st.markdown(f"""
 <div class="gtm-mission-banner">
-  <div class="gtm-mission-title">📡 {country} · {tr("Signals & Strategic Triggers", "市场信号与战略触发器")}</div>
-  <div class="gtm-mission-sub">{tr("What changed · why it matters · what would change the CBU mode", "发生了什么 · 为什么重要 · 什么条件会改变CBU模式")}</div>
+  <div class="gtm-mission-title">ðŸ“¡ {country} Â· {tr("Signals & Strategic Triggers", "å¸‚åœºä¿¡å·ä¸Žæˆ˜ç•¥è§¦å‘å™¨")}</div>
+  <div class="gtm-mission-sub">{tr("What changed Â· why it matters Â· what would change the CBU mode", "å‘ç”Ÿäº†ä»€ä¹ˆ Â· ä¸ºä»€ä¹ˆé‡è¦ Â· ä»€ä¹ˆæ¡ä»¶ä¼šæ”¹å˜CBUæ¨¡å¼")}</div>
 </div>
 """, unsafe_allow_html=True)
-    _sdiv(tr("Structured Signal Feed", "结构化信号"))
+    _sdiv(tr("Structured Signal Feed", "ç»“æž„åŒ–ä¿¡å·"))
     signal_rows = [
         {
-            tr("Signal", "信号"): cdata["policy"]["risk"],
-            tr("Implication", "战略含义"): zh["gate"] if zh else mechanics["governance_test"],
-            tr("Importance", "重要度"): tr("High", "高"),
+            tr("Signal", "ä¿¡å·"): cdata["policy"]["risk"],
+            tr("Implication", "æˆ˜ç•¥å«ä¹‰"): zh["gate"] if zh else mechanics["governance_test"],
+            tr("Importance", "é‡è¦åº¦"): tr("High", "é«˜"),
         },
         {
-            tr("Signal", "信号"): tr("Evidence quality requires periodic refresh", "证据质量需要定期复核"),
-            tr("Implication", "战略含义"): tr(
+            tr("Signal", "ä¿¡å·"): tr("Evidence quality requires periodic refresh", "è¯æ®è´¨é‡éœ€è¦å®šæœŸå¤æ ¸"),
+            tr("Implication", "æˆ˜ç•¥å«ä¹‰"): tr(
                 "Do not upgrade market commitment on stale assumptions.",
-                "不能依据过期假设升级市场投入。",
+                "ä¸èƒ½ä¾æ®è¿‡æœŸå‡è®¾å‡çº§å¸‚åœºæŠ•å…¥ã€‚",
             ),
-            tr("Importance", "重要度"): tr("Medium", "中"),
+            tr("Importance", "é‡è¦åº¦"): tr("Medium", "ä¸­"),
         },
     ]
     st.dataframe(pd.DataFrame(signal_rows), hide_index=True, use_container_width=True)
-    _sdiv(tr("Strategic Trigger Monitor", "战略触发器监控"))
+    _sdiv(tr("Strategic Trigger Monitor", "æˆ˜ç•¥è§¦å‘å™¨ç›‘æŽ§"))
     st.warning(
-        f"**{tr('Decision trigger', '决策触发条件')}**\n\n"
+        f"**{tr('Decision trigger', 'å†³ç­–è§¦å‘æ¡ä»¶')}**\n\n"
         f"{zh['gate'] if zh else mechanics['governance_test']}"
     )
     st.info(
         tr(
             "Future automation will populate FX, tariff, registration, competitor and infrastructure signals. "
             "The current version establishes the governed data structure.",
-            "未来将自动接入汇率、关税、注册量、竞品与基础设施信号。当前版本先建立受治理的数据骨架。",
+            "æœªæ¥å°†è‡ªåŠ¨æŽ¥å…¥æ±‡çŽ‡ã€å…³ç¨Žã€æ³¨å†Œé‡ã€ç«žå“ä¸ŽåŸºç¡€è®¾æ–½ä¿¡å·ã€‚å½“å‰ç‰ˆæœ¬å…ˆå»ºç«‹å—æ²»ç†çš„æ•°æ®éª¨æž¶ã€‚",
         )
     )
-    _sdiv(tr("What Changed Since Last Review", "较上次复核的变化"))
+    _sdiv(tr("What Changed Since Last Review", "è¾ƒä¸Šæ¬¡å¤æ ¸çš„å˜åŒ–"))
     st.dataframe(pd.DataFrame([{
-        tr("Previous view", "上次判断"): tr("Baseline retained", "维持基准判断"),
-        tr("Current view", "当前判断"): tr("Baseline retained", "维持基准判断"),
-        tr("Reason", "原因"): cdata["policy"]["risk"],
-        tr("Mode changed?", "模式是否变化"): tr("No", "否"),
+        tr("Previous view", "ä¸Šæ¬¡åˆ¤æ–­"): tr("Baseline retained", "ç»´æŒåŸºå‡†åˆ¤æ–­"),
+        tr("Current view", "å½“å‰åˆ¤æ–­"): tr("Baseline retained", "ç»´æŒåŸºå‡†åˆ¤æ–­"),
+        tr("Reason", "åŽŸå› "): cdata["policy"]["risk"],
+        tr("Mode changed?", "æ¨¡å¼æ˜¯å¦å˜åŒ–"): tr("No", "å¦"),
     }]), hide_index=True, use_container_width=True)
 
 
@@ -3891,20 +3958,20 @@ def _render_guardrails_tab(country: str, cdata: dict):
     zh = V15_GOV_ZH[country] if V15_LANG == "zh" else None
     st.markdown(f"""
 <div class="gtm-mission-banner">
-  <div class="gtm-mission-title">🚦 {country} · {tr("Market Mechanics & Guardrails", "市场机制与战略边界")}</div>
-  <div class="gtm-mission-sub">{tr("Objective market logic and non-negotiable decision boundaries", "客观市场逻辑与不可突破的决策边界")}</div>
+  <div class="gtm-mission-title">ðŸš¦ {country} Â· {tr("Market Mechanics & Guardrails", "å¸‚åœºæœºåˆ¶ä¸Žæˆ˜ç•¥è¾¹ç•Œ")}</div>
+  <div class="gtm-mission-sub">{tr("Objective market logic and non-negotiable decision boundaries", "å®¢è§‚å¸‚åœºé€»è¾‘ä¸Žä¸å¯çªç ´çš„å†³ç­–è¾¹ç•Œ")}</div>
 </div>
 """, unsafe_allow_html=True)
-    _sdiv(tr("Absolute Red Lines", "绝对红线"))
+    _sdiv(tr("Absolute Red Lines", "ç»å¯¹çº¢çº¿"))
     for red_line in (zh["red"] if zh else guardrails["red_lines"]):
         st.error(red_line)
-    _sdiv(tr("Permitted Strategic Zone", "当前允许区间"))
+    _sdiv(tr("Permitted Strategic Zone", "å½“å‰å…è®¸åŒºé—´"))
     st.success(zh["green"] if zh else guardrails["green_zone"])
-    _sdiv(tr("Market Operating Logic", "市场运作逻辑"))
+    _sdiv(tr("Market Operating Logic", "å¸‚åœºè¿ä½œé€»è¾‘"))
     labels = [
-        (tr("Access & Compliance", "准入与合规"), "market_access"),
-        (tr("Supply Chain & Channel", "供应链与渠道"), "channel_ecosystem"),
-        (tr("Addressable Value Pool", "真实价值池"), "value_pool"),
+        (tr("Access & Compliance", "å‡†å…¥ä¸Žåˆè§„"), "market_access"),
+        (tr("Supply Chain & Channel", "ä¾›åº”é“¾ä¸Žæ¸ é“"), "channel_ecosystem"),
+        (tr("Addressable Value Pool", "çœŸå®žä»·å€¼æ± "), "value_pool"),
     ]
     cols = st.columns(3, gap="medium")
     mechanic_values = zh["mechanics"] if zh else [
@@ -3920,13 +3987,13 @@ def _render_guardrails_tab(country: str, cdata: dict):
   <div class="gtm-card-body">{body}</div>
 </div>
 """, unsafe_allow_html=True)
-    _sdiv(tr("Invalid Assumptions", "无效假设"))
+    _sdiv(tr("Invalid Assumptions", "æ— æ•ˆå‡è®¾"))
     st.info(
         tr(
             "Tariff support is not demand; policy intent is not fleet electrification; market size is not executability; "
             "a headline group is not always the vehicle buyer.",
-            "关税支持不等于真实需求；政策意愿不等于车队已经电动化；市场容量不等于可执行性；"
-            "大型集团也不一定是车辆的实际采购主体。",
+            "å…³ç¨Žæ”¯æŒä¸ç­‰äºŽçœŸå®žéœ€æ±‚ï¼›æ”¿ç­–æ„æ„¿ä¸ç­‰äºŽè½¦é˜Ÿå·²ç»ç”µåŠ¨åŒ–ï¼›å¸‚åœºå®¹é‡ä¸ç­‰äºŽå¯æ‰§è¡Œæ€§ï¼›"
+            "å¤§åž‹é›†å›¢ä¹Ÿä¸ä¸€å®šæ˜¯è½¦è¾†çš„å®žé™…é‡‡è´­ä¸»ä½“ã€‚",
         )
     )
 
@@ -3937,35 +4004,35 @@ def _render_alignment_tab(country: str, cdata: dict):
     zh = V15_GOV_ZH[country] if V15_LANG == "zh" else None
     st.markdown(f"""
 <div class="gtm-mission-banner">
-  <div class="gtm-mission-title">🎯 {country} · {tr("Farizon Strategic Alignment", "远程战略与车型落位")}</div>
-  <div class="gtm-mission-sub">{tr("Where the product fits · what must be true · where it must not be used", "产品适合哪里 · 成立条件是什么 · 什么场景不能使用")}</div>
+  <div class="gtm-mission-title">ðŸŽ¯ {country} Â· {tr("Farizon Strategic Alignment", "è¿œç¨‹æˆ˜ç•¥ä¸Žè½¦åž‹è½ä½")}</div>
+  <div class="gtm-mission-sub">{tr("Where the product fits Â· what must be true Â· where it must not be used", "äº§å“é€‚åˆå“ªé‡Œ Â· æˆç«‹æ¡ä»¶æ˜¯ä»€ä¹ˆ Â· ä»€ä¹ˆåœºæ™¯ä¸èƒ½ä½¿ç”¨")}</div>
 </div>
 """, unsafe_allow_html=True)
     st.info(
-        f"**{tr('Portfolio rule', '产品组合规则')}**\n\n"
+        f"**{tr('Portfolio rule', 'äº§å“ç»„åˆè§„åˆ™')}**\n\n"
         f"{zh['portfolio'] if zh else alignment['portfolio_rule']}"
     )
     rows = []
     for item in alignment["models"]:
         rows.append({
-            tr("Farizon model / capability", "远程车型/能力"): item["model"],
-            tr("Market role", "市场角色"): item["role"],
-            tr("Entry mode", "进入模式"): item["mode"],
-            tr("Strategic rationale", "战略依据"): item["logic"],
+            tr("Farizon model / capability", "è¿œç¨‹è½¦åž‹/èƒ½åŠ›"): item["model"],
+            tr("Market role", "å¸‚åœºè§’è‰²"): item["role"],
+            tr("Entry mode", "è¿›å…¥æ¨¡å¼"): item["mode"],
+            tr("Strategic rationale", "æˆ˜ç•¥ä¾æ®"): item["logic"],
         })
     st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
-    _sdiv(tr("Product & Capability Gaps", "产品与能力缺口"))
+    _sdiv(tr("Product & Capability Gaps", "äº§å“ä¸Žèƒ½åŠ›ç¼ºå£"))
     st.warning(
         tr(
             "Validate homologation, charging interface, payload, aftersales coverage and residual-value support "
             "before upgrading the country commitment.",
-            "升级国家投入前，必须验证认证、充电接口、载荷、售后覆盖和残值支持。",
+            "å‡çº§å›½å®¶æŠ•å…¥å‰ï¼Œå¿…é¡»éªŒè¯è®¤è¯ã€å……ç”µæŽ¥å£ã€è½½è·ã€å”®åŽè¦†ç›–å’Œæ®‹å€¼æ”¯æŒã€‚",
         )
     )
     st.caption(
         tr(
             "Group boundary: CBU is the primary export mode. CKD/local assembly is a staged future option only.",
-            "集团边界：CBU是当前主力出口模式，CKD/本地化组装仅为分阶段的未来选项。",
+            "é›†å›¢è¾¹ç•Œï¼šCBUæ˜¯å½“å‰ä¸»åŠ›å‡ºå£æ¨¡å¼ï¼ŒCKD/æœ¬åœ°åŒ–ç»„è£…ä»…ä¸ºåˆ†é˜¶æ®µçš„æœªæ¥é€‰é¡¹ã€‚",
         )
     )
 
@@ -3973,12 +4040,12 @@ def _render_alignment_tab(country: str, cdata: dict):
 def render_country_dashboard(country: str, cdata: dict):
     """Original country analytics plus V15 executive-governance layers."""
     tab_market, tab_dd, tab_signals, tab_guardrails, tab_alignment, tab_intel = st.tabs([
-        tr("📊 Market & Risk Analytics", "📊 市场与风险分析"),
-        tr("🔎 Evidence & Confidence", "🔎 证据与可信度"),
-        tr("📡 Signals & Triggers", "📡 信号与触发器"),
-        tr("🚦 Strategic Guardrails", "🚦 战略边界"),
-        tr("🎯 Farizon Alignment", "🎯 远程车型落位"),
-        tr("🕵️ Competitive Intelligence", "🕵️ 竞争情报"),
+        tr("ðŸ“Š Market & Risk Analytics", "ðŸ“Š å¸‚åœºä¸Žé£Žé™©åˆ†æž"),
+        tr("ðŸ”Ž Evidence & Confidence", "ðŸ”Ž è¯æ®ä¸Žå¯ä¿¡åº¦"),
+        tr("ðŸ“¡ Signals & Triggers", "ðŸ“¡ ä¿¡å·ä¸Žè§¦å‘å™¨"),
+        tr("ðŸš¦ Strategic Guardrails", "ðŸš¦ æˆ˜ç•¥è¾¹ç•Œ"),
+        tr("ðŸŽ¯ Farizon Alignment", "ðŸŽ¯ è¿œç¨‹è½¦åž‹è½ä½"),
+        tr("ðŸ•µï¸ Competitive Intelligence", "ðŸ•µï¸ ç«žäº‰æƒ…æŠ¥"),
     ])
     with tab_market:
         _render_market_risk_tab(country, cdata)
@@ -3995,7 +4062,7 @@ def render_country_dashboard(country: str, cdata: dict):
 
 
 # 12. MAP BUILDER
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 def build_map(selected_name):
     sel_iso = next((d["iso"] for n,d in TIER1.items() if n==selected_name),"") or \
               next((iso for iso,name in ALL_AFRICA.items() if name==selected_name),"")
@@ -4010,18 +4077,18 @@ def build_map(selected_name):
             d = TIER1[name]
             kpi_text = "<br>".join(f"<b>{v[0]}</b> {v[1]}" for v in d["kpi"].values())
             tip = (f"<b style='font-size:13px;'>{d['flag']} {name}</b><br>"
-                   f"<span style='color:#9BA3B2;font-size:10px;'>TIER 1 · {d['region']}</span><br><br>"
+                   f"<span style='color:#9BA3B2;font-size:10px;'>TIER 1 Â· {d['region']}</span><br><br>"
                    f"{kpi_text}<br><br>"
-                   f"<span style='color:#D04A02;font-size:10px;'>● Click to drill down</span>")
+                   f"<span style='color:#D04A02;font-size:10px;'>â— Click to drill down</span>")
         else:
             m = TIER2_MACRO.get(iso, {})
-            flag = m.get("flag","🌍"); region = m.get("region","Africa")
+            flag = m.get("flag","ðŸŒ"); region = m.get("region","Africa")
             tip = (f"<b style='font-size:13px;'>{flag} {name}</b><br>"
                    f"<span style='color:#9BA3B2;font-size:10px;'>{region}</span><br><br>"
                    f"Est. GDP: <b>${m.get('gdp','N/A')}B</b><br>"
                    f"Est. CV Imports: <b>{m.get('cv_imports','N/A'):,} units/yr</b><br>"
                    f"Road Network: <b>{m.get('roads','N/A')}k km</b><br><br>"
-                   f"<span style='color:#295BA5;font-size:10px;'>● Click for live news</span>")
+                   f"<span style='color:#295BA5;font-size:10px;'>â— Click for live news</span>")
         rows.append({"iso":iso,"score":score,"group":grp,"tooltip":tip})
 
     df = pd.DataFrame(rows)
@@ -4052,15 +4119,397 @@ def build_map(selected_name):
         dragmode=False)
     return fig
 
-# ══════════════════════════════════════════════════════════════════════════════
+
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 12B. V16 COMMERCIAL WORKSPACE & DATA GOVERNANCE
+# Uses the existing V15 visual primitives; no new colour system or page skin.
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+def _v16_country_frame(df: pd.DataFrame, country: str) -> pd.DataFrame:
+    if "Country" not in df.columns:
+        return df.copy()
+    return df[df["Country"].eq(country)].copy()
+
+
+def render_v16_commercial_workspace(country: str):
+    dealers = _v16_country_frame(V16_DEALERS, country)
+    customers = _v16_country_frame(V16_CUSTOMERS, country)
+    opportunities = _v16_country_frame(V16_OPPORTUNITIES, country)
+    actions = _v16_country_frame(V16_ACTIONS, country)
+
+    _level_hdr(
+        1,
+        tr("Commercial Decision Snapshot", "é”€å”®å†³ç­–å¿«ç…§"),
+        tr(
+            "Dealer coverage, account access, weighted pipeline and immediate actions.",
+            "æ¸ é“è¦†ç›–ã€å®¢æˆ·è§¦è¾¾ã€åŠ æƒé¡¹ç›®ç®¡é“ä¸Žè¿‘æœŸè¡ŒåŠ¨ã€‚",
+        ),
+    )
+    weighted_units = (
+        opportunities["Expected Units"] * opportunities["Probability"]
+    ).sum() if not opportunities.empty else 0
+    weighted_value = (
+        opportunities["Expected Units"]
+        * opportunities["Unit Value USD"]
+        * opportunities["Probability"]
+    ).sum() if not opportunities.empty else 0
+    due_dates = pd.to_datetime(actions["Deadline"], errors="coerce") if not actions.empty else pd.Series(dtype="datetime64[ns]")
+    due_actions = int(due_dates.le(pd.Timestamp.now() + pd.Timedelta(days=60)).sum())
+
+    cards = [
+        (tr("Dealer candidates", "å€™é€‰æ¸ é“"), len(dealers)),
+        (tr("Mapped customers", "å·²è¯†åˆ«å®¢æˆ·"), len(customers)),
+        (tr("Pipeline units", "é¡¹ç›®å°æ•°"), int(opportunities["Expected Units"].sum()) if not opportunities.empty else 0),
+        (tr("Weighted units", "åŠ æƒå°æ•°"), round(weighted_units, 1)),
+        (tr("Weighted value", "åŠ æƒé‡‘é¢"), f"${weighted_value/1_000_000:.2f}m"),
+        (tr("Actions due â‰¤60d", "60å¤©å†…åˆ°æœŸè¡ŒåŠ¨"), due_actions),
+    ]
+    for col, (label, value) in zip(st.columns(6), cards):
+        with col:
+            st.metric(label, value)
+
+    if dealers.empty and customers.empty and opportunities.empty:
+        st.info(
+            tr(
+                "Commercial records are not yet migrated for this market. The country analytics remain available; add named dealer, customer and project records before an investment decision.",
+                "è¯¥å¸‚åœºçš„é”€å”®è®°å½•å°šæœªè¿ç§»ã€‚å›½å®¶åˆ†æžä»å¯ä½¿ç”¨ï¼Œä½†æŠ•èµ„å†³ç­–å‰å¿…é¡»è¡¥å……å®žåæ¸ é“ã€å®¢æˆ·å’Œé¡¹ç›®è®°å½•ã€‚",
+            ),
+            icon="â„¹ï¸",
+        )
+        return
+
+    _sdiv(tr("Opportunity Pipeline", "é¡¹ç›®ç®¡é“"))
+    if opportunities.empty:
+        st.info(tr("No opportunity has been recorded.", "å°šæœªå½•å…¥é¡¹ç›®æœºä¼šã€‚"))
+    else:
+        stage_order = ["Research","Contacted","Qualified","Proposal","Pilot","Negotiation","Won","Lost"]
+        stage_units = (
+            opportunities.groupby("Stage")["Expected Units"].sum()
+            .reindex(stage_order, fill_value=0)
+            .reset_index()
+        )
+        fig = px.bar(
+            stage_units,
+            x="Stage",
+            y="Expected Units",
+            color="Expected Units",
+            color_continuous_scale=["#D9E5F5", "#295BA5"],
+            text_auto=True,
+        )
+        fig.update_layout(
+            **{
+                **CHART_BASE,
+                "height": 300,
+                "margin": dict(l=25, r=20, t=20, b=25),
+                "showlegend": False,
+                "coloraxis_showscale": False,
+            }
+        )
+        st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CFG, key=f"v16_pipe_{country}")
+        st.dataframe(opportunities, hide_index=True, use_container_width=True)
+
+    _sdiv(tr("Dealer and Customer Coverage", "æ¸ é“ä¸Žå®¢æˆ·è¦†ç›–"))
+    st.markdown("**" + tr("Dealer candidates", "å€™é€‰æ¸ é“") + "**")
+    if dealers.empty:
+        st.caption(tr("No dealer record.", "æš‚æ— æ¸ é“è®°å½•ã€‚"))
+    else:
+        st.dataframe(dealers, hide_index=True, use_container_width=True)
+    st.markdown("**" + tr("Target accounts", "ç›®æ ‡å®¢æˆ·") + "**")
+    if customers.empty:
+        st.caption(tr("No customer record.", "æš‚æ— å®¢æˆ·è®°å½•ã€‚"))
+    else:
+        st.dataframe(customers, hide_index=True, use_container_width=True)
+
+    st.caption(
+        tr(
+            "Commercial records shown here are internal planning inputs. Named prospects, scores, expected units and probabilities require country-manager verification.",
+            "æœ¬é¡µå®¢æˆ·ã€æ¸ é“ã€è¯„åˆ†ã€é¢„è®¡å°æ•°åŠæˆäº¤æ¦‚çŽ‡å‡ä¸ºå†…éƒ¨ä¸šåŠ¡è¾“å…¥ï¼Œé¡»ç”±å›½å®¶ç»ç†æ ¸éªŒã€‚",
+        )
+    )
+
+
+def render_v16_data_governance(country: str):
+    metrics = _v16_country_frame(V16_METRIC_AUDIT, country)
+    sources = V16_SOURCES[
+        V16_SOURCES["Country"].isin([country, "Cross-market"])
+    ].copy()
+    known_sources = set(V16_SOURCES["Source ID"].dropna())
+    referenced_sources = set(metrics["Source ID"].dropna()) if not metrics.empty else set()
+    orphan_sources = sorted(referenced_sources - known_sources)
+    sourced_share = metrics["Source ID"].notna().mean() if not metrics.empty else 0
+    reported_share = metrics["Data Type"].isin(["Actual", "Reported"]).mean() if not metrics.empty else 0
+    weak_count = int(metrics["Confidence"].isin(["D", "E"]).sum()) if not metrics.empty else 0
+    pub_dates = pd.to_datetime(sources["Publication Date"], errors="coerce")
+    stale_count = int((pd.Timestamp.now() - pub_dates).dt.days.gt(730).sum()) if not sources.empty else 0
+
+    _level_hdr(
+        1,
+        tr("Data Audit Snapshot", "æ•°æ®å®¡è®¡å¿«ç…§"),
+        tr(
+            "Separates reported facts, estimates, model outputs and management judgement.",
+            "æ˜Žç¡®åˆ†ç¦»å®žé™…/æŠ¥å‘Šæ•°æ®ã€ä¼°ç®—ã€æ¨¡åž‹ç»“æžœä¸Žç®¡ç†åˆ¤æ–­ã€‚",
+        ),
+    )
+    cards = [
+        (tr("Audited metrics", "å®¡è®¡æŒ‡æ ‡"), len(metrics)),
+        (tr("Actual / reported", "å®žé™…/æŠ¥å‘Šå æ¯”"), f"{reported_share:.0%}"),
+        (tr("Source linkage", "æ¥æºå…³è”çŽ‡"), f"{sourced_share:.0%}"),
+        (tr("Low-confidence", "ä½Žå¯ä¿¡æŒ‡æ ‡"), weak_count),
+        (tr("Stale sources", "è¿‡æœŸæ¥æº"), stale_count),
+        (tr("Orphan IDs", "å­¤ç«‹æ¥æºID"), len(orphan_sources)),
+    ]
+    for col, (label, value) in zip(st.columns(6), cards):
+        with col:
+            st.metric(label, value)
+
+    if orphan_sources:
+        st.error(
+            tr("Unresolved source IDs: ", "æœªè§£æžæ¥æºIDï¼š") + ", ".join(orphan_sources)
+        )
+    elif metrics.empty:
+        st.warning(
+            tr(
+                "No structured metric audit has been migrated for this country.",
+                "è¯¥å›½å®¶å°šæœªè¿ç§»ç»“æž„åŒ–æŒ‡æ ‡å®¡è®¡æ•°æ®ã€‚",
+            )
+        )
+    else:
+        st.success(tr("Source-ID integrity check passed.", "Source IDå®Œæ•´æ€§æ£€æŸ¥é€šè¿‡ã€‚"))
+
+    _sdiv(tr("Metric Register", "æŒ‡æ ‡ç™»è®°è¡¨"))
+    if not metrics.empty:
+        st.dataframe(metrics, hide_index=True, use_container_width=True)
+    else:
+        st.caption(tr("Pending migration.", "å¾…è¿ç§»ã€‚"))
+
+    _sdiv(tr("Source Register", "æ¥æºç™»è®°è¡¨"))
+    if not sources.empty:
+        st.dataframe(
+            sources,
+            hide_index=True,
+            use_container_width=True,
+            column_config={
+                "Source URL": st.column_config.LinkColumn(
+                    tr("Source URL", "æ¥æºé“¾æŽ¥"),
+                    display_text=tr("Open source", "æ‰“å¼€æ¥æº"),
+                )
+            },
+        )
+
+    _sdiv(tr("Governance Rules", "æ•°æ®æ²»ç†è§„åˆ™"))
+    rules = [
+        tr("Actual / Reported: may support management decisions when the exact source and period are recorded.",
+           "Actual / Reportedï¼šè®°å½•å…·ä½“æ¥æºä¸Žæ•°æ®æœŸåŽï¼Œå¯ç”¨äºŽç®¡ç†åˆ¤æ–­ã€‚"),
+        tr("Estimated / Modelled: must display the model notice and cannot be presented as official statistics.",
+           "Estimated / Modelledï¼šå¿…é¡»æ˜¾ç¤ºæ¨¡åž‹æ ‡è¯†ï¼Œä¸å¾—ä½œä¸ºå®˜æ–¹ç»Ÿè®¡è¡¨è¿°ã€‚"),
+        tr("Judgement: must include an owner, next validation action and deadline.",
+           "Judgementï¼šå¿…é¡»å¯¹åº”è´£ä»»äººã€ä¸‹ä¸€éªŒè¯åŠ¨ä½œä¸Žæˆªæ­¢æ—¶é—´ã€‚"),
+        tr("Confidence C requires triangulation; Dâ€“E are hypothesis-only.",
+           "å¯ä¿¡åº¦Céœ€äº¤å‰éªŒè¯ï¼›Dâ€“Eä»…å¯ä½œä¸ºå‡è®¾ã€‚"),
+    ]
+    st.markdown("\n".join(f"- {rule}" for rule in rules))
+    st.caption(tr(MODEL_NOTICE_EN, MODEL_NOTICE_ZH))
+
+
+def render_v16_executive_brief(country: str, cdata: dict):
+    portfolio = V15_PORTFOLIO[country]
+    governance = cdata["strategic_guardrails"]
+    alignment = cdata["farizon_alignment"]
+    zh = V15_GOV_ZH[country] if V15_LANG == "zh" else None
+    allowed = zh["green"] if zh else governance["green_zone"]
+    portfolio_rule = zh["portfolio"] if zh else alignment["portfolio_rule"]
+    model_names = " / ".join(item["model"] for item in alignment["models"][:3])
+    opps = _v16_country_frame(V16_OPPORTUNITIES, country)
+    actions = _v16_country_frame(V16_ACTIONS, country)
+    pipeline_units = int(opps["Expected Units"].sum()) if not opps.empty else 0
+    next_action = actions.iloc[0]["Action"] if not actions.empty else tr(
+        "Complete named-account and partner validation.",
+        "å®Œæˆå®žåå®¢æˆ·ä¸Žåˆä½œä¼™ä¼´éªŒè¯ã€‚",
+    )
+    deadline = actions.iloc[0]["Deadline"] if not actions.empty else "â€”"
+    decision = (
+        tr("Prioritise", "ä¼˜å…ˆæŠ•å…¥") if portfolio["attract"] >= 75 and portfolio["execute"] >= 60
+        else tr("Conditional Go", "æœ‰æ¡ä»¶è¿›å…¥") if portfolio["execute"] >= 55
+        else tr("Project Only / Hold", "ä»…é¡¹ç›®åˆ¶ / æš‚ç¼“")
+    )
+    st.markdown(f"""
+<div class="gtm-mission-banner">
+  <div class="gtm-mission-title">ðŸŽ¯ {country} Â· {tr("Executive Brief", "ç®¡ç†å±‚å†³ç­–æ‘˜è¦")}</div>
+  <div class="gtm-mission-sub">{tr("Decision first Â· evidence below Â· owner and deadline attached", "å…ˆç»™ç»“è®º Â· ä¸‹æŽ¥è¯æ® Â· æ˜Žç¡®è´£ä»»ä¸ŽæœŸé™")}</div>
+</div>
+""", unsafe_allow_html=True)
+    brief_rows = pd.DataFrame([
+        [tr("Current decision", "å½“å‰ç»“è®º"), decision],
+        [tr("CBU mode", "CBUæ¨¡å¼"), v15_mode_label(portfolio["mode"])],
+        [tr("Recommended models", "æŽ¨èè½¦åž‹"), model_names],
+        [tr("Permitted zone", "å…è®¸åŒºé—´"), allowed],
+        [tr("Portfolio rule", "äº§å“ç»„åˆè§„åˆ™"), portfolio_rule],
+        [tr("Recorded pipeline", "å·²å½•å…¥é¡¹ç›®"), f"{pipeline_units} {tr('units', 'å°')}"],
+        [tr("Immediate action", "è¿‘æœŸè¡ŒåŠ¨"), next_action],
+        [tr("Deadline", "æˆªæ­¢æ—¶é—´"), deadline],
+    ], columns=[tr("Decision field", "å†³ç­–å­—æ®µ"), tr("Management view", "ç®¡ç†åˆ¤æ–­")])
+    st.dataframe(brief_rows, hide_index=True, use_container_width=True)
+
+
+def render_v16_portfolio_home():
+    opportunities = V16_OPPORTUNITIES.copy()
+    actions = V16_ACTIONS.copy()
+    weighted_units = (opportunities["Expected Units"] * opportunities["Probability"]).sum()
+    weighted_value = (
+        opportunities["Expected Units"]
+        * opportunities["Unit Value USD"]
+        * opportunities["Probability"]
+    ).sum()
+    due = pd.to_datetime(actions["Deadline"], errors="coerce")
+    due_60 = int(due.le(pd.Timestamp.now() + pd.Timedelta(days=60)).sum())
+    high_risk = sum(1 for name, item in V15_PORTFOLIO.items() if item["attract"] - item["execute"] >= 25)
+    weak_data = int(V16_METRIC_AUDIT["Confidence"].isin(["D", "E"]).sum())
+
+    _level_hdr(
+        1,
+        tr("Executive Operating KPIs", "æ ¸å¿ƒç»è¥æŒ‡æ ‡"),
+        tr("Portfolio, pipeline, channel, risk and data health in one row.", "å¸‚åœºç»„åˆã€é¡¹ç›®ã€æ¸ é“ã€é£Žé™©å’Œæ•°æ®å¥åº·åº¦æ€»è§ˆã€‚"),
+    )
+    cards = [
+        (tr("Tier 1 markets", "Tier 1å¸‚åœº"), sum(1 for x in V15_PORTFOLIO.values() if x["attract"] >= 75)),
+        (tr("Active countries", "æ´»è·ƒæœºä¼šå›½å®¶"), opportunities["Country"].nunique()),
+        (tr("Pipeline units", "æ½œåœ¨é¡¹ç›®å°æ•°"), int(opportunities["Expected Units"].sum())),
+        (tr("Weighted units", "åŠ æƒå°æ•°"), round(weighted_units, 1)),
+        (tr("Weighted value", "åŠ æƒè®¢å•é‡‘é¢"), f"${weighted_value/1_000_000:.2f}m"),
+        (tr("Mapped dealers", "å·²è¦†ç›–æ¸ é“"), len(V16_DEALERS)),
+        (tr("High-risk gaps", "é«˜é£Žé™©å¸‚åœº"), high_risk),
+        (tr("Low-confidence data", "ä½Žå¯ä¿¡æ•°æ®"), weak_data),
+    ]
+    for col, (label, value) in zip(st.columns(8), cards):
+        with col:
+            st.metric(label, value)
+
+    _level_hdr(
+        2,
+        tr("Country Priority Matrix", "å›½å®¶ä¼˜å…ˆçº§çŸ©é˜µ"),
+        tr("Attractiveness Ã— CBU executability; bubble size = addressable segment.", "å¸‚åœºå¸å¼•åŠ› Ã— CBUå¯æ‰§è¡Œæ€§ï¼›æ°”æ³¡å¤§å°ä»£è¡¨ç›®æ ‡ç»†åˆ†å¸‚åœºã€‚"),
+    )
+    portfolio_rows = [{
+        tr("Country", "å›½å®¶"): v15_country_label(name),
+        "Country Key": name,
+        tr("Market Attractiveness", "å¸‚åœºå¸å¼•åŠ›"): item["attract"],
+        tr("CBU Executability", "CBUå¯æ‰§è¡Œæ€§"): item["execute"],
+        tr("Addressable Segment", "ç›®æ ‡ç»†åˆ†å¸‚åœº"): item["size"],
+        tr("CBU Mode", "CBUæ¨¡å¼"): v15_mode_label(item["mode"]),
+        tr("Strategic Role", "æˆ˜ç•¥è§’è‰²"): item["role"][1 if V15_LANG == "zh" else 0],
+    } for name, item in V15_PORTFOLIO.items()]
+    portfolio_df = pd.DataFrame(portfolio_rows)
+    fig = px.scatter(
+        portfolio_df,
+        x=tr("CBU Executability", "CBUå¯æ‰§è¡Œæ€§"),
+        y=tr("Market Attractiveness", "å¸‚åœºå¸å¼•åŠ›"),
+        size=tr("Addressable Segment", "ç›®æ ‡ç»†åˆ†å¸‚åœº"),
+        color=tr("CBU Mode", "CBUæ¨¡å¼"),
+        text=tr("Country", "å›½å®¶"),
+        color_discrete_map={
+            v15_mode_label("Scale CBU"): "#1A8C5B",
+            v15_mode_label("Controlled CBU"): "#295BA5",
+            v15_mode_label("Project-Based CBU"): "#B45309",
+            v15_mode_label("Validation CBU"): "#7A5AF8",
+        },
+        size_max=46,
+        hover_data=[tr("Strategic Role", "æˆ˜ç•¥è§’è‰²")],
+    )
+    fig.add_vline(x=60, line_dash="dot", line_color="#9BA3B2")
+    fig.add_hline(y=70, line_dash="dot", line_color="#9BA3B2")
+    fig.update_traces(textposition="top center")
+    fig.update_layout(**{**CHART_BASE, "height": 470, "margin": dict(l=35,r=20,t=25,b=25)})
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CFG, key="v16_home_matrix")
+
+    _level_hdr(3, tr("Map & Management Attention", "åœ°å›¾ä¸Žç®¡ç†å±‚å…³æ³¨"), tr("Geography on the left; opportunity, risk and data gaps on the right.", "å·¦ä¾§çœ‹åŒºåŸŸåˆ†å¸ƒï¼Œå³ä¾§çœ‹æœºä¼šã€é£Žé™©å’Œæ•°æ®ç¼ºå£ã€‚"))
+    map_col, attention_col = st.columns([1.55, 1], gap="large")
+    with map_col:
+        st.plotly_chart(build_map(st.session_state.selected_country), use_container_width=True, config={"displayModeBar":False,"scrollZoom":False}, key="v16_home_map")
+    with attention_col:
+        st.markdown("**" + tr("Top opportunity markets", "Topæœºä¼šå¸‚åœº") + "**")
+        top_opportunity = sorted(V15_PORTFOLIO.items(), key=lambda x: (x[1]["attract"] + x[1]["execute"]), reverse=True)[:5]
+        st.dataframe(pd.DataFrame([
+            [v15_country_label(name), item["attract"], item["execute"], v15_mode_label(item["mode"])]
+            for name, item in top_opportunity
+        ], columns=[tr("Country","å›½å®¶"),tr("Attract.","å¸å¼•åŠ›"),tr("Execute","æ‰§è¡Œæ€§"),tr("Mode","æ¨¡å¼")]), hide_index=True, use_container_width=True)
+        st.markdown("**" + tr("Largest execution gaps", "æœ€å¤§æ‰§è¡Œç¼ºå£") + "**")
+        gaps = sorted(V15_PORTFOLIO.items(), key=lambda x: x[1]["attract"]-x[1]["execute"], reverse=True)[:4]
+        st.dataframe(pd.DataFrame([
+            [v15_country_label(name), item["attract"]-item["execute"], v15_mode_label(item["mode"])]
+            for name, item in gaps
+        ], columns=[tr("Country","å›½å®¶"),tr("Gap","ç¼ºå£"),tr("Mode","æ¨¡å¼")]), hide_index=True, use_container_width=True)
+
+    _level_hdr(4, tr("Actions & Changes", "è¡ŒåŠ¨ä¸Žå˜åŒ–"), tr("Current deadlines and recorded portfolio movement.", "å½“å‰è¡ŒåŠ¨æœŸé™å’Œå·²è®°å½•ç»„åˆå˜åŒ–ã€‚"))
+    left, right = st.columns(2, gap="large")
+    with left:
+        st.markdown("**" + tr("Priority actions", "é‡ç‚¹è¡ŒåŠ¨") + f" Â· {due_60} â‰¤60d**")
+        st.dataframe(actions.sort_values(["Priority","Deadline"]), hide_index=True, use_container_width=True)
+    with right:
+        changes = opportunities[["Country","Project","Stage","Expected Units","Expected Close","Next Action"]].copy()
+        st.markdown("**" + tr("Opportunity changes / review queue", "é¡¹ç›®å˜åŒ–ä¸Žå¤æ ¸é˜Ÿåˆ—") + "**")
+        st.dataframe(changes, hide_index=True, use_container_width=True)
+
+    _level_hdr(5, tr("Country Portfolio Table", "å›½å®¶ç»„åˆæ€»è¡¨"), tr("One row per market; use the sidebar to enter the country war room.", "æ¯ä¸ªå¸‚åœºä¸€è¡Œï¼›é€šè¿‡ä¾§æ è¿›å…¥å›½å®¶ä½œæˆ˜å®¤ã€‚"))
+    st.dataframe(portfolio_df.drop(columns=["Country Key"]), hide_index=True, use_container_width=True)
+    st.caption(tr(MODEL_NOTICE_EN, MODEL_NOTICE_ZH))
+
+
+def render_v16_global_commercial():
+    _level_hdr(1, tr("Customer & Channel Database", "å®¢æˆ·ä¸Žæ¸ é“æ•°æ®åº“"), tr("Cross-country dealer, account and opportunity management.", "è·¨å›½å®¶ç®¡ç†æ¸ é“ã€å®¢æˆ·å’Œé¡¹ç›®æœºä¼šã€‚"))
+    countries = sorted(set(V16_DEALERS["Country"]) | set(V16_CUSTOMERS["Country"]) | set(V16_OPPORTUNITIES["Country"]))
+    selected = st.multiselect(tr("Country filter", "å›½å®¶ç­›é€‰"), countries, default=countries)
+    dealers = V16_DEALERS[V16_DEALERS["Country"].isin(selected)]
+    customers = V16_CUSTOMERS[V16_CUSTOMERS["Country"].isin(selected)]
+    opps = V16_OPPORTUNITIES[V16_OPPORTUNITIES["Country"].isin(selected)].copy()
+    opps["Weighted Units"] = opps["Expected Units"] * opps["Probability"]
+    opps["Weighted Value USD"] = opps["Expected Units"] * opps["Unit Value USD"] * opps["Probability"]
+    tabs = st.tabs([tr("Opportunity Pipeline","é¡¹ç›®ç®¡é“"),tr("Dealers","æ¸ é“æ•°æ®åº“"),tr("Customers","å®¢æˆ·æ•°æ®åº“")])
+    with tabs[0]:
+        st.dataframe(opps, hide_index=True, use_container_width=True)
+    with tabs[1]:
+        st.dataframe(dealers, hide_index=True, use_container_width=True)
+    with tabs[2]:
+        st.dataframe(customers, hide_index=True, use_container_width=True)
+    st.caption(tr(MODEL_NOTICE_EN, MODEL_NOTICE_ZH))
+
+
+def render_v16_global_competitor():
+    _level_hdr(1, tr("Competitive Intelligence", "ç«žå“æƒ…æŠ¥"), tr("Facts, field observations and strategic inference must remain separate.", "ä¸¥æ ¼åˆ†ç¦»å¸‚åœºäº‹å®žã€ä¸€çº¿è§‚å¯Ÿå’Œæˆ˜ç•¥æŽ¨æ–­ã€‚"))
+    rows = []
+    for country, intel_data in INTERNAL_COMPETITOR_DATA.items():
+        for record in intel_data.get("competitors", []):
+            rows.append({
+                tr("Country","å›½å®¶"): v15_country_label(country),
+                tr("Evidence layer","è¯æ®å±‚çº§"): "Pending Verification",
+                tr("Brand","å“ç‰Œ"): record.get("Brand_Type",""),
+                tr("Observation","è§‚å¯Ÿ"): (
+                    f"{record.get('Model','')} Â· ${record.get('Price_USD',0):,.0f} Â· "
+                    f"{record.get('Channel_Count',0)} channels"
+                ),
+                tr("Implication","ä¸šåŠ¡å½±å“"): record.get("Channel_Strategy",""),
+                tr("Source","æ¥æº"): "Internal BD Intelligence",
+            })
+    intel = pd.DataFrame(rows)
+    if intel.empty:
+        st.info(tr("No structured competitor record.", "æš‚æ— ç»“æž„åŒ–ç«žå“è®°å½•ã€‚"))
+        return
+    for layer, title in [
+        ("Fact", tr("Layer 1 Â· Market Facts","ç¬¬ä¸€å±‚ Â· å¸‚åœºäº‹å®ž")),
+        ("Observation", tr("Layer 2 Â· Channel Observations","ç¬¬äºŒå±‚ Â· æ¸ é“è§‚å¯Ÿ")),
+        ("Pending Verification", tr("Layer 3 Â· Pending Verification / Inference","ç¬¬ä¸‰å±‚ Â· å¾…éªŒè¯ä¸Žæˆ˜ç•¥æŽ¨æ–­")),
+    ]:
+        _sdiv(title)
+        subset = intel[intel[tr("Evidence layer","è¯æ®å±‚çº§")].astype(str).str.contains(layer, case=False, na=False)]
+        st.dataframe(subset if not subset.empty else intel.head(0), hide_index=True, use_container_width=True)
+
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # 13. SESSION STATE
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 if "selected_country" not in st.session_state:
     st.session_state.selected_country = "Nigeria"
 
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # 14. SIDEBAR
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 with st.sidebar:
     st.markdown("""
 <div style="padding:16px 4px 12px 4px;border-bottom:1px solid rgba(255,255,255,.12);">
@@ -4068,10 +4517,24 @@ with st.sidebar:
         Africa CV Intelligence
     </div>
     <div style="font-family:'Inter';font-size:.68rem;color:rgba(255,255,255,.4);margin-top:2px;">
-        McKinsey UX Refactor · v13.0 · 12 Markets
+        McKinsey UX Refactor Â· v16.0 Â· 12 Markets
     </div>
 </div>
 """, unsafe_allow_html=True)
+    st.markdown('<div class="sb-hdr">Business Workspace</div>', unsafe_allow_html=True)
+    _view_options = [
+        tr("Market Portfolio", "å¸‚åœºç»„åˆ"),
+        tr("Country War Room", "å›½å®¶ä½œæˆ˜å®¤"),
+        tr("Customer & Channel", "å®¢æˆ·ä¸Žæ¸ é“"),
+        tr("Competitive Intelligence", "ç«žå“æƒ…æŠ¥"),
+    ]
+    V16_VIEW = st.radio(
+        tr("Workspace", "ä¸šåŠ¡å·¥ä½œåŒº"),
+        _view_options,
+        index=1,
+        label_visibility="collapsed",
+        key="v16_workspace",
+    )
     st.markdown('<div class="sb-hdr">Core Markets (Tier 1)</div>', unsafe_allow_html=True)
     for cname, cd in TIER1.items():
         is_active = st.session_state.selected_country == cname
@@ -4081,7 +4544,7 @@ with st.sidebar:
             background:#D04A02;border:1px solid #D04A02;
             font-family:'Inter';font-size:.81rem;font-weight:700;color:white;">
     {cd['flag']} &nbsp;{cname}
-    <span style="opacity:.7;font-size:.65rem;margin-left:6px;">● Active</span>
+    <span style="opacity:.7;font-size:.65rem;margin-left:6px;">â— Active</span>
 </div>
 """, unsafe_allow_html=True)
         else:
@@ -4091,38 +4554,38 @@ with st.sidebar:
 
     st.markdown('<div class="sb-hdr">Quick Reference</div>', unsafe_allow_html=True)
     for label, url in [
-        ("📊 NAAMSA — ZA Auto Stats",    "https://naamsa.co.za"),
-        ("💰 SA Treasury Budget 2026",    "https://www.treasury.gov.za"),
-        ("🇷🇼 RDB — Rwanda Invest",       "https://www.rdb.rw"),
-        ("⚡ ANME Tunisia — EV Subsidy",  "https://www.anme.tn"),
-        ("🏛 Loi de Finances TN 2026",    "https://www.finances.gov.tn"),
-        ("🌾 OCP Group Morocco",          "https://www.ocpgroup.ma"),
-        ("🏛 Nigeria Customs (NCS)",      "https://www.customs.gov.ng"),
-        ("⚓ DPFZA — Djibouti Ports",     "https://www.dpfza.gov.dj"),
-        ("🌴 MRA — Mauritius Revenue",    "https://mra.mu"),
-        ("⛏ JIRAMA — Madagascar Power",  "https://www.jirama.mg"),
-        ("🌍 AfDB",                        "https://www.afdb.org"),
-        ("📰 The Africa Report",          "https://www.theafricareport.com"),
+        ("ðŸ“Š NAAMSA â€” ZA Auto Stats",    "https://naamsa.co.za"),
+        ("ðŸ’° SA Treasury Budget 2026",    "https://www.treasury.gov.za"),
+        ("ðŸ‡·ðŸ‡¼ RDB â€” Rwanda Invest",       "https://www.rdb.rw"),
+        ("âš¡ ANME Tunisia â€” EV Subsidy",  "https://www.anme.tn"),
+        ("ðŸ› Loi de Finances TN 2026",    "https://www.finances.gov.tn"),
+        ("ðŸŒ¾ OCP Group Morocco",          "https://www.ocpgroup.ma"),
+        ("ðŸ› Nigeria Customs (NCS)",      "https://www.customs.gov.ng"),
+        ("âš“ DPFZA â€” Djibouti Ports",     "https://www.dpfza.gov.dj"),
+        ("ðŸŒ´ MRA â€” Mauritius Revenue",    "https://mra.mu"),
+        ("â› JIRAMA â€” Madagascar Power",  "https://www.jirama.mg"),
+        ("ðŸŒ AfDB",                        "https://www.afdb.org"),
+        ("ðŸ“° The Africa Report",          "https://www.theafricareport.com"),
     ]:
         st.markdown(f'<a class="sb-link" href="{url}" target="_blank">{label}</a>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("↺  Refresh Intelligence Feed", use_container_width=True, key="refresh"):
+    if st.button("â†º  Refresh Intelligence Feed", use_container_width=True, key="refresh"):
         st.cache_data.clear(); st.rerun()
     st.markdown(f"""
 <div style="font-family:'Inter';font-size:.58rem;color:rgba(255,255,255,.22);
             text-align:center;margin-top:16px;line-height:2.1;">
-    Africa CV Governance & Intelligence v15.0<br>
-    {datetime.now().strftime('%Y-%m-%d %H:%M')} · Internal use only
+    Africa CV Governance & Intelligence v{APP_VERSION}<br>
+    {datetime.now().strftime('%Y-%m-%d %H:%M')} Â· Internal use only
 </div>
 """, unsafe_allow_html=True)
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # 15. PAGE HEADER
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 h1, h2, h3 = st.columns([3, 1, 1])
 with h3:
     if st.button(
-        "🌐 " + tr("切换至中文", "Switch to English"),
+        "ðŸŒ " + tr("åˆ‡æ¢è‡³ä¸­æ–‡", "Switch to English"),
         key="v15_language_switch",
         use_container_width=True,
     ):
@@ -4133,10 +4596,10 @@ with h1:
     st.markdown("""
 <div style="padding:18px 0 6px 0;">
     <div style="font-family:'Inter';font-size:1.28rem;font-weight:700;color:#2D3142;letter-spacing:-.3px;">
-        Africa Commercial Vehicle Market Governance & Intelligence
+        Africa Commercial Vehicle Market & Sales Intelligence
     </div>
     <div style="font-family:'Inter';font-size:.78rem;color:#9BA3B2;margin-top:3px;">
-        12 Tier 1 markets · Decision → Monetisation → Depth → Action narrative flow
+        12 Tier 1 markets Â· Decision â†’ Monetisation â†’ Depth â†’ Action narrative flow
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -4145,17 +4608,29 @@ with h2:
 <div style="padding:18px 0 6px 0;text-align:right;">
     <div style="font-family:'Inter';font-size:.7rem;color:#9BA3B2;">{datetime.now().strftime('%B %d, %Y')}</div>
     <div style="font-family:'Inter';font-size:.74rem;color:#D04A02;font-weight:600;margin-top:2px;">
-        ● Live Intelligence Feed
+        â— Intelligence Monitor
     </div>
 </div>
 """, unsafe_allow_html=True)
 st.markdown('<hr style="margin:0 0 18px 0;border-color:#E2E5EB;">', unsafe_allow_html=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# 16. MAP SECTION — single-column-friendly, map only (no side metrics card,
-#     since all KPIs now live inside Level 1 of the dashboard below — this
+# V16 top-level workspaces. Country War Room deliberately falls through to the
+# original map and country renderer below, preserving the established page skin.
+if V16_VIEW == tr("Market Portfolio", "å¸‚åœºç»„åˆ"):
+    render_v16_portfolio_home()
+    st.stop()
+if V16_VIEW == tr("Customer & Channel", "å®¢æˆ·ä¸Žæ¸ é“"):
+    render_v16_global_commercial()
+    st.stop()
+if V16_VIEW == tr("Competitive Intelligence", "ç«žå“æƒ…æŠ¥"):
+    render_v16_global_competitor()
+    st.stop()
+
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 16. MAP SECTION â€” single-column-friendly, map only (no side metrics card,
+#     since all KPIs now live inside Level 1 of the dashboard below â€” this
 #     removes one more source of side-by-side text crowding)
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 sel     = st.session_state.selected_country
 is_t1   = sel in TIER1
 cdata   = TIER1.get(sel, {})
@@ -4168,7 +4643,7 @@ st.markdown("""
             text-transform:uppercase;color:#5A6070;margin-bottom:8px;">
     Africa Strategic Market Map
     <span style="font-weight:400;color:#9BA3B2;margin-left:8px;">
-        · Click any country to drill down · Orange = selected · Blue = Tier 1 (12 markets)
+        Â· Click any country to drill down Â· Orange = selected Â· Blue = Tier 1 (12 markets)
     </span>
 </div>
 """, unsafe_allow_html=True)
@@ -4202,23 +4677,21 @@ for lc, (cname, cd) in zip(leg_cols, TIER1.items()):
 </div>
 """, unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# V15 EXECUTIVE PORTFOLIO COCKPIT — additive layer; original map remains intact
-# ─────────────────────────────────────────────────────────────────────────────
-with st.expander(
-    tr("📌 Executive Portfolio Cockpit", "📌 管理层市场组合"),
-    expanded=False,
-):
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# V15 EXECUTIVE PORTFOLIO COCKPIT â€” retained as migration reference.
+# V16 renders the live portfolio as a dedicated top-level workspace.
+# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+if False:  # disabled duplicate; kept temporarily until the data-governance refactor
     portfolio_rows = []
     for country_name, item in V15_PORTFOLIO.items():
         portfolio_rows.append({
-            tr("Country", "国家"): v15_country_label(country_name),
+            tr("Country", "å›½å®¶"): v15_country_label(country_name),
             "_country_key": country_name,
-            tr("Market Attractiveness", "市场吸引力"): item["attract"],
-            tr("CBU Executability", "CBU可执行性"): item["execute"],
-            tr("Addressable Segment", "目标细分市场"): item["size"],
-            tr("CBU Mode", "CBU模式"): v15_mode_label(item["mode"]),
-            tr("Strategic Role", "战略角色"): item["role"][1 if V15_LANG == "zh" else 0],
+            tr("Market Attractiveness", "å¸‚åœºå¸å¼•åŠ›"): item["attract"],
+            tr("CBU Executability", "CBUå¯æ‰§è¡Œæ€§"): item["execute"],
+            tr("Addressable Segment", "ç›®æ ‡ç»†åˆ†å¸‚åœº"): item["size"],
+            tr("CBU Mode", "CBUæ¨¡å¼"): v15_mode_label(item["mode"]),
+            tr("Strategic Role", "æˆ˜ç•¥è§’è‰²"): item["role"][1 if V15_LANG == "zh" else 0],
         })
     portfolio_df = pd.DataFrame(portfolio_rows)
     portfolio_colors = {
@@ -4229,14 +4702,14 @@ with st.expander(
     }
     portfolio_fig = px.scatter(
         portfolio_df,
-        x=tr("CBU Executability", "CBU可执行性"),
-        y=tr("Market Attractiveness", "市场吸引力"),
-        size=tr("Addressable Segment", "目标细分市场"),
-        color=tr("CBU Mode", "CBU模式"),
-        text=tr("Country", "国家"),
+        x=tr("CBU Executability", "CBUå¯æ‰§è¡Œæ€§"),
+        y=tr("Market Attractiveness", "å¸‚åœºå¸å¼•åŠ›"),
+        size=tr("Addressable Segment", "ç›®æ ‡ç»†åˆ†å¸‚åœº"),
+        color=tr("CBU Mode", "CBUæ¨¡å¼"),
+        text=tr("Country", "å›½å®¶"),
         color_discrete_map=portfolio_colors,
         size_max=46,
-        hover_data=[tr("Strategic Role", "战略角色")],
+        hover_data=[tr("Strategic Role", "æˆ˜ç•¥è§’è‰²")],
     )
     portfolio_fig.add_vline(x=60, line_dash="dot", line_color="#9BA3B2")
     portfolio_fig.add_hline(y=70, line_dash="dot", line_color="#9BA3B2")
@@ -4249,14 +4722,14 @@ with st.expander(
             "xaxis": {
                 **CHART_BASE["xaxis"],
                 "range": [20, 95],
-                "title": tr("CBU Executability", "CBU可执行性"),
+                "title": tr("CBU Executability", "CBUå¯æ‰§è¡Œæ€§"),
             },
             "yaxis": {
                 **CHART_BASE["yaxis"],
                 "range": [45, 95],
-                "title": tr("Market Attractiveness", "市场吸引力"),
+                "title": tr("Market Attractiveness", "å¸‚åœºå¸å¼•åŠ›"),
             },
-            "legend_title_text": tr("CBU Mode", "CBU模式"),
+            "legend_title_text": tr("CBU Mode", "CBUæ¨¡å¼"),
         }
     )
     st.plotly_chart(
@@ -4279,38 +4752,59 @@ with st.expander(
         reverse=True,
     )[:4]
     st.warning(
-        "**" + tr("Strategic Attention", "战略关注") + "**\n\n" +
-        " · ".join(
+        "**" + tr("Strategic Attention", "æˆ˜ç•¥å…³æ³¨") + "**\n\n" +
+        " Â· ".join(
             f"{v15_country_label(name)}: {v15_mode_label(item['mode'])}"
             for name, item in attention
         )
     )
 
-# ══════════════════════════════════════════════════════════════════════════════
-# 17. COUNTRY DASHBOARD — single narrative-flow tab (Task 2 + Policy tab)
-# ══════════════════════════════════════════════════════════════════════════════
-flag_display = cdata.get("flag", macro.get("flag","🌍")) if is_t1 else macro.get("flag","🌍")
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 17. COUNTRY DASHBOARD â€” single narrative-flow tab (Task 2 + Policy tab)
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+flag_display = cdata.get("flag", macro.get("flag","ðŸŒ")) if is_t1 else macro.get("flag","ðŸŒ")
 
 st.markdown(f"""
 <div class="section-hdr" style="margin-top:30px;">
     <div class="section-bar"></div>
-    <div class="section-title">{flag_display} &nbsp;{sel} — Country Dashboard</div>
-    <div class="section-sub">{"Full Tier 1 narrative-flow analysis" if is_t1 else "Tier 2 — general coverage"}</div>
+    <div class="section-title">{flag_display} &nbsp;{sel} â€” Country Dashboard</div>
+    <div class="section-sub">{"Full Tier 1 narrative-flow analysis" if is_t1 else "Tier 2 â€” general coverage"}</div>
 </div>
 """, unsafe_allow_html=True)
 
 if not is_t1:
-    st.info(f"**{sel}** is a Tier 2 market. Full narrative-flow analysis available for 12 Tier 1 core markets.", icon="ℹ️")
+    st.info(f"**{sel}** is a Tier 2 market. Full narrative-flow analysis available for 12 Tier 1 core markets.", icon="â„¹ï¸")
     m1, m2, m3 = st.columns(3)
     with m1: st.metric("Est. GDP",        "${:,.1f}B".format(macro.get("gdp",0)),  help="IMF WEO estimate")
     with m2: st.metric("Road Network",    "{:,}k km".format(macro.get("roads",0)), help="AfDB infrastructure data")
     with m3: st.metric("Est. CV Imports", "{:,} units/yr".format(macro.get("cv_imports",0)), help="Regional trade estimate")
-    st.caption("Source: [AfDB](https://www.afdb.org) · [IMF WEO](https://www.imf.org) · Indicative estimates.")
+    st.caption("Source: [AfDB](https://www.afdb.org) Â· [IMF WEO](https://www.imf.org) Â· Indicative estimates.")
 else:
-    tab_dashboard, tab_policy = st.tabs(["📊  Market Dashboard", "📋  Policy & Market Access"])
+    render_v16_executive_brief(sel, cdata)
+    tab_market, tab_customer, tab_product, tab_policy, tab_intel = st.tabs([
+        tr("ðŸ“Š Market & Segment", "ðŸ“Š å¸‚åœºä¸Žåœºæ™¯"),
+        tr("ðŸ¤ Customer & Channel", "ðŸ¤ å®¢æˆ·ä¸Žæ¸ é“"),
+        tr("ðŸŽ¯ Product, Price & TCO", "ðŸŽ¯ äº§å“ã€ä»·æ ¼ä¸ŽTCO"),
+        tr("ðŸ“‹ Policy, Risk & Actions", "ðŸ“‹ æ”¿ç­–ã€é£Žé™©ä¸Žè¡ŒåŠ¨"),
+        tr("ðŸ•µï¸ Competition & Sources", "ðŸ•µï¸ ç«žå“ä¸Žæ¥æº"),
+    ])
 
-    with tab_dashboard:
-        render_country_dashboard(sel, cdata)
+    with tab_market:
+        _render_market_risk_tab(sel, cdata)
+        _render_signals_tab(sel, cdata)
+
+    with tab_customer:
+        render_v16_commercial_workspace(sel)
+
+    with tab_product:
+        _render_alignment_tab(sel, cdata)
+        st.info(
+            tr(
+                "The route-based TCO engine remains in Market & Segment in this framework release. "
+                "It will be moved here when vehicle and price master data are governed.",
+                "å½“å‰æ¡†æž¶ç‰ˆæœ¬ä¸­ï¼Œçº¿è·¯TCOæ¨¡åž‹ä»ä¿ç•™åœ¨â€œå¸‚åœºä¸Žåœºæ™¯â€ã€‚å®Œæˆè½¦åž‹å’Œä»·æ ¼ä¸»æ•°æ®æ²»ç†åŽï¼Œå°†æ•´ä½“è¿ç§»è‡³æœ¬æ¨¡å—ã€‚",
+            )
+        )
 
     with tab_policy:
         p     = cdata["policy"]
@@ -4319,16 +4813,16 @@ else:
         src_t = cdata["sources"].get("trade",("",""))
 
         # Single-column policy cards (Task 1: no side-by-side long text)
-        st.markdown(f'<div class="pol-card"><div class="pol-card-title">🏷 Tariff & Import Structure</div><p>{p["tariff"]}</p></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="pol-card"><div class="pol-card-title">ðŸ· Tariff & Import Structure</div><p>{p["tariff"]}</p></div>', unsafe_allow_html=True)
         st.caption(f"Source: [{src_c[0]}]({src_c[1]})")
 
-        st.markdown(f'<div class="pol-card ok"><div class="pol-card-title">📋 Certification & Homologation</div><p>{p["certification"]}</p></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="pol-card ok"><div class="pol-card-title">ðŸ“‹ Certification & Homologation</div><p>{p["certification"]}</p></div>', unsafe_allow_html=True)
         st.caption(f"Source: [{src_m[0]}]({src_m[1]})")
 
-        st.markdown(f'<div class="pol-card"><div class="pol-card-title">🏗 Key Buyers & Procurement Bodies</div><p>{p["key_buyers"]}</p></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="pol-card"><div class="pol-card-title">ðŸ— Key Buyers & Procurement Bodies</div><p>{p["key_buyers"]}</p></div>', unsafe_allow_html=True)
         st.caption(f"Source: [{src_t[0]}]({src_t[1]})")
 
-        st.markdown(f'<div class="pol-card warn"><div class="pol-card-title">⚠ Risk Factors & Operational Considerations</div><p>{p["risk"]}</p></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="pol-card warn"><div class="pol-card-title">âš  Risk Factors & Operational Considerations</div><p>{p["risk"]}</p></div>', unsafe_allow_html=True)
 
         _sdiv("Market Entry Assessment Scorecard")
         all_sc = {
@@ -4361,45 +4855,57 @@ else:
     </div>
 </div>
 """, unsafe_allow_html=True)
-        st.caption(f"Source: [{src_t[0]}]({src_t[1]}) · Assessment based on simulated and publicly available market intelligence.")
+        st.caption(f"Source: [{src_t[0]}]({src_t[1]}) Â· Assessment based on simulated and publicly available market intelligence.")
+        _render_due_diligence_tab(sel, cdata)
+        _render_guardrails_tab(sel, cdata)
+        _sdiv(tr("Action Register", "è¡ŒåŠ¨ç®¡ç†"))
+        country_actions = _v16_country_frame(V16_ACTIONS, sel)
+        if country_actions.empty:
+            st.info(tr("No structured action has been recorded.", "å°šæœªå½•å…¥ç»“æž„åŒ–è¡ŒåŠ¨ã€‚"))
+        else:
+            st.dataframe(country_actions, hide_index=True, use_container_width=True)
 
-# ══════════════════════════════════════════════════════════════════════════════
-# 18. INTELLIGENCE FEED — collapsed expander at the very bottom of the page.
+    with tab_intel:
+        _render_competitive_intel_tab(sel, cdata)
+        render_v16_data_governance(sel)
+
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+# 18. INTELLIGENCE FEED â€” collapsed expander at the very bottom of the page.
 #     No longer a tab, no longer competing for visual attention with the
 #     structured dashboard above.
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 st.markdown("<br>", unsafe_allow_html=True)
 news_query = cdata.get("news_query","") if is_t1 else f"{sel} transport logistics commercial vehicle"
 
-with st.expander(f"📡 点击展开：{sel} 近期商业与政策情报流 / Click to expand recent intelligence", expanded=False):
+with st.expander(f"ðŸ“¡ ç‚¹å‡»å±•å¼€ï¼š{sel} è¿‘æœŸå•†ä¸šä¸Žæ”¿ç­–æƒ…æŠ¥æµ / Click to expand recent intelligence", expanded=False):
     st.markdown(f"""
 <div style="background:#F8F9FB;border:1px solid #E2E5EB;border-radius:8px;
             padding:11px 16px;margin-bottom:14px;font-family:'Inter';
             font-size:.76rem;color:#5A6070;line-height:1.7;">
-    Sources: Reuters · Bloomberg · FT · Engineering News · BusinessDay · Zawya · Africa Report
-    &nbsp;·&nbsp; Window: 30-day primary / 90-day fallback / curated insights guaranteed
-    {"&nbsp;·&nbsp; <span style='color:#D04A02;'>⚠ Tier 2 — general coverage</span>" if not is_t1 else ""}
+    Sources: Reuters Â· Bloomberg Â· FT Â· Engineering News Â· BusinessDay Â· Zawya Â· Africa Report
+    &nbsp;Â·&nbsp; Automated RSS + curated inputs Â· 30-day primary / 90-day fallback
+    {"&nbsp;Â·&nbsp; <span style='color:#D04A02;'>âš  Tier 2 â€” general coverage</span>" if not is_t1 else ""}
 </div>
 """, unsafe_allow_html=True)
     render_news_panel(news_query, sel)
-    st.caption(f"Keywords used: `{news_query}` · Cache TTL: 30 minutes")
+    st.caption(f"Keywords used: `{news_query}` Â· Cache TTL: 30 minutes")
 
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 # 19. FOOTER
-# ══════════════════════════════════════════════════════════════════════════════
+# â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 st.markdown("<br>", unsafe_allow_html=True)
 st.markdown(f"""
 <div style="border-top:1px solid #E2E5EB;padding-top:14px;
             font-family:'Inter';font-size:.68rem;color:#9BA3B2;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
         <div>
-            <strong style="color:#5A6070;">Africa CV Market Governance & Intelligence Platform v15.0</strong>
-            &nbsp;·&nbsp; Internal strategic use only
-            &nbsp;·&nbsp; +DJ/MU/MG Strategic Expansion · Immutable TCO · Signals · Guardrails · Farizon Alignment
+            <strong style="color:#5A6070;">Africa CV Market Governance & Intelligence Platform v{APP_VERSION}</strong>
+            &nbsp;Â·&nbsp; Internal strategic use only
+            &nbsp;Â·&nbsp; +DJ/MU/MG Strategic Expansion Â· Immutable TCO Â· Signals Â· Guardrails Â· Farizon Alignment
         </div>
         <div style="text-align:right;">
-            RDB · RURA · NAAMSA · Stats SA · National Treasury ZA · ANME TN · OCP · DPFZA · MRA · JIRAMA · Reuters · Bloomberg · AfDB
-            &nbsp;·&nbsp; {datetime.now().strftime('%Y-%m-%d %H:%M')} UTC
+            RDB Â· RURA Â· NAAMSA Â· Stats SA Â· National Treasury ZA Â· ANME TN Â· OCP Â· DPFZA Â· MRA Â· JIRAMA Â· Reuters Â· Bloomberg Â· AfDB
+            &nbsp;Â·&nbsp; {datetime.now().strftime('%Y-%m-%d %H:%M')} UTC
         </div>
     </div>
 </div>
