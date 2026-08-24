@@ -11,9 +11,10 @@ import plotly.express as px
 import pandas as pd
 import numpy as np
 import copy
+import re
 from datetime import datetime, timedelta
 
-APP_VERSION = "16.0.0"
+APP_VERSION = "16.1.0"
 DATA_VERSION = "2026-07-30"
 SCHEMA_VERSION = "1.0"
 MODEL_NOTICE_EN = "Model estimate or internal judgement; not official market statistics."
@@ -1978,166 +1979,390 @@ for iso, name in ALL_AFRICA.items():
 ALL_ISO_LIST = list(dict.fromkeys(ISO_TO_NAME.keys()))
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 7. NEWS FETCHER — wide net, smart filter, guaranteed no blank
-#    (logic unchanged; rendering destination moves to a bottom-page expander)
+# 7. LIVE INTELLIGENCE ENGINE v2 — recency-first, scored, no stale fallback
+# ══════════════════════════════════════════════════════════════════════════════
+# Design rule:
+#   0–30d  -> Current Intelligence (default feed)
+#   31–90d -> Watchlist / Context only
+#   >90d   -> Never shown as "recent news"
+# No hard-coded curated fallback is injected into the live feed. Empty is safer
+# than stale: if nothing relevant is found, the UI says so explicitly.
 # ══════════════════════════════════════════════════════════════════════════════
 AUTHORITY_DOMAINS = [
     "reuters","bloomberg","ft.com","engineeringnews","businessday",
     "zawya","theafricareport","africanews","afdb","apanews",
     "naamsa","naddc","statssa","moti.gov","finances.gov.tn","anme.tn",
     "rdb.rw","rura.rw","newtimes.co.rw","ktpress.rw",
-    "dpfza.gov.dj","mra.mu","jirama.mg",
+    "dpfza.gov.dj","mra.mu","jirama.mg","gov.","gouv.","customs",
+    "ministry","ministere","ministère","revenue authority","statistics",
 ]
-NOISE_WORDS = {"rumor","rumour","unconfirmed","alleged","shocking","viral","leaked","clickbait"}
+NOISE_WORDS = {
+    "rumor","rumour","unconfirmed","alleged","shocking","viral",
+    "leaked","clickbait","celebrity","football","soccer","music",
+}
 
-FALLBACK_INSIGHTS = {
-    "Tunisia": [
-        {"title":"Loi de Finances 2026 : les véhicules électriques bénéficient d'une exonération totale de droits de douane et d'une TVA réduite à 7% — un avantage TCO historique pour les flottes commerciales tunisiennes.",
-         "link":"https://www.finances.gov.tn","published":"2026-01-15","source":"Ministère des Finances Tunisie (Curated Insight)"},
-        {"title":"ANME confirms TND 10,000 direct subsidy per commercial BEV registered in Tunisia under the 2026 Energy Efficiency Programme — applications open Q1 2026.",
-         "link":"https://www.anme.tn","published":"2026-01-20","source":"ANME Tunisia (Curated Insight)"},
-        {"title":"CPG (Compagnie des Phosphates de Gafsa) issues tender for 120 heavy logistics vehicles for Gafsa–Sfax corridor — deadline Q2 2026.",
-         "link":"https://www.marchespublics.gov.tn","published":"2026-02-01","source":"Marchés Publics Tunisie (Curated Insight)"},
-        {"title":"STEG accelerates EV charging station rollout: 200 commercial charging points planned for Tunis–Sousse–Sfax corridor by end 2026.",
-         "link":"https://www.steg.com.tn","published":"2026-02-15","source":"STEG Tunisie (Curated Insight)"},
+INTEL_CATEGORY_KEYWORDS = {
+    "Regulation": [
+        "regulation","policy","law","tax","duty","vat","customs","import",
+        "homologation","certification","standard","quota","licence","license",
+        "registration","tariff","subsidy","incentive","ban","emission",
     ],
-    "Algeria": [
-        {"title":"Sonatrach lance un appel d'offres pour 350 camions-citernes GNL pour la distribution de gaz naturel dans les wilayas du Sud — délai de soumission T2 2026.",
-         "link":"https://www.sonatrach.dz","published":"2026-01-28","source":"Sonatrach Algérie (Curated Insight)"},
-        {"title":"Ministry of Industry confirms Rouiba automotive cluster to receive DZD 8bn infrastructure upgrade — creates new CKD assembly capacity for Chinese commercial vehicle JV candidates.",
-         "link":"https://www.industrie.gov.dz","published":"2026-02-05","source":"Ministère de l'Industrie Algérie (Curated Insight)"},
+    "Tender": [
+        "tender","rfp","procurement","bid","contract award","purchase order",
+        "fleet renewal","government purchase","public procurement",
     ],
-    "Morocco": [
-        {"title":"OCP Group issues annual strategic logistics tender — phosphate distribution network expansion requires 180 additional heavy trucks for Khouribga contractor fleet refresh (2026–2028 cycle).",
-         "link":"https://www.ocpgroup.ma","published":"2026-01-12","source":"OCP Group (Curated Insight)"},
-        {"title":"AIVAM: le marché des véhicules utilitaires lourds au Maroc progresse de 8.5% en 2025 — la demande tirée par les grands chantiers d'infrastructure.",
-         "link":"http://www.aivam.ma","published":"2026-01-25","source":"AIVAM Maroc (Curated Insight)"},
+    "Dealer": [
+        "dealer","distributor","distribution agreement","agency","agent",
+        "showroom","service centre","service center","exclusive distributor",
+        "partner","dealership",
     ],
-    "Rwanda": [
-        {"title":"Rwanda Development Board (RDB) confirms: zero import duty and zero VAT on all electric commercial vehicles — most comprehensive EV fiscal package in Sub-Saharan Africa.",
-         "link":"https://www.rdb.rw","published":"2026-01-10","source":"RDB Rwanda (Curated Insight)"},
-        {"title":"RURA Green Mobility Strategy 2023–2035: Rwanda targets 100% electric public transport and 70% EV commercial vehicle fleet by 2035 — policy-locked demand pipeline for fleet operators.",
-         "link":"https://www.rura.rw","published":"2026-01-18","source":"RURA Rwanda (Curated Insight)"},
-        {"title":"Kigali Bus Services (KBS) issues RFP for 50 electric buses for Kigali metropolitan routes — delivery expected H2 2026. G2G procurement framework preferred.",
-         "link":"https://www.kigalicity.gov.rw","published":"2026-02-03","source":"City of Kigali (Curated Insight)"},
-        {"title":"REG (Rwanda Energy Group) reports <2% grid outage rate in 2024 — Kigali's power reliability confirmed as best-in-class in Sub-Saharan Africa for commercial EV depot charging.",
-         "link":"https://www.reg.rw","published":"2026-02-08","source":"REG Rwanda (Curated Insight)"},
-        {"title":"MINICOM Rwanda: EV commercial vehicle registrations grew 58% in 2025 — Yutong, BYD, and Foton lead market. e-LCV urban logistics segment fastest growing (+82% YoY).",
-         "link":"https://www.minicom.gov.rw","published":"2026-02-20","source":"MINICOM Rwanda (Curated Insight)"},
+    "Competitor": [
+        "foton","jac","maxus","saic","dongfeng","byd","sinotruk","yutong",
+        "toyota","ford","nissan","mercedes","isuzu","iveco","renault",
+        "geely","farizon","zeekr","changan","chery","great wall","gwm",
     ],
-    "Djibouti": [
-        {"title":"DPFZA confirms Doraleh Multipurpose Port container throughput up 11% YoY as Ethiopian transit trade continues to grow — drayage fleet capacity cited as a bottleneck for 2026.",
-         "link":"https://www.dpfza.gov.dj","published":"2026-01-22","source":"DPFZA Djibouti (Curated Insight)"},
-        {"title":"Ethio-Djibouti Railway freight volumes reach new record as port-to-rail handoff efficiency becomes the corridor's next investment priority.",
-         "link":"https://www.edrailway.com","published":"2026-02-10","source":"Ethio-Djibouti Railway (Curated Insight)"},
+    "Fleet Customer": [
+        "fleet","logistics","delivery","parcel","courier","mining","utility",
+        "airport","hotel","bus operator","transport company","last mile",
     ],
-    "Mauritius": [
-        {"title":"Mauritius Revenue Authority confirms continuation of 0% excise duty on battery-electric commercial vehicles through the 2026/27 fiscal year.",
-         "link":"https://mra.mu","published":"2026-01-14","source":"MRA Mauritius (Curated Insight)"},
-        {"title":"Beachcomber and LUX* Resorts jointly announce fleet electrification pilot for resort shuttle and light-distribution vehicles ahead of the 2026 peak tourism season.",
-         "link":"https://energy.govmu.org","published":"2026-02-06","source":"Ministry of Energy Mauritius (Curated Insight)"},
+    "Infrastructure": [
+        "charging","charger","charging station","grid","electricity","depot",
+        "renewable","power supply","ev infrastructure",
     ],
-    "Madagascar": [
-        {"title":"Ambatovy confirms multi-year mining haulage fleet renewal programme for the Moramanga–Toamasina corridor — diesel rigid and tipper trucks specified.",
-         "link":"https://www.ambatovy.com","published":"2026-01-30","source":"Ambatovy (Curated Insight)"},
-        {"title":"JIRAMA reports continued grid capacity constraints outside Antananarivo, reinforcing captive diesel generation as the operating norm for inland mining and industrial sites.",
-         "link":"https://www.jirama.mg","published":"2026-02-12","source":"JIRAMA Madagascar (Curated Insight)"},
+    "FX & Economy": [
+        "exchange rate","forex","fx","currency","inflation","interest rate",
+        "central bank","foreign exchange","devaluation","import financing",
+    ],
+    "Automotive Market": [
+        "vehicle sales","registrations","automotive market","commercial vehicle",
+        "light commercial","truck sales","van sales","vehicle market",
     ],
 }
 
-@st.cache_data(ttl=1800)
-def fetch_news(query: str, country: str = "", limit: int = 7) -> dict:
-    cutoff_30 = datetime.utcnow() - timedelta(days=30)
-    cutoff_90 = datetime.utcnow() - timedelta(days=90)
+INTEL_ACTIONS = {
+    "Regulation": (
+        "Confirm the exact legal text / effective date and update market-access assumptions.",
+        "核对法规原文、生效日期及适用车型，并同步更新准入假设。",
+    ),
+    "Tender": (
+        "Qualify buyer, deadline, technical specification and procurement route; decide bid/no-bid.",
+        "核实采购主体、截止时间、技术规格与采购路径，并形成投标/不投标判断。",
+    ),
+    "Dealer": (
+        "Update partner/conflict map and assess whether this changes channel priority or exclusivity risk.",
+        "更新渠道及品牌冲突图谱，判断是否影响合作伙伴优先级或排他风险。",
+    ),
+    "Competitor": (
+        "Update competitor PVA, local price/channel evidence and the affected customer segment.",
+        "更新竞品PVA、当地价格/渠道证据，并识别受影响客户场景。",
+    ),
+    "Fleet Customer": (
+        "Check fleet size, replacement cycle and duty cycle; convert the signal into a named opportunity if qualified.",
+        "核实车队规模、换车周期与工况；若成立则转为实名项目机会。",
+    ),
+    "Infrastructure": (
+        "Re-test depot-charging feasibility and TCO assumptions for the affected route or customer.",
+        "重新验证相关客户/线路的充电可行性及TCO假设。",
+    ),
+    "FX & Economy": (
+        "Re-test landed cost, payment security and FX sensitivity before quoting or stocking.",
+        "重新验证落地成本、付款安全及汇率敏感性，再决定报价或备库。",
+    ),
+    "Automotive Market": (
+        "Validate the data scope and update market sizing / competitor share only if the source is sufficiently robust.",
+        "先核实数据口径与来源强度，再决定是否更新市场规模或竞品份额。",
+    ),
+    "General": (
+        "Review relevance with the country owner before changing any market assumption.",
+        "由国家负责人确认业务相关性后，再调整任何市场假设。",
+    ),
+}
 
-    def _parse(url):
-        try:
-            feed = feedparser.parse(url)
-            out = []
-            for e in feed.entries:
-                t = e.get("title","")
-                if not t or any(n in t.lower() for n in NOISE_WORDS):
-                    continue
-                pub_str, pub_dt = "–", None
-                if hasattr(e,"published_parsed") and e.published_parsed:
-                    pub_dt  = datetime(*e.published_parsed[:6])
-                    pub_str = pub_dt.strftime("%Y-%m-%d")
-                out.append({"title":t,"link":e.get("link","#"),
-                             "published":pub_str,"pub_dt":pub_dt,
-                             "source":e.get("source",{}).get("title","–")})
-            out.sort(key=lambda x: x["pub_dt"] or datetime.min, reverse=True)
-            return out
-        except Exception:
-            return []
+COUNTRY_INTEL_TERMS = {
+    "Tunisia": [
+        'automobile registration OR vehicle registration OR immatriculation',
+        'commercial vehicle OR light commercial vehicle OR véhicule utilitaire',
+        'electric vehicle OR véhicule électrique OR charging',
+        'vehicle import OR customs OR douane OR homologation OR ATTT OR OCT',
+        'Loukil OR UADH OR Aures Auto OR Ennakl OR Automobile.tn',
+        'fleet tender OR appel offres vehicle OR marché public véhicule',
+        'Foton OR JAC OR Maxus OR BYD OR Dongfeng OR Farizon',
+    ],
+    "South Africa": [
+        'commercial vehicle OR light commercial vehicle OR truck market',
+        'electric commercial vehicle OR electric van OR fleet electrification',
+        'NAAMSA OR vehicle sales OR vehicle registration',
+        'fleet tender OR logistics fleet OR parcel fleet',
+        'Foton OR JAC OR Maxus OR BYD OR Dongfeng OR Farizon',
+        'charging infrastructure OR Eskom OR electricity tariff',
+    ],
+    "Egypt": [
+        'commercial vehicle OR truck market OR van market',
+        'electric vehicle OR electric commercial vehicle',
+        'vehicle import OR customs OR automotive regulation OR AIDP',
+        'fleet tender OR public procurement vehicle',
+        'Foton OR JAC OR Maxus OR BYD OR Dongfeng OR Farizon',
+        'foreign exchange OR vehicle import financing',
+    ],
+    "Rwanda": [
+        'electric vehicle OR electric commercial vehicle OR e-mobility',
+        'RURA OR RDB OR vehicle tax OR vehicle import',
+        'fleet tender OR public transport OR logistics fleet',
+        'charging infrastructure OR electricity tariff',
+        'BYD OR Foton OR Yutong OR Farizon',
+    ],
+    "Morocco": [
+        'commercial vehicle OR véhicule utilitaire OR truck market',
+        'electric vehicle OR véhicule électrique',
+        'vehicle import OR homologation OR customs OR douane',
+        'AIVAM OR vehicle registration',
+        'dealer OR distributor OR automobile group',
+        'Foton OR JAC OR Maxus OR BYD OR Dongfeng OR Farizon',
+        'fleet tender OR appel offres véhicule',
+    ],
+}
 
-    def _auth(item):
-        return any(d in (item["link"]+item["source"]).lower() for d in AUTHORITY_DOMAINS)
 
-    def _recent(item, cutoff):
-        return item["pub_dt"] is None or item["pub_dt"] >= cutoff
+def _intel_queries(country: str, base_query: str = "") -> list[str]:
+    """Build a country-specific query portfolio instead of one generic RSS query."""
+    terms = COUNTRY_INTEL_TERMS.get(country, [
+        'commercial vehicle OR truck OR van',
+        'electric vehicle OR fleet electrification',
+        'vehicle import OR customs OR homologation',
+        'fleet tender OR vehicle procurement',
+        'Foton OR JAC OR Maxus OR BYD OR Dongfeng OR Farizon',
+    ])
+    queries = []
+    if base_query:
+        queries.append(base_query)
+    queries.extend(f'"{country}" ({term})' for term in terms)
+    # Deduplicate while preserving order; cap calls to protect page latency.
+    return list(dict.fromkeys(q.strip() for q in queries if q.strip()))[:7]
 
-    enc1 = (query+" when:30d").replace(" ","+").replace('"',"%22")
-    raw1 = _parse(f"https://news.google.com/rss/search?q={enc1}&hl=en-US&gl=US&ceid=US:en")
-    r30 = [x for x in raw1 if _recent(x, cutoff_30)]
-    a30 = [x for x in r30 if _auth(x)]
-    if len(a30) >= 3:
-        return {"items":a30[:limit],"is_authority":True,"is_fallback":False}
-    if len(r30) >= 3:
-        return {"items":r30[:limit],"is_authority":False,"is_fallback":False}
 
-    enc2 = (query+" when:90d").replace(" ","+").replace('"',"%22")
-    raw2 = _parse(f"https://news.google.com/rss/search?q={enc2}&hl=en-US&gl=US&ceid=US:en")
-    r90 = [x for x in raw2 if _recent(x, cutoff_90)]
-    if len(r90) >= 3:
-        return {"items":r90[:limit],"is_authority":False,"is_fallback":False}
+def _intel_category(title: str) -> str:
+    low = title.lower()
+    scores = {
+        cat: sum(1 for kw in kws if kw in low)
+        for cat, kws in INTEL_CATEGORY_KEYWORDS.items()
+    }
+    best = max(scores, key=scores.get) if scores else "General"
+    return best if scores.get(best, 0) > 0 else "General"
 
-    enc3 = query.replace(" ","+").replace('"',"%22")
-    raw3 = _parse(f"https://news.google.com/rss/search?q={enc3}&hl=en-US&gl=US&ceid=US:en")
-    if len(raw3) >= 2:
-        return {"items":raw3[:limit],"is_authority":False,"is_fallback":False}
 
-    fb = FALLBACK_INSIGHTS.get(country, [])
-    if fb:
-        return {"items":fb[:limit],"is_authority":False,"is_fallback":True}
-    return {"items":[],"is_authority":False,"is_fallback":True}
+def _intel_relevance(title: str) -> int:
+    low = title.lower()
+    strong = [
+        "commercial vehicle","truck","van","fleet","vehicle","automotive",
+        "electric","ev","dealer","distributor","tender","procurement",
+        "customs","homologation","charging","logistics",
+    ]
+    hits = sum(1 for kw in strong if kw in low)
+    return min(100, 35 + hits * 13) if hits else 20
+
+
+def _intel_authority(item: dict) -> int:
+    hay = f"{item.get('link','')} {item.get('source','')}".lower()
+    if any(d in hay for d in AUTHORITY_DOMAINS):
+        return 100
+    if any(x in hay for x in ["official", "ministry", "authority", "government", "group", "motors"]):
+        return 80
+    return 55
+
+
+def _intel_recency(pub_dt: datetime | None, now: datetime) -> int:
+    if pub_dt is None:
+        return 0
+    age = max(0, (now - pub_dt).days)
+    if age <= 7:
+        return 100
+    if age <= 14:
+        return 90
+    if age <= 30:
+        return 78
+    if age <= 60:
+        return 55
+    if age <= 90:
+        return 40
+    return 0
+
+
+def _intel_impact(category: str, title: str) -> int:
+    high = {"Regulation", "Tender", "Dealer"}
+    medium = {"Competitor", "Fleet Customer", "Infrastructure", "FX & Economy"}
+    score = 90 if category in high else 75 if category in medium else 55
+    low = title.lower()
+    if any(x in low for x in ["ban", "exclusive", "award", "tender", "tax", "duty", "homologation", "subsidy"]):
+        score = min(100, score + 10)
+    return score
+
+
+def _intel_business_implication(category: str) -> str:
+    pair = INTEL_ACTIONS.get(category, INTEL_ACTIONS["General"])
+    return pair[1 if V15_LANG == "zh" else 0]
+
+
+def _intel_score(item: dict, now: datetime) -> int:
+    recency = _intel_recency(item.get("pub_dt"), now)
+    relevance = _intel_relevance(item.get("title", ""))
+    authority = _intel_authority(item)
+    impact = _intel_impact(item.get("category", "General"), item.get("title", ""))
+    return round(recency * .30 + relevance * .30 + authority * .20 + impact * .20)
+
+
+def _parse_google_news(url: str) -> list[dict]:
+    try:
+        feed = feedparser.parse(url)
+        out = []
+        for e in feed.entries:
+            title = (e.get("title", "") or "").strip()
+            if not title or any(n in title.lower() for n in NOISE_WORDS):
+                continue
+            pub_dt = None
+            if getattr(e, "published_parsed", None):
+                pub_dt = datetime(*e.published_parsed[:6])
+            # Unknown publication dates are intentionally rejected from the live feed.
+            if pub_dt is None:
+                continue
+            source = e.get("source", {}) or {}
+            source_name = source.get("title", "–") if isinstance(source, dict) else "–"
+            out.append({
+                "title": title,
+                "link": e.get("link", "#"),
+                "published": pub_dt.strftime("%Y-%m-%d"),
+                "pub_dt": pub_dt,
+                "source": source_name,
+            })
+        return out
+    except Exception:
+        return []
+
+
+@st.cache_data(ttl=900, show_spinner=False)
+def fetch_news(query: str, country: str = "", limit: int = 8) -> dict:
+    """Fetch and score business intelligence. Never backfills stale hard-coded news."""
+    from urllib.parse import quote_plus
+
+    now = datetime.utcnow()
+    cutoff_30 = now - timedelta(days=30)
+    cutoff_90 = now - timedelta(days=90)
+    collected = []
+
+    for q in _intel_queries(country, query):
+        encoded = quote_plus(f"{q} when:90d")
+        url = f"https://news.google.com/rss/search?q={encoded}&hl=en-US&gl=US&ceid=US:en"
+        collected.extend(_parse_google_news(url))
+
+    # De-duplicate syndication / repeated Google News entries by normalized title.
+    unique = {}
+    for item in collected:
+        key = re.sub(r"[^a-z0-9]+", " ", item["title"].lower()).strip()
+        if not key:
+            continue
+        old = unique.get(key)
+        if old is None or item["pub_dt"] > old["pub_dt"]:
+            unique[key] = item
+
+    scored = []
+    for item in unique.values():
+        item = item.copy()
+        item["category"] = _intel_category(item["title"])
+        item["score"] = _intel_score(item, now)
+        item["authority_score"] = _intel_authority(item)
+        item["implication"] = _intel_business_implication(item["category"])
+        scored.append(item)
+
+    current = [
+        x for x in scored
+        if x["pub_dt"] >= cutoff_30 and x["score"] >= 58
+    ]
+    watch = [
+        x for x in scored
+        if cutoff_90 <= x["pub_dt"] < cutoff_30 and x["score"] >= 65
+    ]
+    current.sort(key=lambda x: (x["score"], x["pub_dt"]), reverse=True)
+    watch.sort(key=lambda x: (x["score"], x["pub_dt"]), reverse=True)
+
+    return {
+        "items": current[:limit],
+        "watch_items": watch[:5],
+        "is_authority": bool(current) and all(x["authority_score"] >= 80 for x in current[:3]),
+        "is_fallback": False,
+        "as_of": now.strftime("%Y-%m-%d %H:%M UTC"),
+        "queries_run": len(_intel_queries(country, query)),
+    }
+
 
 def _is_auth(item):
-    return any(d in (item["link"]+item["source"]).lower() for d in AUTHORITY_DOMAINS)
+    return _intel_authority(item) >= 80
+
 
 def render_news_panel(query: str, country: str):
-    """
-    Renders the news list. This function itself is unchanged from prior
-    versions — what changes (Task 3) is WHERE it gets called: now always
-    inside a collapsed st.expander at the very bottom of the page.
-    """
-    with st.spinner(f"Fetching intelligence for {country}..."):
+    with st.spinner(tr(f"Fetching live intelligence for {country}...", f"正在获取 {country} 最新市场情报...")):
         result = fetch_news(query, country=country)
-    items, is_auth, is_fb = result["items"], result["is_authority"], result["is_fallback"]
-    badge = ('<span class="news-badge">AUTHORITY · 30D</span>' if is_auth else
-             '<span class="news-fb-badge">GENERAL · 90D</span>' if not is_fb else
-             '<span class="news-fb-badge">MARKET INSIGHTS · CURATED</span>')
+
+    items = result["items"]
+    watch_items = result.get("watch_items", [])
+
+    current_label = tr("CURRENT · ≤30D", "最新 · ≤30天")
     st.markdown('<div class="news-wrap">', unsafe_allow_html=True)
     st.markdown(
-        f'<div class="news-hdr"><span class="news-hdr-title">📡 &nbsp;{country} — Market Intelligence</span>{badge}</div>',
-        unsafe_allow_html=True)
+        f'<div class="news-hdr"><span class="news-hdr-title">📡 &nbsp;{country} — '
+        f'{tr("Live Commercial Intelligence", "实时商业情报")}</span>'
+        f'<span class="news-badge">{current_label}</span></div>',
+        unsafe_allow_html=True,
+    )
+
     if not items:
-        st.markdown('<div class="news-empty">📭 No results found. Try refreshing.</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="news-empty">'
+            + tr(
+                "No high-value intelligence published in the last 30 days met the quality threshold. "
+                "The system will not backfill old curated stories as current news.",
+                "过去30天未检索到达到质量阈值的高价值新增情报。系统不会再用旧的人工整理信息冒充近期新闻。",
+            )
+            + '</div>',
+            unsafe_allow_html=True,
+        )
     else:
-        if is_fb:
-            st.markdown(
-                '<div style="padding:8px 16px;background:#FFF8F5;border-bottom:1px solid #F0C4AC;'
-                'font-family:Inter;font-size:.72rem;color:#D04A02;">'
-                '⚡ Live news unavailable — showing curated market intelligence for this market.</div>',
-                unsafe_allow_html=True)
         for item in items:
             sc = "news-src" if _is_auth(item) else "news-fb-src"
+            category = item.get("category", "General")
+            score = item.get("score", 0)
             st.markdown(
                 f'<div class="news-item">'
                 f'<a class="news-title-a" href="{item["link"]}" target="_blank">{item["title"]}</a>'
-                f'<div class="news-meta"><span class="{sc}">{item["source"]}</span>{item["published"]}</div>'
+                f'<div class="news-meta"><span class="{sc}">{item["source"]}</span>'
+                f'{item["published"]} &nbsp;·&nbsp; {category} &nbsp;·&nbsp; Intel {score}/100</div>'
+                f'<div style="font-family:Inter;font-size:.72rem;color:#5A6070;margin-top:7px;line-height:1.55;">'
+                f'<b>{tr("Action:", "建议动作：")}</b> {item["implication"]}</div>'
                 f'</div>',
-                unsafe_allow_html=True)
+                unsafe_allow_html=True,
+            )
     st.markdown("</div>", unsafe_allow_html=True)
+    st.caption(
+        tr(
+            f"As of {result['as_of']} · {result['queries_run']} country-specific query groups · "
+            "30-day live feed only · scores combine recency, relevance, source authority and business impact.",
+            f"更新时间 {result['as_of']} · 已运行 {result['queries_run']} 组国家定向检索 · "
+            "主情报流仅保留30天内内容 · 评分综合时效性、相关性、来源权威性与业务影响。",
+        )
+    )
+
+    if watch_items:
+        with st.expander(tr("Watchlist · 31–90 days (context only)", "观察列表 · 31–90天（仅作背景）"), expanded=False):
+            watch_df = pd.DataFrame([{
+                tr("Date", "日期"): x["published"],
+                tr("Category", "类别"): x["category"],
+                tr("Headline", "事件"): x["title"],
+                tr("Source", "来源"): x["source"],
+                tr("Score", "情报评分"): x["score"],
+            } for x in watch_items])
+            st.dataframe(watch_df, hide_index=True, use_container_width=True)
+            st.caption(tr(
+                "Watchlist items are intentionally excluded from the current-news feed.",
+                "观察列表内容不会进入“最新新闻”主情报流。",
+            ))
 # ══════════════════════════════════════════════════════════════════════════════
 # 8. DATA GENERATORS
 # ══════════════════════════════════════════════════════════════════════════════
@@ -4124,6 +4349,47 @@ def build_map(selected_name):
 # 12B. V16 COMMERCIAL WORKSPACE & DATA GOVERNANCE
 # Uses the existing V15 visual primitives; no new colour system or page skin.
 # ══════════════════════════════════════════════════════════════════════════════
+STAGE_BASE_PROBABILITY = {
+    "Research": 0.05,
+    "Contacted": 0.10,
+    "Qualified": 0.25,
+    "Technical Fit": 0.35,
+    "Proposal": 0.40,
+    "Pilot": 0.55,
+    "Commercial Fit": 0.60,
+    "Negotiation": 0.70,
+    "Tender": 0.60,
+    "PO": 0.95,
+    "Won": 1.00,
+    "Lost": 0.00,
+}
+
+
+def _effective_pipeline_probability(row: pd.Series) -> float:
+    """Stage-led probability with a controlled ±10pp manual override."""
+    stage_base = STAGE_BASE_PROBABILITY.get(str(row.get("Stage", "")), 0.10)
+    raw = row.get("Probability", stage_base)
+    try:
+        manual = float(raw)
+    except (TypeError, ValueError):
+        manual = stage_base
+    lower = max(0.0, stage_base - 0.10)
+    upper = min(1.0, stage_base + 0.10)
+    return min(max(manual, lower), upper)
+
+
+def _prepare_opportunity_pipeline(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty:
+        return df.copy()
+    out = df.copy()
+    out["Stage Base Probability"] = out["Stage"].map(STAGE_BASE_PROBABILITY).fillna(0.10)
+    out["Manual Probability"] = pd.to_numeric(out["Probability"], errors="coerce")
+    out["Effective Probability"] = out.apply(_effective_pipeline_probability, axis=1)
+    out["Weighted Units"] = out["Expected Units"] * out["Effective Probability"]
+    out["Weighted Value USD"] = out["Expected Units"] * out["Unit Value USD"] * out["Effective Probability"]
+    return out
+
+
 def _v16_country_frame(df: pd.DataFrame, country: str) -> pd.DataFrame:
     if "Country" not in df.columns:
         return df.copy()
@@ -4133,7 +4399,7 @@ def _v16_country_frame(df: pd.DataFrame, country: str) -> pd.DataFrame:
 def render_v16_commercial_workspace(country: str):
     dealers = _v16_country_frame(V16_DEALERS, country)
     customers = _v16_country_frame(V16_CUSTOMERS, country)
-    opportunities = _v16_country_frame(V16_OPPORTUNITIES, country)
+    opportunities = _prepare_opportunity_pipeline(_v16_country_frame(V16_OPPORTUNITIES, country))
     actions = _v16_country_frame(V16_ACTIONS, country)
 
     _level_hdr(
@@ -4144,14 +4410,8 @@ def render_v16_commercial_workspace(country: str):
             "渠道覆盖、客户触达、加权项目管道与近期行动。",
         ),
     )
-    weighted_units = (
-        opportunities["Expected Units"] * opportunities["Probability"]
-    ).sum() if not opportunities.empty else 0
-    weighted_value = (
-        opportunities["Expected Units"]
-        * opportunities["Unit Value USD"]
-        * opportunities["Probability"]
-    ).sum() if not opportunities.empty else 0
+    weighted_units = opportunities["Weighted Units"].sum() if not opportunities.empty else 0
+    weighted_value = opportunities["Weighted Value USD"].sum() if not opportunities.empty else 0
     due_dates = pd.to_datetime(actions["Deadline"], errors="coerce") if not actions.empty else pd.Series(dtype="datetime64[ns]")
     due_actions = int(due_dates.le(pd.Timestamp.now() + pd.Timedelta(days=60)).sum())
 
@@ -4181,7 +4441,7 @@ def render_v16_commercial_workspace(country: str):
     if opportunities.empty:
         st.info(tr("No opportunity has been recorded.", "尚未录入项目机会。"))
     else:
-        stage_order = ["Research","Contacted","Qualified","Proposal","Pilot","Negotiation","Won","Lost"]
+        stage_order = ["Research","Contacted","Qualified","Technical Fit","Proposal","Pilot","Commercial Fit","Negotiation","Tender","PO","Won","Lost"]
         stage_units = (
             opportunities.groupby("Stage")["Expected Units"].sum()
             .reindex(stage_order, fill_value=0)
@@ -4238,8 +4498,36 @@ def render_v16_data_governance(country: str):
     sourced_share = metrics["Source ID"].notna().mean() if not metrics.empty else 0
     reported_share = metrics["Data Type"].isin(["Actual", "Reported"]).mean() if not metrics.empty else 0
     weak_count = int(metrics["Confidence"].isin(["D", "E"]).sum()) if not metrics.empty else 0
-    pub_dates = pd.to_datetime(sources["Publication Date"], errors="coerce")
-    stale_count = int((pd.Timestamp.now() - pub_dates).dt.days.gt(730).sum()) if not sources.empty else 0
+    def _source_ttl_days(row: pd.Series) -> int:
+        scope = str(row.get("Scope", "")).lower()
+        source_type = str(row.get("Source Type", "")).lower()
+        if any(k in scope for k in ["fx", "exchange", "fuel", "diesel"]):
+            return 30
+        if any(k in scope for k in ["electricity", "charging", "price", "dealer", "brand"]):
+            return 90
+        if any(k in scope for k in ["tax", "customs", "homologation", "policy", "regulation", "authorisation", "authorization"]):
+            return 180
+        if any(k in scope for k in ["registration", "market", "transport statistics", "sales"]):
+            return 450
+        if "method" in scope or source_type == "consulting":
+            return 1095
+        if source_type == "internal":
+            return 90
+        return 365
+
+    if not sources.empty:
+        pub_dates = pd.to_datetime(sources["Publication Date"], errors="coerce")
+        source_age = (pd.Timestamp.now().normalize() - pub_dates).dt.days
+        sources["TTL Days"] = sources.apply(_source_ttl_days, axis=1)
+        sources["Age Days"] = source_age
+        sources["Freshness"] = np.where(
+            pub_dates.isna(),
+            "Missing date",
+            np.where(source_age > sources["TTL Days"], "Stale", "Current"),
+        )
+        stale_count = int(sources["Freshness"].eq("Stale").sum())
+    else:
+        stale_count = 0
 
     _level_hdr(
         1,
@@ -4305,6 +4593,8 @@ def render_v16_data_governance(country: str):
            "Judgement：必须对应责任人、下一验证动作与截止时间。"),
         tr("Confidence C requires triangulation; D–E are hypothesis-only.",
            "可信度C需交叉验证；D–E仅可作为假设。"),
+        tr("Freshness uses metric-specific TTLs instead of one 730-day rule: FX/fuel 30d, prices/dealers 90d, policy/access 180d, annual market data 450d.",
+           "数据时效按类型设置TTL，不再统一使用730天：汇率/油价30天，价格/渠道90天，政策准入180天，年度市场数据450天。"),
     ]
     st.markdown("\n".join(f"- {rule}" for rule in rules))
     st.caption(tr(MODEL_NOTICE_EN, MODEL_NOTICE_ZH))
@@ -4351,14 +4641,10 @@ def render_v16_executive_brief(country: str, cdata: dict):
 
 
 def render_v16_portfolio_home():
-    opportunities = V16_OPPORTUNITIES.copy()
+    opportunities = _prepare_opportunity_pipeline(V16_OPPORTUNITIES.copy())
     actions = V16_ACTIONS.copy()
-    weighted_units = (opportunities["Expected Units"] * opportunities["Probability"]).sum()
-    weighted_value = (
-        opportunities["Expected Units"]
-        * opportunities["Unit Value USD"]
-        * opportunities["Probability"]
-    ).sum()
+    weighted_units = opportunities["Weighted Units"].sum()
+    weighted_value = opportunities["Weighted Value USD"].sum()
     due = pd.to_datetime(actions["Deadline"], errors="coerce")
     due_60 = int(due.le(pd.Timestamp.now() + pd.Timedelta(days=60)).sum())
     high_risk = sum(1 for name, item in V15_PORTFOLIO.items() if item["attract"] - item["execute"] >= 25)
@@ -4479,14 +4765,17 @@ def render_v16_global_competitor():
         for record in intel_data.get("competitors", []):
             rows.append({
                 tr("Country","国家"): v15_country_label(country),
-                tr("Evidence layer","证据层级"): "Pending Verification",
+                tr("Evidence layer","证据层级"): record.get(
+                    "Evidence_Type",
+                    "Observation" if record.get("Source_ID") else "Pending Verification"
+                ),
                 tr("Brand","品牌"): record.get("Brand_Type",""),
                 tr("Observation","观察"): (
                     f"{record.get('Model','')} · ${record.get('Price_USD',0):,.0f} · "
                     f"{record.get('Channel_Count',0)} channels"
                 ),
                 tr("Implication","业务影响"): record.get("Channel_Strategy",""),
-                tr("Source","来源"): "Internal BD Intelligence",
+                tr("Source","来源"): record.get("Source_ID", "Internal BD Intelligence · source pending"),
             })
     intel = pd.DataFrame(rows)
     if intel.empty:
@@ -4502,6 +4791,29 @@ def render_v16_global_competitor():
         st.dataframe(subset if not subset.empty else intel.head(0), hide_index=True, use_container_width=True)
 
 # ══════════════════════════════════════════════════════════════════════════════
+def render_v16_logic_audit(country: str):
+    """Surface textual contradictions that should be fixed before management use."""
+    issues = []
+    cdata = TIER1.get(country, {})
+    text_blob = str(cdata).lower()
+    # The platform states Pure-EV only; flag legacy diesel recommendations.
+    legacy_terms = ["diesel-only", "lead exclusively with rugged", "diesel rigid", "diesel mining"]
+    if any(term in text_blob for term in legacy_terms):
+        issues.append(tr(
+            "Legacy strategy text recommends diesel products while the platform states a Pure-EV-only product boundary.",
+            "旧战略文本仍在推荐柴油车型，但平台已明确我司仅销售纯电商用车，存在战略口径冲突。",
+        ))
+    if country in V15_PORTFOLIO and V15_PORTFOLIO[country].get("size"):
+        issues.append(tr(
+            "Portfolio 'addressable segment' is still a planning-model input unless linked to V16_METRIC_AUDIT / a source ID.",
+            "Portfolio中的“目标细分市场规模”目前仍属于规划模型输入，除非已关联V16_METRIC_AUDIT及Source ID。",
+        ))
+    if issues:
+        _sdiv(tr("Logic & Evidence Warnings", "逻辑与证据预警"))
+        for issue in issues:
+            st.warning(issue)
+
+
 # 13. SESSION STATE
 # ══════════════════════════════════════════════════════════════════════════════
 if "selected_country" not in st.session_state:
@@ -4868,6 +5180,7 @@ else:
     with tab_intel:
         _render_competitive_intel_tab(sel, cdata)
         render_v16_data_governance(sel)
+        render_v16_logic_audit(sel)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 18. INTELLIGENCE FEED — collapsed expander at the very bottom of the page.
