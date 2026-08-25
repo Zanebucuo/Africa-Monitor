@@ -3,3 +3,4 @@ feedparser>=6.0.10
 plotly>=5.20.0
 pandas>=2.0.0
 numpy>=1.26.0
+pypdf>=4.0,<7.0
