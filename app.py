@@ -12,10 +12,14 @@ import pandas as pd
 import numpy as np
 import copy
 import re
+import io
+import html as html_lib
+from urllib.request import Request, urlopen
+from urllib.parse import urljoin
 from datetime import datetime, timedelta
 
-APP_VERSION = "16.1.0"
-DATA_VERSION = "2026-07-30"
+APP_VERSION = "16.2.0"
+DATA_VERSION = "2026-08-25"
 SCHEMA_VERSION = "1.0"
 MODEL_NOTICE_EN = "Model estimate or internal judgement; not official market statistics."
 MODEL_NOTICE_ZH = "模型估算或内部判断，不代表官方市场统计。"
@@ -139,6 +143,305 @@ V16_METRIC_AUDIT = pd.DataFrame([
     ["Rwanda","Addressable EV-van pilot",20,"units","2027","Modelled","D","SRC-MOD-01","2026-07-29"],
 ], columns=["Country","Metric","Value","Unit","Period","Data Type","Confidence","Source ID","Updated At"])
 
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# V16.2 AUTO MARKET DATA ENGINE — trial deployment
+# Purpose: refresh selected authoritative market metrics without allowing a failed
+# scraper to overwrite management data. Auto data is displayed separately and can
+# later be promoted into the audited metric register after validation.
+# ─────────────────────────────────────────────────────────────────────────────
+AUTO_MARKET_SOURCE_CONFIG = {
+    "South Africa": {
+        "frequency": "Monthly",
+        "source_name": "naamsa | The Automotive Business Council",
+        "landing_url": "https://naamsa.net/newsroom/?nocache=1",
+        "confidence": "A",
+        "mode": "auto",
+    },
+    "Tunisia": {
+        "frequency": "Annual",
+        "source_name": "Automobile.tn (ATTT registration data)",
+        "landing_url": "https://www.automobile.tn/fr/magazine/enquetes/2026-01-09-statistiques-des-immatriculations-2025.html",
+        "confidence": "B",
+        "mode": "auto",
+    },
+    "Kenya": {
+        "frequency": "Annual",
+        "source_name": "Kenya National Bureau of Statistics — Economic Survey",
+        "landing_url": "https://www.knbs.or.ke/wp-content/uploads/2026/04/2026-Economic-Survey.pdf",
+        "confidence": "A",
+        "mode": "auto",
+    },
+}
+
+_AUTO_COLUMNS = [
+    "Country", "Metric", "Value", "Unit", "Period", "Data Type", "Confidence",
+    "Source Name", "Source URL", "Retrieved At", "Auto Status"
+]
+
+
+def _auto_empty(country: str, status: str, source_url: str = "", source_name: str = "") -> pd.DataFrame:
+    return pd.DataFrame([{
+        "Country": country,
+        "Metric": "Auto refresh status",
+        "Value": None,
+        "Unit": "",
+        "Period": "",
+        "Data Type": "System",
+        "Confidence": "—",
+        "Source Name": source_name,
+        "Source URL": source_url,
+        "Retrieved At": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+        "Auto Status": status,
+    }], columns=_AUTO_COLUMNS)
+
+
+def _http_bytes(url: str, timeout: int = 18) -> bytes:
+    req = Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (compatible; AfricaCVMonitor/16.2; +market-intelligence)",
+        "Accept": "text/html,application/pdf,application/xhtml+xml,*/*;q=0.8",
+    })
+    with urlopen(req, timeout=timeout) as resp:
+        return resp.read()
+
+
+def _html_to_text(raw: bytes) -> str:
+    text = raw.decode("utf-8", errors="ignore")
+    text = re.sub(r"(?is)<script.*?>.*?</script>", " ", text)
+    text = re.sub(r"(?is)<style.*?>.*?</style>", " ", text)
+    text = re.sub(r"(?s)<[^>]+>", " ", text)
+    text = html_lib.unescape(text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _int_token(token: str) -> int:
+    return int(re.sub(r"[^0-9]", "", token))
+
+
+def _pdf_text(raw: bytes) -> str:
+    """PDF extraction is optional so the app still runs if pypdf is not installed."""
+    try:
+        from pypdf import PdfReader
+    except Exception as exc:
+        raise RuntimeError("pypdf dependency missing; add pypdf>=4.0 to requirements.txt") from exc
+    reader = PdfReader(io.BytesIO(raw))
+    return "\n".join((page.extract_text() or "") for page in reader.pages)
+
+
+def _metric_row(country, metric, value, unit, period, confidence, source_name, source_url, status="Live parsed"):
+    return {
+        "Country": country,
+        "Metric": metric,
+        "Value": value,
+        "Unit": unit,
+        "Period": period,
+        "Data Type": "Reported",
+        "Confidence": confidence,
+        "Source Name": source_name,
+        "Source URL": source_url,
+        "Retrieved At": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+        "Auto Status": status,
+    }
+
+
+def _fetch_tunisia_auto() -> pd.DataFrame:
+    country = "Tunisia"
+    cfg = AUTO_MARKET_SOURCE_CONFIG[country]
+    url = cfg["landing_url"]
+    try:
+        text = _html_to_text(_http_bytes(url))
+        rows = []
+        patterns = [
+            ("Camionnettes / utility registrations", r"Camionnettes\s*\(VU\).*?([0-9][0-9\s]{2,})\s+([0-9][0-9\s]{2,})\s*\+?([0-9,.]+)%"),
+            ("Total VU market", r"Total\s+March[eé]\s+VU\s+([0-9][0-9\s]{2,})\s+([0-9][0-9\s]{2,})\s*\+?([0-9,.]+)%"),
+            ("Total vehicle market", r"Total\s+March[eé]\s+([0-9][0-9\s]{2,})\s+([0-9][0-9\s]{2,})\s*\+?([0-9,.]+)%"),
+        ]
+        for metric, pat in patterns:
+            m = re.search(pat, text, flags=re.I)
+            if not m:
+                continue
+            cur, prev = _int_token(m.group(1)), _int_token(m.group(2))
+            rows.append(_metric_row(country, metric, cur, "units", "2025", cfg["confidence"], cfg["source_name"], url))
+            rows.append(_metric_row(country, metric + " — previous", prev, "units", "2024", cfg["confidence"], cfg["source_name"], url))
+        if not rows:
+            return _auto_empty(country, "Source reachable but expected registration fields were not parsed; review parser.", url, cfg["source_name"])
+        return pd.DataFrame(rows, columns=_AUTO_COLUMNS)
+    except Exception as exc:
+        return _auto_empty(country, f"Refresh failed: {type(exc).__name__}: {exc}", url, cfg["source_name"])
+
+
+def _discover_naamsa_latest_pdf() -> str:
+    landing = AUTO_MARKET_SOURCE_CONFIG["South Africa"]["landing_url"]
+    raw = _http_bytes(landing)
+    html_text = raw.decode("utf-8", errors="ignore")
+    # Prefer FLASH standard monthly file. The YYYYMM portion makes lexical max reliable.
+    candidates = re.findall(r'href=["\']([^"\']*FLASH_STD_20\d{4}\.pdf)["\']', html_text, flags=re.I)
+    if not candidates:
+        # Some WordPress pages expose absolute URLs without a quoted href in cached markup.
+        candidates = re.findall(r'https?://[^\s"\']*FLASH_STD_20\d{4}\.pdf', html_text, flags=re.I)
+    if not candidates:
+        raise RuntimeError("Latest naamsa monthly FLASH PDF was not discovered on newsroom page")
+    abs_urls = [urljoin(landing, c) for c in candidates]
+    def key(u: str):
+        m = re.search(r"FLASH_STD_(20\d{4})\.pdf", u, flags=re.I)
+        return m.group(1) if m else "000000"
+    return max(abs_urls, key=key)
+
+
+def _fetch_south_africa_auto() -> pd.DataFrame:
+    country = "South Africa"
+    cfg = AUTO_MARKET_SOURCE_CONFIG[country]
+    try:
+        pdf_url = _discover_naamsa_latest_pdf()
+        ym = re.search(r"FLASH_STD_(20\d{4})\.pdf", pdf_url, flags=re.I)
+        period = ym.group(1) if ym else "Latest month"
+        raw = _http_bytes(pdf_url)
+        text = re.sub(r"\s+", " ", _pdf_text(raw))
+        rows = []
+        # Parse current-month local volumes from the Market-at-a-Glance table.
+        specs = [
+            ("Passenger vehicle sales", r"Passenger\s+([0-9][0-9\s]{2,})\s+[0-9][0-9\s]{2,}"),
+            ("Light CV <3501kg sales", r"Light\s+CV\s*<\s*3501kg\s+([0-9][0-9\s]{2,})\s+[0-9][0-9\s]{1,}"),
+            ("Medium CV 3501-8500kg sales", r"Medium\s+CV\s+3501\s*[-–]\s*8500kg\s+([0-9][0-9\s]{1,})\s+[0-9][0-9\s]{0,}"),
+            ("Industry total vehicle sales", r"Industry\s+Total\s+([0-9][0-9\s]{2,})\s+[0-9][0-9\s]{2,}"),
+        ]
+        for metric, pat in specs:
+            m = re.search(pat, text, flags=re.I)
+            if m:
+                rows.append(_metric_row(country, metric, _int_token(m.group(1)), "units", period, cfg["confidence"], cfg["source_name"], pdf_url))
+        # Heavy CV family: add three sub-segments if present.
+        for metric, pat in [
+            ("Heavy CV 8501-16500kg sales", r"Heavy\s+CV\s+8501\s*[-–]\s*16500kg\s+([0-9][0-9\s]{1,})"),
+            ("Extra Heavy CV >16500kg sales", r"Extra\s+Heavy\s+CV\s*>\s*16500kg\s+([0-9][0-9\s]{1,})"),
+            ("Bus >8500kg sales", r"Bus\s*>\s*8500kg\s+([0-9][0-9\s]{1,})"),
+        ]:
+            m = re.search(pat, text, flags=re.I)
+            if m:
+                rows.append(_metric_row(country, metric, _int_token(m.group(1)), "units", period, cfg["confidence"], cfg["source_name"], pdf_url))
+        if not rows:
+            return _auto_empty(country, "Latest naamsa report discovered, but expected sales rows were not parsed.", pdf_url, cfg["source_name"])
+        return pd.DataFrame(rows, columns=_AUTO_COLUMNS)
+    except Exception as exc:
+        return _auto_empty(country, f"Refresh failed: {type(exc).__name__}: {exc}", cfg["landing_url"], cfg["source_name"])
+
+
+def _fetch_kenya_auto() -> pd.DataFrame:
+    country = "Kenya"
+    cfg = AUTO_MARKET_SOURCE_CONFIG[country]
+    url = cfg["landing_url"]
+    try:
+        raw = _http_bytes(url, timeout=25)
+        text = re.sub(r"\s+", " ", _pdf_text(raw))
+        rows = []
+        # 2026 Economic Survey table 13.4 contains 2021–2025 columns; the last
+        # numeric token in each row is the latest (2025 provisional) value.
+        specs = [
+            ("Panel vans & pick-ups registrations", r"Panel\s+Vans,?\s*Pick-ups,?\s*etc\s+((?:[0-9,]+\s+){3,6}[0-9,]+)"),
+            ("Lorries / trucks registrations", r"Lorries/Trucks\s+((?:[0-9,]+\s+){3,6}[0-9,]+)"),
+            ("Buses & coaches registrations", r"Buses\s+and\s+Coaches\s+((?:[0-9,]+\s+){3,6}[0-9,]+)"),
+            ("Mini-buses / Matatu registrations", r"Mini-Buses/Matatu\s+((?:[0-9,]+\s+){3,6}[0-9,]+)"),
+            ("Total motor vehicle registrations", r"Total\s+Motor\s+Vehicles\s+((?:[0-9,]+\s+){3,6}[0-9,]+)"),
+        ]
+        for metric, pat in specs:
+            m = re.search(pat, text, flags=re.I)
+            if not m:
+                continue
+            nums = re.findall(r"[0-9][0-9,]*", m.group(1))
+            if nums:
+                rows.append(_metric_row(country, metric, _int_token(nums[-1]), "units", "2025*", cfg["confidence"], cfg["source_name"], url))
+        if not rows:
+            return _auto_empty(country, "KNBS survey downloaded but Table 13.4 could not be parsed; review parser.", url, cfg["source_name"])
+        return pd.DataFrame(rows, columns=_AUTO_COLUMNS)
+    except Exception as exc:
+        return _auto_empty(country, f"Refresh failed: {type(exc).__name__}: {exc}", url, cfg["source_name"])
+
+
+@st.cache_data(ttl=21600, show_spinner=False)
+def fetch_auto_market_data(country: str) -> pd.DataFrame:
+    """Return live-parsed market metrics for supported trial countries.
+
+    Safety rule: this function never mutates V15_PORTFOLIO, TIER1 or V16_METRIC_AUDIT.
+    Auto data remains a separate evidence layer until reviewed.
+    """
+    if country == "South Africa":
+        return _fetch_south_africa_auto()
+    if country == "Tunisia":
+        return _fetch_tunisia_auto()
+    if country == "Kenya":
+        return _fetch_kenya_auto()
+    return _auto_empty(country, "No automatic market-sales adapter configured for this country yet.")
+
+
+def _auto_market_health(df: pd.DataFrame) -> tuple[str, int, int]:
+    if df.empty:
+        return "Unavailable", 0, 0
+    usable = df[(df["Data Type"] == "Reported") & pd.to_numeric(df["Value"], errors="coerce").notna()]
+    errors = df[df["Metric"] == "Auto refresh status"]
+    if not usable.empty:
+        return "Live", len(usable), len(errors)
+    return "Needs attention", 0, len(errors)
+
+
+def render_auto_market_data_panel(country: str):
+    """Small trial panel used inside Data Governance; does not disturb legacy pages."""
+    cfg = AUTO_MARKET_SOURCE_CONFIG.get(country)
+    _sdiv(tr("Auto Market Data — Trial", "自动市场数据 — 试运行"))
+    if cfg is None:
+        st.info(tr(
+            "No automatic registration/sales source has been configured for this market yet.",
+            "该市场尚未配置自动销量/注册量数据源。",
+        ))
+        return
+
+    top = st.columns([1.2, 1, 1, 1.2])
+    with top[0]:
+        st.caption(tr("Primary source", "主要来源"))
+        st.markdown(f"**{cfg['source_name']}**")
+    with top[1]:
+        st.caption(tr("Refresh cadence", "刷新频率"))
+        st.markdown(f"**{cfg['frequency']}**")
+    with top[2]:
+        st.caption(tr("Confidence", "可信度"))
+        st.markdown(f"**{cfg['confidence']}**")
+    with top[3]:
+        if st.button(tr("Refresh auto data", "刷新自动数据"), key=f"auto_refresh_{country}"):
+            fetch_auto_market_data.clear()
+            st.rerun()
+
+    with st.spinner(tr("Checking authoritative market source…", "正在检查权威市场数据源…")):
+        auto_df = fetch_auto_market_data(country)
+    health, metric_count, error_count = _auto_market_health(auto_df)
+    c1, c2, c3 = st.columns(3)
+    c1.metric(tr("Auto status", "自动状态"), health)
+    c2.metric(tr("Live metrics", "实时指标"), metric_count)
+    c3.metric(tr("Parser alerts", "解析提醒"), error_count)
+
+    if metric_count:
+        st.success(tr(
+            "Live values were parsed from the source. They remain separate from audited management metrics until reviewed.",
+            "已从来源实时解析数据；在人工复核前，不会覆盖正式管理指标。",
+        ))
+    else:
+        st.warning(tr(
+            "No live metric was promoted. Existing dashboard values remain unchanged.",
+            "本次未获得可用实时指标，现有看板数据不会被覆盖。",
+        ))
+
+    st.dataframe(
+        auto_df,
+        hide_index=True,
+        use_container_width=True,
+        column_config={
+            "Source URL": st.column_config.LinkColumn(
+                tr("Source URL", "来源链接"), display_text=tr("Open source", "打开来源")
+            )
+        },
+    )
+    st.caption(tr(
+        "Trial rule: auto-refresh is an evidence layer, not an automatic write-back. Promote into V16_METRIC_AUDIT only after the source, scope and period are verified.",
+        "试运行规则：自动刷新仅作为证据层，不自动回写正式指标。确认来源、口径和数据期后，再迁移至 V16_METRIC_AUDIT。",
+    ))
 
 # 1. GLOBAL CSS — including mandatory anti text-overlap rule
 # ══════════════════════════════════════════════════════════════════════════════
@@ -4582,6 +4885,8 @@ def render_v16_data_governance(country: str):
                 )
             },
         )
+
+    render_auto_market_data_panel(country)
 
     _sdiv(tr("Governance Rules", "数据治理规则"))
     rules = [
