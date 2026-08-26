@@ -1,6 +1,6 @@
 """
 Africa Commercial Vehicle Market Governance & Intelligence Platform
-Market Intelligence Edition v18.0
+Evidence-Driven Market Intelligence Edition v19.0
 McKinsey UX Refactor — Narrative-Flow Layout · Zero Text Overlap · Collapsed Intel Feed
 """
 
@@ -17,10 +17,13 @@ import html as html_lib
 from urllib.request import Request, urlopen
 from urllib.parse import urljoin
 from datetime import datetime, timedelta
+from pathlib import Path
+import hashlib
+import json
 
-APP_VERSION = "18.0.0"
+APP_VERSION = "19.0.0"
 DATA_VERSION = "2026-08-26"
-SCHEMA_VERSION = "1.1"
+SCHEMA_VERSION = "1.2"
 MODEL_NOTICE_EN = "Model estimate or internal judgement; not official market statistics."
 MODEL_NOTICE_ZH = "模型估算或内部判断，不代表官方市场统计。"
 
@@ -5729,6 +5732,688 @@ def render_v18_global_governance():
         st.dataframe(V16_SOURCES, hide_index=True, use_container_width=True)
 
 
+
+# ══════════════════════════════════════════════════════════════════════════════
+# V19 EVIDENCE-DRIVEN MARKET INTELLIGENCE + DATA INTAKE
+# Decision-first at the top, evidence-rich immediately underneath.
+# Public/reported data may drive charts; model inputs must expose methodology;
+# user-supplied files are read from the repository or previewed through upload.
+# ══════════════════════════════════════════════════════════════════════════════
+
+V19_REPO_ROOT = Path(__file__).resolve().parent
+V19_DATA_ROOT = V19_REPO_ROOT / "data"
+V19_INBOX_DIR = V19_DATA_ROOT / "inbox"
+V19_PUBLIC_DIR = V19_DATA_ROOT / "public"
+V19_MANIFEST_PATH = V19_DATA_ROOT / "manifest.csv"
+V19_SUPPORTED_DATA_EXT = {".csv", ".xlsx"}
+V19_SUPPORTED_EVIDENCE_EXT = {".pdf", ".csv", ".xlsx"}
+
+V19_MANIFEST_COLUMNS = [
+    "File", "Country", "Dataset", "Period", "Source", "Source Type",
+    "Confidence", "Status", "Source URL", "Notes"
+]
+V19_STANDARD_METRIC_COLUMNS = [
+    "Country", "Period", "Segment", "Metric", "Value", "Unit",
+    "Source ID", "Source Name", "Source URL", "Evidence Type",
+    "Confidence", "Status", "Updated At"
+]
+V19_COMPETITOR_COLUMNS = [
+    "Country", "Farizon Model", "Brand", "Model", "Benchmark Type",
+    "Price Local", "Currency", "Battery kWh", "Range km", "Payload kg",
+    "Cargo m3", "Length mm", "Warranty", "Source ID", "Source URL",
+    "Evidence Type", "Period", "Status"
+]
+V19_DEMAND_INPUT_COLUMNS = [
+    "Country", "Application", "Return-to-base", "Mileage fit", "Payload fit",
+    "Charging feasibility", "Urban duty cycle", "Evidence Type", "Source ID",
+    "Source URL", "Period", "Status"
+]
+
+V19_SOURCE_REGISTRY = pd.DataFrame([
+    ["ZA-NAAMSA-ATM26", "South Africa", "naamsa Automotive Trade Manual 2026", "naamsa", "https://naamsa.net/press-releases/naamsa-releases-the-2026-automotive-trade-manual/", "Industry official", "2025", "A", "Annual market / imports / NEV"],
+    ["ZA-STATS-P7162-Q1-26", "South Africa", "Land transport survey — March 2026", "Statistics South Africa", "https://www.statssa.gov.za/publications/P7162/P7162March2026.pdf", "Government", "2026-Q1", "A", "Freight income by commodity"],
+    ["ZA-STATS-P7162-APR26", "South Africa", "Land transport survey — April 2026 key findings", "Statistics South Africa", "https://www.statssa.gov.za/?PPN=P7162&SCH=74308&page_id=1856", "Government", "2026-04", "A", "Road-freight momentum"],
+    ["ZA-MAXUS-EDELIVER3", "South Africa", "Maxus eDeliver 3", "Maxus South Africa", "https://maxus.co.za/edeliver3/", "OEM", "Current", "A", "EV van technical specification"],
+    ["ZA-FOTON-EVIEW", "South Africa", "Foton eView Panel Van", "Foton South Africa", "https://fotonsa.co.za/new-models/eview-panel-van/", "OEM", "Current", "A", "EV van price and technical specification"],
+    ["ZA-FOTON-ETRUCKMATE", "South Africa", "Foton eTruckmate", "Foton South Africa", "https://fotonsa.co.za/new-models/etruckmate/", "OEM", "Current", "A", "Electric light-truck price and technical specification"],
+    ["ZA-FOTON-EAUMARK", "South Africa", "Foton eAumark 6 Ton", "Foton South Africa", "https://fotonsa.co.za/new-models/eaumark/", "OEM", "Current", "A", "Electric truck price and technical specification"],
+    ["ZA-NRCS-VC8023", "South Africa", "NRCS VC 8023", "NRCS", "https://www.nrcs.org.za/CompulsorySpecification/Automotive/VC%208023.pdf", "Government", "Current", "A", "Homologation / compulsory specification"],
+], columns=["Source ID", "Country", "Title", "Publisher", "URL", "Source Type", "Period", "Confidence", "Scope"])
+
+# Official South African freight-demand snapshot. Values are transcribed from
+# Stats SA P7162 Table B (March 2026), so the dashboard can remain useful even if
+# the public website is temporarily unavailable. The exact source is visible.
+V19_SA_FREIGHT_Q1 = pd.DataFrame([
+    ["Agriculture & forestry", 3855, 6.6, 5569, 44.5],
+    ["Mining & quarrying", 21932, 37.5, 21740, -0.9],
+    ["Manufactured food & beverage", 6391, 10.9, 6232, -2.5],
+    ["Containers", 1705, 2.9, 1927, 13.0],
+    ["Parcels", 1511, 2.6, 1914, 26.7],
+    ["Other freight", 13363, 22.8, 13608, 1.8],
+], columns=["Commodity", "Q1 2025 Rm", "Weight %", "Q1 2026 Rm", "YoY %"])
+
+V19_SA_MARKET_FACTS = {
+    "Total new vehicle sales 2025": (597338, "units", "+15.7% YoY", "ZA-NAAMSA-ATM26"),
+    "NEV sales 2025": (16716, "units", "2.8% of total new-vehicle sales", "ZA-NAAMSA-ATM26"),
+    "Light-vehicle imports 2025": (391287, "units", "69.1% of total light-vehicle sales", "ZA-NAAMSA-ATM26"),
+    "China-origin light-vehicle imports": (91326, "units", "23.3% of light-vehicle imports", "ZA-NAAMSA-ATM26"),
+}
+
+# Official / OEM-published competitor snapshot. Missing values deliberately stay
+# blank rather than being guessed. User-supplied approved files can add/replace rows.
+V19_SA_COMPETITORS = pd.DataFrame([
+    ["South Africa", "V6E", "Maxus", "eDeliver 3", "Direct / adjacent EV van", None, "ZAR", 50.23, 250, 945, 4.8, 4555, "See OEM site", "ZA-MAXUS-EDELIVER3", "https://maxus.co.za/edeliver3/", "Official OEM", "Current", "Approved"],
+    ["South Africa", "V6E", "Foton", "eView Panel Van", "Direct / adjacent EV van", 850000, "ZAR", 50.0, 195, None, 7.0, 5320, "5yr/200,000km battery & motor", "ZA-FOTON-EVIEW", "https://fotonsa.co.za/new-models/eview-panel-van/", "Official OEM", "Current", "Approved"],
+    ["South Africa", "V7E", "Maxus", "eDeliver 3", "Adjacent EV van", None, "ZAR", 50.23, 250, 945, 4.8, 4555, "See OEM site", "ZA-MAXUS-EDELIVER3", "https://maxus.co.za/edeliver3/", "Official OEM", "Current", "Approved"],
+    ["South Africa", "V7E", "Foton", "eView Panel Van", "Adjacent EV van", 850000, "ZAR", 50.0, 195, None, 7.0, 5320, "5yr/200,000km battery & motor", "ZA-FOTON-EVIEW", "https://fotonsa.co.za/new-models/eview-panel-van/", "Official OEM", "Current", "Approved"],
+    ["South Africa", "F1E", "Foton", "eTruckmate", "Direct / adjacent electric truck", 575000, "ZAR", 38.0, 280, 1380, None, 4670, "5yr/200,000km battery & motor", "ZA-FOTON-ETRUCKMATE", "https://fotonsa.co.za/new-models/etruckmate/", "Official OEM", "Current", "Approved"],
+    ["South Africa", "F1E", "Foton", "eAumark 6 Ton", "Upper adjacent electric truck", 1199900, "ZAR", 81.0, None, 3570, None, 5960, "5yr/200,000km battery & motor", "ZA-FOTON-EAUMARK", "https://fotonsa.co.za/new-models/eaumark/", "Official OEM", "Current", "Approved"],
+], columns=V19_COMPETITOR_COLUMNS)
+
+V19_SA_DEMAND_FIT_DEFAULT = pd.DataFrame([
+    ["South Africa", "Parcel / courier", 9, 8, 8, 7, 9, "Internal operating assumption", "ZA-STATS-P7162-Q1-26", "https://www.statssa.gov.za/publications/P7162/P7162March2026.pdf", "2026-Q1", "Approved"],
+    ["South Africa", "FMCG distribution", 8, 8, 8, 7, 8, "Internal operating assumption", "ZA-STATS-P7162-Q1-26", "https://www.statssa.gov.za/publications/P7162/P7162March2026.pdf", "2026-Q1", "Approved"],
+    ["South Africa", "Port / container", 6, 5, 4, 6, 4, "Internal operating assumption", "ZA-STATS-P7162-Q1-26", "https://www.statssa.gov.za/publications/P7162/P7162March2026.pdf", "2026-Q1", "Approved"],
+    ["South Africa", "Agriculture distribution", 6, 6, 6, 5, 5, "Internal operating assumption", "ZA-STATS-P7162-Q1-26", "https://www.statssa.gov.za/publications/P7162/P7162March2026.pdf", "2026-Q1", "Approved"],
+    ["South Africa", "Mining support", 3, 3, 2, 3, 2, "Internal operating assumption", "ZA-STATS-P7162-Q1-26", "https://www.statssa.gov.za/publications/P7162/P7162March2026.pdf", "2026-Q1", "Approved"],
+], columns=V19_DEMAND_INPUT_COLUMNS)
+
+V19_DEMAND_MOMENTUM_MAP = {
+    "Parcel / courier": (26.7, 2.6, "Parcels"),
+    "FMCG distribution": (-2.5, 10.9, "Manufactured food & beverage"),
+    "Port / container": (13.0, 2.9, "Containers"),
+    "Agriculture distribution": (44.5, 6.6, "Agriculture & forestry"),
+    "Mining support": (-0.9, 37.5, "Mining & quarrying"),
+}
+
+V19_FIT_WEIGHTS = {
+    "Return-to-base": 0.30,
+    "Mileage fit": 0.25,
+    "Payload fit": 0.20,
+    "Charging feasibility": 0.15,
+    "Urban duty cycle": 0.10,
+}
+
+
+def _v19_hash_name(name: str) -> str:
+    return hashlib.sha1(name.encode("utf-8", errors="ignore")).hexdigest()[:10]
+
+
+def _v19_source(source_id: str) -> dict:
+    hit = V19_SOURCE_REGISTRY[V19_SOURCE_REGISTRY["Source ID"] == source_id]
+    if hit.empty:
+        legacy = V16_SOURCES[V16_SOURCES["Source ID"] == source_id]
+        if legacy.empty:
+            return {}
+        r = legacy.iloc[0]
+        return {"Source ID":source_id,"Title":r.get("Source Name",""),"Publisher":r.get("Source Name",""),"URL":r.get("Source URL",""),"Period":r.get("Publication Date","")}
+    return hit.iloc[0].to_dict()
+
+
+def _v19_source_line(source_ids, period="", note=""):
+    if isinstance(source_ids, str):
+        source_ids = [source_ids]
+    bits=[]
+    for sid in source_ids or []:
+        s=_v19_source(sid)
+        if not s:
+            continue
+        title=html_lib.escape(str(s.get("Title") or s.get("Publisher") or sid))
+        url=str(s.get("URL") or "")
+        if url:
+            bits.append(f'<a href="{html_lib.escape(url)}" target="_blank">{title}</a>')
+        else:
+            bits.append(title)
+    meta=[]
+    if period: meta.append(html_lib.escape(str(period)))
+    if note: meta.append(html_lib.escape(str(note)))
+    extra = " · ".join(meta)
+    st.markdown(
+        f'<div style="font-family:Inter;font-size:.68rem;color:#7D8494;margin:-2px 0 14px 0;">'
+        f'<b>Source:</b> {" · ".join(bits) if bits else "—"}' + (f' · {extra}' if extra else '') + '</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def _v19_evidence_badge(kind: str) -> str:
+    labels={
+        "verified": tr("VERIFIED", "已验证"),
+        "derived": tr("DERIVED", "派生"),
+        "model": tr("MODEL", "模型"),
+        "internal": tr("INTERNAL", "内部判断"),
+        "user": tr("USER DATA", "自有数据"),
+    }
+    return labels.get(kind, kind.upper())
+
+
+def _v19_evidence_header(kind: str, title: str, subtitle: str, source_ids=None, period="", methodology=""):
+    color = {"verified":"#1A8C5B","derived":"#295BA5","model":"#B45309","internal":"#21325B","user":"#7A5AF8"}.get(kind,"#5A6070")
+    st.markdown(f'''
+<div style="background:#fff;border:1px solid #E2E5EB;border-left:4px solid {color};border-radius:9px;padding:15px 18px;margin:8px 0 10px 0;box-shadow:0 2px 8px rgba(28,39,60,.05);">
+  <div style="font:700 .61rem Inter;color:{color};letter-spacing:.8px;text-transform:uppercase;">{_v19_evidence_badge(kind)}</div>
+  <div style="font:750 1.02rem Inter;color:#1E2945;margin-top:5px;">{html_lib.escape(str(title))}</div>
+  <div style="font:400 .72rem Inter;color:#8A91A2;margin-top:4px;line-height:1.5;">{html_lib.escape(str(subtitle))}</div>
+</div>''', unsafe_allow_html=True)
+    _v19_source_line(source_ids or [], period, methodology)
+
+
+def _v19_full_card(label: str, value: str, body: str, source_id: str | None = None):
+    source_html=""
+    if source_id:
+        s=_v19_source(source_id)
+        if s and s.get("URL"):
+            source_html=f'<div style="margin-top:9px;font-size:.64rem;"><a href="{html_lib.escape(str(s["URL"]))}" target="_blank">Source · {html_lib.escape(str(s.get("Publisher") or s.get("Title") or source_id))}</a></div>'
+    return f'''
+<div class="decision-card" style="min-height:0;height:auto;overflow:visible;">
+ <div class="k">{html_lib.escape(str(label))}</div>
+ <div class="v">{html_lib.escape(str(value))}</div>
+ <div class="s" style="white-space:normal;overflow:visible;display:block;">{html_lib.escape(str(body))}</div>
+ {source_html}
+</div>'''
+
+
+def _v19_manifest() -> pd.DataFrame:
+    if not V19_MANIFEST_PATH.exists():
+        return pd.DataFrame(columns=V19_MANIFEST_COLUMNS)
+    try:
+        df=pd.read_csv(V19_MANIFEST_PATH)
+        for c in V19_MANIFEST_COLUMNS:
+            if c not in df.columns: df[c]=""
+        return df[V19_MANIFEST_COLUMNS].fillna("")
+    except Exception:
+        return pd.DataFrame(columns=V19_MANIFEST_COLUMNS)
+
+
+def _v19_scan_repo_files() -> pd.DataFrame:
+    rows=[]
+    manifest=_v19_manifest()
+    m_by_file={str(r["File"]).replace("\\","/"):r for _,r in manifest.iterrows()}
+    for base in [V19_INBOX_DIR, V19_PUBLIC_DIR]:
+        if not base.exists():
+            continue
+        for p in sorted(base.rglob("*")):
+            if not p.is_file() or p.suffix.lower() not in V19_SUPPORTED_EVIDENCE_EXT:
+                continue
+            rel=str(p.relative_to(V19_REPO_ROOT)).replace("\\","/")
+            m=m_by_file.get(rel,{})
+            rows.append([
+                rel,p.suffix.lower(),p.stat().st_size,
+                m.get("Country",""),m.get("Dataset",""),m.get("Period",""),
+                m.get("Source",""),m.get("Status","Unregistered"),m.get("Confidence","")
+            ])
+    return pd.DataFrame(rows,columns=["File","Type","Bytes","Country","Dataset","Period","Source","Status","Confidence"])
+
+
+def _v19_read_table(path_or_file, filename: str):
+    ext=Path(filename).suffix.lower()
+    if ext==".csv":
+        return pd.read_csv(path_or_file)
+    if ext==".xlsx":
+        try:
+            return pd.read_excel(path_or_file)
+        except ImportError as exc:
+            raise RuntimeError("Reading .xlsx requires openpyxl>=3.1. Add it to requirements.txt") from exc
+    raise ValueError(f"Unsupported tabular format: {ext}")
+
+
+def _v19_standard_metrics_from_file(path: Path, meta: dict) -> pd.DataFrame:
+    try:
+        df=_v19_read_table(path,str(path))
+    except Exception:
+        return pd.DataFrame(columns=V19_STANDARD_METRIC_COLUMNS)
+    if not {"Metric","Value"}.issubset(df.columns):
+        return pd.DataFrame(columns=V19_STANDARD_METRIC_COLUMNS)
+    out=df.copy()
+    defaults={
+        "Country":meta.get("Country",""),"Period":meta.get("Period",""),"Segment":"",
+        "Unit":"","Source ID":"","Source Name":meta.get("Source",""),"Source URL":meta.get("Source URL",""),
+        "Evidence Type":meta.get("Source Type","User supplied"),"Confidence":meta.get("Confidence","B"),
+        "Status":meta.get("Status","Approved"),"Updated At":datetime.now().strftime("%Y-%m-%d"),
+    }
+    for c,v in defaults.items():
+        if c not in out.columns: out[c]=v
+        else: out[c]=out[c].fillna(v)
+    out["Value"]=pd.to_numeric(out["Value"],errors="coerce")
+    return out[V19_STANDARD_METRIC_COLUMNS].dropna(subset=["Value"])
+
+
+def _v19_repo_dataset(dataset: str, country: str | None = None) -> pd.DataFrame:
+    manifest=_v19_manifest()
+    if manifest.empty:
+        return pd.DataFrame()
+    ok=manifest[(manifest["Status"].str.lower()=="approved") & (manifest["Dataset"].str.lower()==dataset.lower())]
+    if country:
+        ok=ok[ok["Country"].str.lower()==country.lower()]
+    frames=[]
+    for _,m in ok.iterrows():
+        p=V19_REPO_ROOT / str(m["File"])
+        if not p.exists() or p.suffix.lower() not in V19_SUPPORTED_DATA_EXT:
+            continue
+        try:
+            frames.append(_v19_read_table(p,str(p)))
+        except Exception:
+            continue
+    return pd.concat(frames,ignore_index=True) if frames else pd.DataFrame()
+
+
+def _v19_repo_metrics(country: str | None = None) -> pd.DataFrame:
+    manifest=_v19_manifest()
+    if manifest.empty:
+        return pd.DataFrame(columns=V19_STANDARD_METRIC_COLUMNS)
+    ok=manifest[(manifest["Status"].str.lower()=="approved") & manifest["Dataset"].str.lower().isin(["market metrics","vehicle sales","registration","macro metrics"])]
+    if country:
+        ok=ok[ok["Country"].str.lower()==country.lower()]
+    frames=[]
+    for _,m in ok.iterrows():
+        p=V19_REPO_ROOT / str(m["File"])
+        if p.exists() and p.suffix.lower() in V19_SUPPORTED_DATA_EXT:
+            x=_v19_standard_metrics_from_file(p,m.to_dict())
+            if not x.empty: frames.append(x)
+    return pd.concat(frames,ignore_index=True) if frames else pd.DataFrame(columns=V19_STANDARD_METRIC_COLUMNS)
+
+
+def _v19_user_competitors(country: str) -> pd.DataFrame:
+    frames=[]
+    for dataset in ["Competitor Specs", "Product Specs"]:
+        x=_v19_repo_dataset(dataset,country)
+        if not x.empty: frames.append(x)
+    if not frames: return pd.DataFrame(columns=V19_COMPETITOR_COLUMNS)
+    x=pd.concat(frames,ignore_index=True)
+    for c in V19_COMPETITOR_COLUMNS:
+        if c not in x.columns: x[c]=None
+    return x[V19_COMPETITOR_COLUMNS]
+
+
+def _v19_demand_inputs(country: str) -> pd.DataFrame:
+    x=_v19_repo_dataset("Demand Fit Inputs",country)
+    if not x.empty:
+        for c in V19_DEMAND_INPUT_COLUMNS:
+            if c not in x.columns: x[c]=None
+        return x[V19_DEMAND_INPUT_COLUMNS]
+    if country=="South Africa":
+        return V19_SA_DEMAND_FIT_DEFAULT.copy()
+    return pd.DataFrame(columns=V19_DEMAND_INPUT_COLUMNS)
+
+
+def _v19_fit_score(row) -> float:
+    total=0.0
+    for k,w in V19_FIT_WEIGHTS.items():
+        total += float(pd.to_numeric(pd.Series([row.get(k)]),errors="coerce").fillna(0).iloc[0]) * w
+    return round(total,2)
+
+
+def render_v19_sa_market_facts():
+    _level_hdr(2, tr("Verified Market Facts", "已验证市场事实"), tr("Annual structure from naamsa; monthly sales appear only if the parser passes validation.", "年度结构来自NAAMSA；月度销量只有在自动解析通过校验后才展示。"))
+    label_zh={
+        "Total new vehicle sales 2025":"2025新车总销量",
+        "NEV sales 2025":"2025新能源销量",
+        "Light-vehicle imports 2025":"2025轻型车进口",
+        "China-origin light-vehicle imports":"中国来源轻型车进口",
+    }
+    sub_zh={
+        "+15.7% YoY":"同比 +15.7%",
+        "2.8% of total new-vehicle sales":"占新车总销量 2.8%",
+        "69.1% of total light-vehicle sales":"占轻型车销量 69.1%",
+        "23.3% of light-vehicle imports":"占轻型车进口 23.3%",
+    }
+    cols=st.columns(4)
+    for col,(label,(value,unit,sub,sid)) in zip(cols,V19_SA_MARKET_FACTS.items()):
+        with col:
+            st.metric(label_zh.get(label,label) if V15_LANG=="zh" else label, f"{value:,.0f}", sub_zh.get(sub,sub) if V15_LANG=="zh" else sub)
+    _v19_source_line("ZA-NAAMSA-ATM26","2025",tr("Annual official industry publication", "年度行业官方出版物"))
+
+    auto=_verified_auto_rows("South Africa")
+    if not auto.empty:
+        _v19_evidence_header("verified",tr("Latest commercial-vehicle segment sales", "最新商用车细分销量"),tr("Only values that passed parser range and consistency checks are allowed into this chart.", "只有通过解析范围与一致性校验的数据才能进入该图。"),[],str(auto.iloc[0]["Period"]),"Fail-closed validation")
+        fig,seg=_sa_latest_sales_chart(auto)
+        if fig is not None:
+            st.plotly_chart(fig,use_container_width=True,config=PLOTLY_CFG,key="v19_za_latest_segments")
+            source_name=auto.iloc[0]["Source Name"]; source_url=auto.iloc[0]["Source URL"]
+            st.markdown(f'<div style="font-size:.68rem;color:#7D8494;margin-top:-8px;">Source: <a href="{source_url}" target="_blank">{source_name}</a> · {auto.iloc[0]["Period"]}</div>',unsafe_allow_html=True)
+            top=seg.sort_values("Units",ascending=False).iloc[0]
+            _chart_takeaway(f"最新通过校验的NAAMSA月度数据中，{top['Segment']}为商用车细分中销量最高的一项（约 {top['Units']:,.0f} 台）。该图只陈述当月细分销量，不推断渠道、省份或终端客户结构。",f"{top['Segment']} is the largest validated monthly CV segment. No channel or provincial inference is made.","verified")
+    else:
+        st.warning(tr("Latest NAAMSA monthly parser has not passed certification. The chart is withheld instead of displaying questionable values.","最新NAAMSA月度解析尚未通过认证，因此本期图表直接隐藏，不展示可疑数字。"))
+
+
+def render_v19_sa_freight_demand():
+    _level_hdr(3,tr("Freight Demand Evidence", "货运需求证据"),tr("What is actually growing underneath commercial-vehicle demand?", "商用车需求背后，哪些货运品类真的在增长？"))
+    _v19_evidence_header("verified",tr("Freight income momentum by commodity", "分货类货运收入增速"),tr("Q1 2026 versus Q1 2025; R million values are published by Statistics South Africa.", "2026年一季度对比2025年一季度；收入金额来自南非统计局。"),"ZA-STATS-P7162-Q1-26","2026-Q1","Table B")
+    df=V19_SA_FREIGHT_Q1.sort_values("YoY %",ascending=True)
+    fig=px.bar(df,x="YoY %",y="Commodity",orientation="h",text="YoY %",hover_data=["Weight %","Q1 2026 Rm"])
+    fig.update_traces(texttemplate="%{text:.1f}%",textposition="outside")
+    fig.update_layout(**{**CHART_BASE,"height":390,"margin":dict(l=30,r=60,t=15,b=30),"xaxis_title":"YoY growth (%)","yaxis_title":""})
+    st.plotly_chart(fig,use_container_width=True,config=PLOTLY_CFG,key="v19_za_freight_q1")
+    _chart_takeaway("2026年一季度，Parcel收入同比增长26.7%、Containers增长13.0%、农业与林业增长44.5%；矿业仍是最大收入权重之一，但同比略降0.9%。这说明“需求大”与“适合纯电”是两件事：城市配送/包裹更值得优先验证，矿业则需单独看线路、载重和充电。","Parcel and container freight are growing faster, while mining remains large but slightly down; demand size and EV fit must be separated.","verified")
+    st.caption(tr("Latest road-freight momentum: Stats SA reported seasonally adjusted road freight +4.7% in the three months to April 2026 versus the previous three months.","最新道路货运动量：Stats SA披露，截至2026年4月的三个月，道路货运经季调后较前三个月增长4.7%。"))
+    _v19_source_line("ZA-STATS-P7162-APR26","2026-04")
+
+
+def render_v19_demand_fit(country: str, cdata: dict):
+    _level_hdr(4,tr("Demand × Electrification Fit", "需求强度 × 电动化适配"),tr("Market demand is evidence; EV fit is a transparent operating model.", "市场需求用事实数据，EV适配度使用公开模型逻辑。"))
+    if country=="South Africa":
+        fit=_v19_demand_inputs(country).copy()
+        fit["EV Fit /10"]=fit.apply(_v19_fit_score,axis=1)
+        fit["Demand momentum %"]=fit["Application"].map(lambda x: V19_DEMAND_MOMENTUM_MAP.get(x,(np.nan,np.nan,""))[0])
+        fit["Demand weight %"]=fit["Application"].map(lambda x: V19_DEMAND_MOMENTUM_MAP.get(x,(np.nan,np.nan,""))[1])
+        fit["Evidence commodity"]=fit["Application"].map(lambda x: V19_DEMAND_MOMENTUM_MAP.get(x,(np.nan,np.nan,""))[2])
+        fig=px.scatter(fit,x="Demand momentum %",y="EV Fit /10",size="Demand weight %",text="Application",hover_data=["Evidence commodity","Return-to-base","Mileage fit","Payload fit","Charging feasibility","Urban duty cycle"],size_max=42)
+        fig.add_hline(y=6,line_dash="dot",line_color="#9BA3B2")
+        fig.add_vline(x=0,line_dash="dot",line_color="#9BA3B2")
+        fig.update_traces(textposition="top center")
+        fig.update_layout(**{**CHART_BASE,"height":470,"margin":dict(l=45,r=35,t=20,b=45),"xaxis_title":"Verified demand momentum (YoY %)","yaxis_title":"EV operating fit / 10","yaxis":{**CHART_BASE["yaxis"],"range":[0,10]}})
+        st.plotly_chart(fig,use_container_width=True,config=PLOTLY_CFG,key="v19_za_demand_fit")
+        best=fit.sort_values(["EV Fit /10","Demand momentum %"],ascending=False).iloc[0]
+        _chart_takeaway(f"“{best['Application']}”在当前模型中的EV运营适配度最高（{best['EV Fit /10']:.1f}/10），同时对应需求指标同比 {best['Demand momentum %']:+.1f}%。这里没有把模型分数伪装成市场销量：X轴是Stats SA事实，Y轴是透明运营模型。",f"{best['Application']} has the strongest EV operating fit; X is verified demand momentum and Y is a transparent operating model.","derived")
+        with st.expander(tr("查看EV适配模型公式与全部输入", "展开查看EV适配模型公式与全部输入"),expanded=False):
+            st.markdown("**EV Fit = 30% Return-to-base + 25% Mileage fit + 20% Payload fit + 15% Charging feasibility + 10% Urban duty cycle**")
+            show=fit[["Application","Demand momentum %","Demand weight %","EV Fit /10","Return-to-base","Mileage fit","Payload fit","Charging feasibility","Urban duty cycle","Evidence Type","Source ID"]]
+            st.dataframe(show,hide_index=True,use_container_width=True)
+            st.caption(tr("The five EV-fit inputs are internal operating assumptions unless replaced by an Approved 'Demand Fit Inputs' file in data/manifest.csv. The demand-growth axis remains Stats SA evidence.","五项EV适配输入默认属于内部运营假设；如在data/manifest.csv中批准“Demand Fit Inputs”文件，则由你的数据覆盖。需求增速轴仍使用Stats SA事实数据。"))
+    else:
+        apps=cdata.get("segment_apps",{})
+        if not apps:
+            st.info(tr("No demand-fit assumptions have been registered.","暂无需求适配输入。")); return
+        rows=[]
+        for app,v in apps.items():
+            rows.append([app,float(v.get("ev_readiness",0)),"Legacy model assumption"])
+        df=pd.DataFrame(rows,columns=["Application","EV Fit /10","Evidence"])
+        fig=px.bar(df,x="EV Fit /10",y="Application",orientation="h",text="EV Fit /10")
+        fig.update_layout(**{**CHART_BASE,"height":330,"xaxis_title":"Model EV fit /10","yaxis_title":"","xaxis":{**CHART_BASE["xaxis"],"range":[0,10]}})
+        st.plotly_chart(fig,use_container_width=True,config=PLOTLY_CFG,key=f"v19_generic_fit_{country}")
+        _chart_takeaway("该市场暂缺可直接量化的需求侧公开数据，因此这里只保留EV适配模型，不再显示伪精确的场景销量。建议通过Data Intake补充当地物流、车队或注册数据后再升级为“Demand × Fit”二维分析。","Demand-side evidence is not yet sufficiently structured, so only the EV-fit model is shown; no pseudo-precise scenario volumes are displayed.","model")
+
+
+def _v19_render_approved_metric_chart(country: str, user: pd.DataFrame):
+    if user.empty:
+        return
+    clean=user.copy()
+    clean["Value"]=pd.to_numeric(clean["Value"],errors="coerce")
+    clean=clean.dropna(subset=["Value"])
+    candidates=[]
+    for metric,g in clean.groupby("Metric"):
+        if g["Period"].astype(str).nunique() >= 2:
+            candidates.append(metric)
+    if candidates:
+        metric=candidates[0]
+        g=clean[clean["Metric"]==metric].sort_values("Period")
+        fig=px.line(g,x="Period",y="Value",markers=True,color="Segment" if g["Segment"].astype(str).str.len().gt(0).any() else None)
+        fig.update_layout(**{**CHART_BASE,"height":350,"xaxis_title":"Period","yaxis_title":str(g["Unit"].dropna().iloc[0]) if not g["Unit"].dropna().empty else "Value"})
+        st.plotly_chart(fig,use_container_width=True,config=PLOTLY_CFG,key=f"v19_user_trend_{country}_{_v19_hash_name(metric)}")
+        first=float(g.iloc[0]["Value"]); last=float(g.iloc[-1]["Value"]); delta=(last/first-1)*100 if first else np.nan
+        delta_text=f"{delta:+.1f}%" if pd.notna(delta) else "—"
+        _chart_takeaway(f"你的Approved数据中，“{metric}”从 {g.iloc[0]['Period']} 到 {g.iloc[-1]['Period']} 变化约 {delta_text}。该趋势由GitHub数据文件直接驱动，无需修改app.py。",f"Approved repository data show {metric} changed by about {delta_text}; the chart is file-driven, not hard-coded.","user")
+
+
+def render_v19_market_structure(country: str, cdata: dict):
+    _level_hdr(1,tr("Market Size & Structure", "市场规模与结构"),tr("Start with verified market facts, then explain the demand underneath them.","先讲真实市场数据，再解释需求从哪里来。"))
+    if country=="South Africa":
+        render_v19_sa_market_facts()
+        render_v19_sa_freight_demand()
+        render_v19_demand_fit(country,cdata)
+    else:
+        # User-approved repo metrics come before legacy model values.
+        user=_v19_repo_metrics(country)
+        if not user.empty:
+            _v19_evidence_header("user",tr("Approved market data from repository", "GitHub已批准市场数据"),tr("These rows come from data/manifest.csv entries marked Approved.","这些数据来自data/manifest.csv中Status=Approved的文件。"),[],"")
+            st.dataframe(user,hide_index=True,use_container_width=True)
+            _v19_render_approved_metric_chart(country,user)
+            _chart_takeaway("这是你自行录入并在manifest中批准的数据，可作为后续图表与市场判断的正式输入；建议所有关键数字同时维护Source ID与Source URL。","Approved repository data can drive subsequent charts; keep Source ID and Source URL for every material figure.","user")
+        auto=_verified_auto_rows(country)
+        if not auto.empty:
+            _v19_evidence_header("verified",tr("Latest automatic market data", "最新自动市场数据"),tr("Automatic data appears only after validation.","自动数据只有通过校验后才展示。"),[],str(auto.iloc[0]["Period"]),"Fail-closed")
+            st.dataframe(auto[["Metric","Value","Unit","Period","Source Name","Source URL"]],hide_index=True,use_container_width=True,column_config={"Source URL":st.column_config.LinkColumn(tr("Source","来源"),display_text=tr("Open","打开"))})
+        render_v19_demand_fit(country,cdata)
+        with st.expander(tr("Additional market depth / legacy analytical charts", "展开更多市场深度 / 旧版分析图"),expanded=False):
+            st.warning(tr("Only use the following legacy charts as research inputs unless the exact source is certified.","下列旧版图表只有在精确来源通过认证后才能作为事实；否则仅作为研究输入。"))
+            src=cdata.get("sources",{}).get("trade",("",""))
+            st.plotly_chart(chart_brand(gen_brand_df(country),country),use_container_width=True,config=PLOTLY_CFG,key=f"v19_legacy_brand_{country}")
+            if src[0]: st.caption(f"Legacy source label: {src[0]} · {src[1]}")
+            renderer=EXCLUSIVE_CHART_REGISTRY.get(country)
+            if renderer: renderer()
+
+
+def _v19_all_competitors(country: str) -> pd.DataFrame:
+    frames=[]
+    if country=="South Africa": frames.append(V19_SA_COMPETITORS.copy())
+    user=_v19_user_competitors(country)
+    if not user.empty: frames.append(user)
+    if not frames: return pd.DataFrame(columns=V19_COMPETITOR_COLUMNS)
+    df=pd.concat(frames,ignore_index=True)
+    # Prefer user-approved row when the same brand/model appears twice.
+    df["_user"]=df["Evidence Type"].astype(str).str.contains("user|field|internal",case=False,na=False).astype(int)
+    df=df.sort_values("_user").drop_duplicates(["Country","Farizon Model","Brand","Model"],keep="last").drop(columns="_user")
+    return df
+
+
+def render_v19_sa_competition():
+    _level_hdr(2,tr("Verified EV Commercial-Vehicle Benchmarks", "已验证新能源商用车竞品"),tr("OEM-published South African specs; unknown values remain blank.","仅使用南非OEM官方披露参数；未知数据保持空白，不猜测。"))
+    comp=_v19_all_competitors("South Africa")
+    _v19_evidence_header("verified",tr("Local EV benchmark set", "当地新能源竞品集合"),tr("Maxus and Foton products already marketed in South Africa provide a real benchmark for Farizon PVA.","Maxus与Foton已在南非销售的新能源商用车，可直接作为Farizon PVA基准。"),["ZA-MAXUS-EDELIVER3","ZA-FOTON-EVIEW","ZA-FOTON-ETRUCKMATE","ZA-FOTON-EAUMARK"],"Current")
+    show_cols=["Farizon Model","Brand","Model","Benchmark Type","Price Local","Currency","Battery kWh","Range km","Payload kg","Cargo m3","Warranty","Source URL"]
+    st.dataframe(comp[show_cols],hide_index=True,use_container_width=True,column_config={"Source URL":st.column_config.LinkColumn(tr("Official source","官方来源"),display_text=tr("Open","打开"))})
+
+    van=comp[comp["Farizon Model"].isin(["V6E","V7E"])].drop_duplicates(["Brand","Model"])
+    van=van[pd.to_numeric(van["Range km"],errors="coerce").notna() & pd.to_numeric(van["Cargo m3"],errors="coerce").notna()].copy()
+    if len(van)>=2:
+        van["Range km"]=pd.to_numeric(van["Range km"],errors="coerce"); van["Cargo m3"]=pd.to_numeric(van["Cargo m3"],errors="coerce")
+        fig=px.scatter(van,x="Cargo m3",y="Range km",text=van["Brand"]+" "+van["Model"],hover_data=["Battery kWh","Price Local","Payload kg"])
+        fig.update_traces(textposition="top center",marker=dict(size=18))
+        fig.update_layout(**{**CHART_BASE,"height":390,"xaxis_title":"Cargo volume (m³)","yaxis_title":"Published range (km)"})
+        st.plotly_chart(fig,use_container_width=True,config=PLOTLY_CFG,key="v19_za_evvan_landscape")
+        _chart_takeaway("Maxus eDeliver 3与Foton eView代表了南非现有纯电Van的两种定位：前者公开续航更高，后者货厢容积更大且有明确当地起售价。Farizon V6E/V7E要形成说服力，必须把自身价格、payload、cargo volume和质保录入后再做同图对比。","Maxus and Foton define two existing EV-van positions. Farizon needs its local price, payload, cargo volume and warranty loaded before a defensible PVA is possible.","verified")
+
+
+def render_v19_competition_channel(country: str, cdata: dict):
+    _level_hdr(1,tr("Competition & Dealer Landscape", "竞争与经销商格局"),tr("Who is already selling, what is the benchmark, and what dealer capability is required?", "谁已经在卖、对标是谁、什么渠道能力才足够？"))
+    if country=="South Africa":
+        render_v19_sa_competition()
+        _level_hdr(3,tr("Dealer Landscape", "经销商生态"),tr("Dealer analysis is about market-control capability, not CRM deadlines.","经销商分析关注市场控制与服务能力，不做CRM式截止日管理。"))
+        dealer=V16_DEALERS[V16_DEALERS["Country"]==country].copy()
+        if not dealer.empty:
+            st.dataframe(dealer[["Dealer / Group","Relationship Stage","Partner Score","Commercial Assessment","Data Type","Source ID"]],hide_index=True,use_container_width=True)
+        st.info(tr("Preferred partner profile: national CV sales and aftersales coverage, fleet-account capability, spare-parts discipline, EV technical readiness, and limited conflict with directly competing Chinese EV-CV brands.","理想经销商画像：全国性商用车销售与售后覆盖、Fleet大客户能力、备件管理、EV技术能力，以及较低的同级中国新能源商用车品牌冲突。"))
+    else:
+        render_v18_competition_channel(country,cdata)
+
+
+def render_v19_product_pva(country: str, cdata: dict):
+    _level_hdr(1,tr("Product Fit & PVA", "产品匹配与PVA"),tr("Every Farizon product must be attached to a real local benchmark set.","每个Farizon产品都必须绑定真实当地竞品集合。"))
+    models=_v18_pure_ev_models(cdata)
+    comp=_v19_all_competitors(country)
+    for item in models[:4]:
+        fm=str(item.get("model",""))
+        # Split combined model strings into display but retain a usable filter.
+        model_keys=[x.strip() for x in re.split(r"/|,",fm) if x.strip()]
+        rows=comp[comp["Farizon Model"].isin(model_keys)] if not comp.empty else pd.DataFrame()
+        bench=" / ".join((rows["Brand"].astype(str)+" "+rows["Model"].astype(str)).drop_duplicates().tolist()[:3]) if not rows.empty else tr("Awaiting local benchmark data", "待补当地竞品")
+        st.markdown(_v19_full_card(fm,_plain_text(item.get("role"),160),f"{tr('Local benchmarks','当地对标')}: {bench}. {_plain_text(item.get('logic'),260)}"),unsafe_allow_html=True)
+        if not rows.empty:
+            with st.expander(f"{fm} · {tr('competitor evidence','竞品证据')}",expanded=False):
+                st.dataframe(rows[["Brand","Model","Benchmark Type","Price Local","Currency","Battery kWh","Range km","Payload kg","Cargo m3","Warranty","Source URL"]],hide_index=True,use_container_width=True,column_config={"Source URL":st.column_config.LinkColumn(tr("Source","来源"),display_text=tr("Open","打开"))})
+    if country=="South Africa":
+        st.warning(tr("V19 deliberately does not invent V6E/V7E/F1E technical specifications. Add Farizon official specs and local target price through Data Intake → Competitor Specs / Product Specs, then the PVA will become quantitative.","V19不会虚构V6E/V7E/F1E参数。请通过“数据录入中心 → Competitor Specs / Product Specs”录入远程官方参数与当地目标价，PVA即可升级为定量对比。"))
+
+    _level_hdr(2,tr("60-Month TCO Benchmark", "60个月TCO基准"),tr("Country benchmark; all important assumptions remain visible.","国家级基准；关键假设全部可追溯。"))
+    p=cdata["tco_params"]
+    st.plotly_chart(chart_tco_breakeven(country),use_container_width=True,config=PLOTLY_CFG,key=f"v19_tco_{country}")
+    breakeven_month,_=calc_tco_breakeven(country)
+    ice_per_km=p["Diesel_Price_per_L"]*p["ICE_Consumption_L_per_100km"]/100
+    ev_per_km=p["Charging_Tariff_per_kWh"]*p["EV_Consumption_kWh_per_100km"]/100
+    be=tr("not reached within 60 months","60个月内未达到平衡") if breakeven_month is None else tr(f"around month {breakeven_month:.1f}",f"约第 {breakeven_month:.1f} 个月")
+    if ev_per_km < ice_per_km:
+        _chart_takeaway(f"国家基准下，纯电能源成本约 ${ev_per_km:.3f}/公里，低于燃油 ${ice_per_km:.3f}/公里；盈亏平衡点为{be}。这仍不是客户报价，必须用真实价格、里程、载重、充电和融资条件复算。",f"EV energy cost is lower than ICE under the country benchmark; break-even is {be}. Customer-specific inputs are still required.","derived")
+    else:
+        _chart_takeaway(f"国家基准下，纯电能源成本约 ${ev_per_km:.3f}/公里，高于或接近燃油 ${ice_per_km:.3f}/公里；盈亏平衡点为{be}。当前不应仅凭政策或ESG逻辑推进。",f"EV energy cost is not clearly below ICE under the current country benchmark; break-even is {be}.","derived")
+    with st.expander(tr("查看TCO全部假设与来源","展开查看TCO全部假设与来源"),expanded=False):
+        st.dataframe(pd.DataFrame([{
+            "ICE Capex":p["ICE_Capex"],"EV Capex":p["EV_Capex"],"Diesel/L":p["Diesel_Price_per_L"],
+            "Charging/kWh":p["Charging_Tariff_per_kWh"],"Monthly km":p["Monthly_km"],"Interest":p["Interest_Rate"],
+            "ICE residual":p["ICE_Residual_Pct"],"EV residual":p["EV_Residual_Pct"],
+            "ICE L/100km":p["ICE_Consumption_L_per_100km"],"EV kWh/100km":p["EV_Consumption_kWh_per_100km"]
+        }]),hide_index=True,use_container_width=True)
+        st.caption(f"Source reference: {p.get('source_name','')} · {p.get('source_url','')}")
+
+
+def render_v19_access_strategy(country: str, cdata: dict):
+    render_v18_access_strategy(country,cdata)
+    if country=="South Africa":
+        _v19_source_line("ZA-NRCS-VC8023","Current",tr("Use the exact compulsory specification for homologation evidence.","准入依据使用具体强制规范，而不是监管机构首页。"))
+
+
+def render_v19_executive_answer(country: str, cdata: dict):
+    portfolio=V15_PORTFOLIO[country]
+    alignment=cdata.get("farizon_alignment",{})
+    models=_v18_pure_ev_models(cdata)
+    model_names=" / ".join([m.get("model","") for m in models[:3]]) or "—"
+    mech=cdata.get("market_mechanics",{})
+    guard=cdata.get("strategic_guardrails",{})
+    decision={"Scale CBU":tr("Scale with controls","有条件放量"),"Controlled CBU":tr("Selective entry","选择性进入"),"Project-Based CBU":tr("Project-based entry","项目型进入"),"Validation CBU":tr("Validate first","先验证")}.get(portfolio["mode"],portfolio["mode"])
+    _level_hdr(1,f"{country} · {tr('Market Verdict','市场结论')}",tr("Answer first; evidence is directly below, not hidden in another workflow.","先给结论；证据紧跟其后，不要求用户跨页面反复验证。"))
+    cards=[
+        _v19_full_card(tr("Current verdict","当前判断"),decision,_plain_text(guard.get("green_zone"),420)),
+        _v19_full_card(tr("Product focus","产品重点"),model_names,_plain_text(alignment.get("portfolio_rule"),420)),
+        _v19_full_card(tr("Demand pool","需求池"),tr("See evidence below","见下方证据"),_plain_text(mech.get("value_pool"),420),"ZA-STATS-P7162-Q1-26" if country=="South Africa" else None),
+        _v19_full_card(tr("Market entry","市场入口"),tr("Dealer-led OEM model","经销商主导OEM模式"),_plain_text(mech.get("channel_ecosystem"),420)),
+        _v19_full_card(tr("Main friction","核心摩擦"),tr("Access + economics + service","准入 + 经济性 + 售后"),_plain_text(mech.get("market_access"),420)),
+        _v19_full_card(tr("Scale gate","放量条件"),tr("Evidence before volume","证据先于规模"),_plain_text(mech.get("governance_test"),420)),
+    ]
+    st.markdown('<div class="decision-grid">'+''.join(cards)+'</div>',unsafe_allow_html=True)
+    if country=="South Africa":
+        _chart_takeaway("南非不是“有没有商用车需求”的问题，而是“哪些需求既足够大、又适合纯电、并且能由合格经销商服务”。V19因此把NAAMSA销量、Stats SA货运需求、真实EV竞品和TCO放在同一条证据链中。","South Africa requires linking market demand, EV suitability, dealer capability and economics in one evidence chain.","derived")
+
+
+def _v19_template_df(dataset: str) -> pd.DataFrame:
+    if dataset=="Market Metrics":
+        return pd.DataFrame([["South Africa","2026-07","LCV","LCV sales",12345,"units","ZA-MY-SOURCE","NAAMSA","https://...","Official","A","Approved","2026-08-26"]],columns=V19_STANDARD_METRIC_COLUMNS)
+    if dataset in {"Competitor Specs","Product Specs"}:
+        return pd.DataFrame([["South Africa","V6E","Farizon","V6E","Ours",None,"ZAR",None,None,None,None,None,"","FARIZON-V6E-ZA","https://...","Official OEM","Current","Approved"]],columns=V19_COMPETITOR_COLUMNS)
+    if dataset=="Demand Fit Inputs":
+        return V19_SA_DEMAND_FIT_DEFAULT.head(1).copy()
+    return pd.DataFrame()
+
+
+def _v19_manifest_template() -> pd.DataFrame:
+    return pd.DataFrame([["data/public/south_africa/ZA_NAAMSA_2026-07_VEHICLE-SALES.xlsx","South Africa","Market Metrics","2026-07","NAAMSA","Official","A","Approved","https://...","Use standard metric schema"]],columns=V19_MANIFEST_COLUMNS)
+
+
+def render_v19_data_intake():
+    _level_hdr(1,tr("Data Intake Center", "市场数据录入中心"),tr("Upload for immediate analysis, or let Streamlit read approved files committed to GitHub.","可临时拖拽分析，也可让Streamlit直接读取GitHub仓库中已批准的数据文件。"))
+    st.info(tr("Persistence rule: files uploaded in the browser are temporary. For durable data, add the normalized file to data/public/ or data/inbox/ and register it in data/manifest.csv. Do not put confidential dealer/customer data in a public GitHub repository.","持久化规则：浏览器拖入的文件只用于当前分析。需要长期生效，请把标准化文件加入GitHub的 data/public/ 或 data/inbox/，并在 data/manifest.csv 登记。公开GitHub不要存放经销商报价、联系人、客户或其他内部敏感数据。"))
+
+    tab_upload,tab_repo,tab_templates=st.tabs([tr("Temporary Upload","临时拖拽"),tr("GitHub Inbox","GitHub数据箱"),tr("Templates","模板")])
+    with tab_upload:
+        dataset=st.selectbox(tr("Dataset type","数据类型"),["Market Metrics","Competitor Specs","Product Specs","Demand Fit Inputs","Evidence PDF"],key="v19_intake_type")
+        uploaded=st.file_uploader(tr("Drop CSV / XLSX / PDF here","拖入 CSV / XLSX / PDF"),type=["csv","xlsx","pdf"],key="v19_uploader")
+        if uploaded is not None:
+            ext=Path(uploaded.name).suffix.lower()
+            c1,c2,c3=st.columns(3)
+            country=c1.selectbox(tr("Country","国家"),list(TIER1.keys()),index=list(TIER1.keys()).index(st.session_state.selected_country) if st.session_state.selected_country in TIER1 else 0,key="v19_upload_country")
+            period=c2.text_input(tr("Period","数据期"),value="2026-08",key="v19_upload_period")
+            source=c3.text_input(tr("Source","来源"),value="Field / Official source",key="v19_upload_source")
+            source_url=st.text_input(tr("Source URL / evidence link","来源链接 / 证据链接"),value="",key="v19_upload_url")
+            source_type=st.selectbox(tr("Evidence type","证据类型"),["Official","Industry","OEM","Field Research","Internal Estimate"],key="v19_upload_evidence")
+            confidence=st.selectbox(tr("Confidence","可信度"),["A","B","C","D"],index=1,key="v19_upload_conf")
+            if ext==".pdf":
+                st.success(tr("PDF registered as evidence preview. V19 does not automatically turn an arbitrary PDF into market facts without a dataset-specific parser.","PDF作为证据文件登记。V19不会把任意PDF自动转换成市场事实，除非存在对应的数据解析器。"))
+                manifest_row=pd.DataFrame([[f"data/public/{country.lower().replace(' ','_')}/{uploaded.name}",country,"Evidence PDF",period,source,source_type,confidence,"Pending",source_url,"Upload file to GitHub, then mark Approved after review"]],columns=V19_MANIFEST_COLUMNS)
+                st.dataframe(manifest_row,hide_index=True,use_container_width=True)
+                st.download_button(tr("Download manifest row","下载manifest记录"),manifest_row.to_csv(index=False).encode("utf-8-sig"),file_name=f"manifest_{_v19_hash_name(uploaded.name)}.csv",mime="text/csv")
+            else:
+                try:
+                    raw=_v19_read_table(uploaded,uploaded.name)
+                    st.caption(tr(f"Detected {len(raw):,} rows × {len(raw.columns)} columns.",f"识别到 {len(raw):,} 行 × {len(raw.columns)} 列。"))
+                    st.dataframe(raw.head(30),hide_index=True,use_container_width=True)
+                    template=_v19_template_df(dataset)
+                    expected=list(template.columns)
+                    missing=[x for x in expected if x not in raw.columns]
+                    if not missing:
+                        normalized=raw[expected].copy()
+                        st.success(tr("Schema matched. File can be committed directly to GitHub after review.","字段与标准模板匹配，复核后可直接提交到GitHub。"))
+                    elif dataset=="Market Metrics" and len(raw.columns)>=2:
+                        st.warning(tr("Schema differs. Map the essential columns below; V19 will generate a normalized CSV for GitHub.","字段不同。请映射核心列，V19会生成可提交GitHub的标准CSV。"))
+                        opts=["—"]+list(raw.columns)
+                        m1,m2,m3,m4=st.columns(4)
+                        metric_col=m1.selectbox("Metric",opts,key="map_metric")
+                        value_col=m2.selectbox("Value",opts,key="map_value")
+                        segment_col=m3.selectbox("Segment",opts,key="map_segment")
+                        unit_col=m4.selectbox("Unit",opts,key="map_unit")
+                        normalized=pd.DataFrame()
+                        if metric_col!="—" and value_col!="—":
+                            normalized=pd.DataFrame({
+                                "Country":country,"Period":period,
+                                "Segment":raw[segment_col].astype(str) if segment_col!="—" else "",
+                                "Metric":raw[metric_col].astype(str),"Value":pd.to_numeric(raw[value_col],errors="coerce"),
+                                "Unit":raw[unit_col].astype(str) if unit_col!="—" else "",
+                                "Source ID":f"USER-{country[:2].upper()}-{_v19_hash_name(uploaded.name)}",
+                                "Source Name":source,"Source URL":source_url,"Evidence Type":source_type,
+                                "Confidence":confidence,"Status":"Pending","Updated At":datetime.now().strftime("%Y-%m-%d")
+                            }).dropna(subset=["Value"])
+                    else:
+                        normalized=pd.DataFrame()
+                        st.error(tr("This file does not match the selected template. Download the template, reshape the file, and upload again.","该文件与所选模板不匹配。请下载模板整理字段后重新上传。"))
+                    if not normalized.empty:
+                        _level_hdr(3,tr("Normalized Preview", "标准化预览"),tr("Nothing is written back automatically.","系统不会自动写回GitHub。"))
+                        st.dataframe(normalized.head(100),hide_index=True,use_container_width=True)
+                        safe=f"{country.replace(' ','_')}_{dataset.replace(' ','_')}_{period}.csv"
+                        st.download_button(tr("Download normalized CSV","下载标准化CSV"),normalized.to_csv(index=False).encode("utf-8-sig"),file_name=safe,mime="text/csv")
+                        rel=f"data/public/{country.lower().replace(' ','_')}/{safe}"
+                        manifest_row=pd.DataFrame([[rel,country,dataset,period,source,source_type,confidence,"Pending",source_url,"Review, commit file to GitHub, then change Status to Approved"]],columns=V19_MANIFEST_COLUMNS)
+                        st.download_button(tr("Download manifest row","下载manifest记录"),manifest_row.to_csv(index=False).encode("utf-8-sig"),file_name=f"manifest_{_v19_hash_name(safe)}.csv",mime="text/csv")
+                except Exception as exc:
+                    st.error(f"{type(exc).__name__}: {exc}")
+
+    with tab_repo:
+        files=_v19_scan_repo_files()
+        manifest=_v19_manifest()
+        k1,k2,k3=st.columns(3)
+        k1.metric(tr("Repository data files","仓库数据文件"),len(files))
+        k2.metric(tr("Manifest rows","Manifest记录"),len(manifest))
+        k3.metric(tr("Approved rows","已批准记录"),int((manifest["Status"].str.lower()=="approved").sum()) if not manifest.empty else 0)
+        if files.empty:
+            st.warning(tr("No files found under data/inbox/ or data/public/. Create those folders in GitHub and add files using the templates.","GitHub仓库的 data/inbox/ 与 data/public/ 下暂未发现文件。请创建文件夹并按模板上传。"))
+        else:
+            st.dataframe(files,hide_index=True,use_container_width=True)
+        approved=_v19_repo_metrics()
+        if not approved.empty:
+            st.success(tr(f"{len(approved):,} approved metric rows are readable by the dashboard.",f"看板当前可直接读取 {len(approved):,} 条已批准指标。"))
+            st.dataframe(approved.head(100),hide_index=True,use_container_width=True)
+        st.caption(tr("GitHub behaviour: Streamlit Cloud pulls repository files on deployment/restart. Adding an Approved file changes dashboard data without editing app.py.","GitHub工作方式：Streamlit Cloud部署/重启时会拉取仓库文件。新增Approved数据文件后，无需修改app.py即可改变看板数据。"))
+
+    with tab_templates:
+        for name in ["Market Metrics","Competitor Specs","Demand Fit Inputs"]:
+            df=_v19_template_df(name)
+            st.markdown(f"**{name}**")
+            st.dataframe(df,hide_index=True,use_container_width=True)
+            st.download_button(tr("Download template","下载模板"),df.to_csv(index=False).encode("utf-8-sig"),file_name=f"template_{name.lower().replace(' ','_')}.csv",mime="text/csv",key=f"tmpl_{name}")
+        m=_v19_manifest_template()
+        st.markdown("**data/manifest.csv**")
+        st.dataframe(m,hide_index=True,use_container_width=True)
+        st.download_button(tr("Download manifest template","下载manifest模板"),m.to_csv(index=False).encode("utf-8-sig"),file_name="manifest.csv",mime="text/csv",key="tmpl_manifest")
+
+
+def render_v19_intelligence_evidence(country: str, cdata: dict):
+    render_v18_intelligence_evidence(country,cdata)
+    repo=_v19_repo_metrics(country)
+    if not repo.empty:
+        _level_hdr(3,tr("Your Approved Market Evidence", "你的已批准市场数据"),tr("GitHub files approved through manifest.csv.","来自GitHub且已通过manifest.csv批准。"))
+        st.dataframe(repo,hide_index=True,use_container_width=True)
+    with st.expander(tr("V19 source registry", "V19来源库"),expanded=False):
+        combined=pd.concat([V19_SOURCE_REGISTRY,V16_SOURCES.rename(columns={"Source Name":"Title","Source URL":"URL","Publication Date":"Period"})[["Source ID","Country","Title","URL","Source Type","Period","Confidence"]].assign(Publisher="",Scope="Legacy register")],ignore_index=True,sort=False)
+        st.dataframe(combined,hide_index=True,use_container_width=True,column_config={"URL":st.column_config.LinkColumn(tr("Source URL","来源链接"),display_text=tr("Open","打开"))})
+
+
+def render_v19_global_governance():
+    render_v18_global_governance()
+    _level_hdr(3,tr("Repository Data Health", "GitHub数据健康度"),tr("Approved files can supplement or replace hard-coded research inputs.","Approved文件可以补充或替代硬编码研究输入。"))
+    files=_v19_scan_repo_files(); manifest=_v19_manifest(); metrics=_v19_repo_metrics()
+    c1,c2,c3=st.columns(3)
+    c1.metric(tr("Repo files","仓库文件"),len(files))
+    c2.metric(tr("Approved manifest rows","已批准Manifest"),int((manifest["Status"].str.lower()=="approved").sum()) if not manifest.empty else 0)
+    c3.metric(tr("Approved metric rows","已批准指标"),len(metrics))
+    if not files.empty: st.dataframe(files,hide_index=True,use_container_width=True)
+
+
 # 13. SESSION STATE
 # ══════════════════════════════════════════════════════════════════════════════
 if "selected_country" not in st.session_state:
@@ -5744,7 +6429,7 @@ with st.sidebar:
         Africa CV Intelligence
     </div>
     <div style="font-family:'Inter';font-size:.68rem;color:rgba(255,255,255,.4);margin-top:2px;">
-        Market Intelligence Edition · v18.0 · 12 Markets
+        Evidence-Driven Edition · v19.0 · 12 Markets
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -5755,6 +6440,7 @@ with st.sidebar:
         tr("Dealer Landscape", "经销商格局"),
         tr("Competitive Intelligence", "竞品情报"),
         tr("Data Governance", "数据治理"),
+        tr("Data Intake", "数据录入中心"),
     ]
     V16_VIEW = st.radio(
         tr("Workspace", "业务工作区"),
@@ -5827,7 +6513,7 @@ with h1:
         Africa Commercial Vehicle Market Intelligence
     </div>
     <div style="font-family:'Inter';font-size:.78rem;color:#9BA3B2;margin-top:3px;">
-        12 Tier 1 markets · Market Size → Demand → Competition → Channel → Product Fit → Access → Strategy
+        12 Tier 1 markets · Verified Market → Demand Evidence → Competition → Dealer → PVA/TCO → Access → Strategy
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -5854,7 +6540,10 @@ if V16_VIEW == tr("Competitive Intelligence", "竞品情报"):
     render_v16_global_competitor()
     st.stop()
 if V16_VIEW == tr("Data Governance", "数据治理"):
-    render_v18_global_governance()
+    render_v19_global_governance()
+    st.stop()
+if V16_VIEW == tr("Data Intake", "数据录入中心"):
+    render_v19_data_intake()
     st.stop()
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -6011,7 +6700,7 @@ if not is_t1:
     with m3: st.metric("Est. CV Imports", "{:,} units/yr".format(macro.get("cv_imports",0)), help="Regional trade estimate")
     st.caption("Source: [AfDB](https://www.afdb.org) · [IMF WEO](https://www.imf.org) · Indicative estimates.")
 else:
-    render_v18_executive_answer(sel, cdata)
+    render_v19_executive_answer(sel, cdata)
     tab_market, tab_comp, tab_product, tab_access, tab_intel = st.tabs([
         tr("📊 Market Size & Demand", "📊 市场规模与需求"),
         tr("🏢 Competition & Dealer", "🏢 竞争与经销商"),
@@ -6021,19 +6710,19 @@ else:
     ])
 
     with tab_market:
-        render_v18_market_structure(sel, cdata)
+        render_v19_market_structure(sel, cdata)
 
     with tab_comp:
-        render_v18_competition_channel(sel, cdata)
+        render_v19_competition_channel(sel, cdata)
 
     with tab_product:
-        render_v18_product_tco(sel, cdata)
+        render_v19_product_pva(sel, cdata)
 
     with tab_access:
-        render_v18_access_strategy(sel, cdata)
+        render_v19_access_strategy(sel, cdata)
 
     with tab_intel:
-        render_v18_intelligence_evidence(sel, cdata)
+        render_v19_intelligence_evidence(sel, cdata)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 18. INTELLIGENCE FEED — Tier 2 fallback only.
@@ -6056,7 +6745,7 @@ st.markdown(f"""
         <div>
             <strong style="color:#5A6070;">Africa CV Market Governance & Intelligence Platform v{APP_VERSION}</strong>
             &nbsp;·&nbsp; Internal strategic use only
-            &nbsp;·&nbsp; Market-first OEM view · Verified Data Gate · Demand Signals · Dealer Landscape · Pure-EV Product Fit
+            &nbsp;·&nbsp; Evidence-driven OEM view · Verified Data Gate · User Data Intake · Demand Evidence · PVA/TCO · Dealer Landscape
         </div>
         <div style="text-align:right;">
             RDB · RURA · NAAMSA · Stats SA · National Treasury ZA · ANME TN · OCP · DPFZA · MRA · JIRAMA · Reuters · Bloomberg · AfDB
