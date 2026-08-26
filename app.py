@@ -1,6 +1,6 @@
 """
 Africa Commercial Vehicle Market Governance & Intelligence Platform
-Decision-First Intelligence Engine v17.0
+Market Intelligence Edition v18.0
 McKinsey UX Refactor — Narrative-Flow Layout · Zero Text Overlap · Collapsed Intel Feed
 """
 
@@ -18,9 +18,9 @@ from urllib.request import Request, urlopen
 from urllib.parse import urljoin
 from datetime import datetime, timedelta
 
-APP_VERSION = "17.0.0"
+APP_VERSION = "18.0.0"
 DATA_VERSION = "2026-08-26"
-SCHEMA_VERSION = "1.0"
+SCHEMA_VERSION = "1.1"
 MODEL_NOTICE_EN = "Model estimate or internal judgement; not official market statistics."
 MODEL_NOTICE_ZH = "模型估算或内部判断，不代表官方市场统计。"
 
@@ -245,6 +245,60 @@ def _metric_row(country, metric, value, unit, period, confidence, source_name, s
     }
 
 
+AUTO_VALIDATION_RULES = {
+    "South Africa": {
+        "Passenger vehicle sales": (10_000, 70_000),
+        "Light CV <3501kg sales": (3_000, 35_000),
+        "Medium CV 3501-8500kg sales": (50, 4_000),
+        "Heavy CV 8501-16500kg sales": (50, 4_000),
+        "Extra Heavy CV >16500kg sales": (100, 6_000),
+        "Bus >8500kg sales": (0, 2_000),
+        "Industry total vehicle sales": (20_000, 100_000),
+    },
+    "Tunisia": {
+        "Camionnettes / utility registrations": (1_000, 40_000),
+        "Camionnettes / utility registrations — previous": (1_000, 40_000),
+        "Total VU market": (1_000, 50_000),
+        "Total VU market — previous": (1_000, 50_000),
+        "Total vehicle market": (10_000, 150_000),
+        "Total vehicle market — previous": (10_000, 150_000),
+    },
+    "Kenya": {
+        "Panel vans & pick-ups registrations": (500, 40_000),
+        "Lorries / trucks registrations": (500, 40_000),
+        "Buses & coaches registrations": (100, 15_000),
+        "Mini-buses / Matatu registrations": (100, 20_000),
+        "Total motor vehicle registrations": (20_000, 300_000),
+    },
+}
+
+def _certify_auto_df(country: str, rows: list[dict], source_url: str, source_name: str) -> pd.DataFrame:
+    if not rows:
+        return _auto_empty(country, "No parsed rows available for validation.", source_url, source_name)
+    rules=AUTO_VALIDATION_RULES.get(country,{})
+    errors=[]
+    for row in rows:
+        metric=row.get("Metric","")
+        value=pd.to_numeric(pd.Series([row.get("Value")]),errors="coerce").iloc[0]
+        if pd.isna(value):
+            errors.append(f"{metric}: non-numeric value")
+            continue
+        if metric in rules:
+            lo,hi=rules[metric]
+            if not (lo <= float(value) <= hi):
+                errors.append(f"{metric}: {value:,.0f} outside plausibility range {lo:,}–{hi:,}")
+    if country=="South Africa" and not errors:
+        by_metric={r["Metric"]:float(r["Value"]) for r in rows if pd.notna(r.get("Value"))}
+        total=by_metric.get("Industry total vehicle sales")
+        comps=[by_metric[x] for x in ["Passenger vehicle sales","Light CV <3501kg sales","Medium CV 3501-8500kg sales","Heavy CV 8501-16500kg sales","Extra Heavy CV >16500kg sales","Bus >8500kg sales"] if x in by_metric]
+        if total and len(comps)>=4 and sum(comps)>total*1.08:
+            errors.append(f"category subtotal {sum(comps):,.0f} exceeds industry total {total:,.0f}")
+    if errors:
+        return _auto_empty(country,"VALIDATION FAILED — automatic values withheld: "+" | ".join(errors[:4]),source_url,source_name)
+    for row in rows: row["Auto Status"]="Validated"
+    return pd.DataFrame(rows,columns=_AUTO_COLUMNS)
+
+
 def _fetch_tunisia_auto() -> pd.DataFrame:
     country = "Tunisia"
     cfg = AUTO_MARKET_SOURCE_CONFIG[country]
@@ -266,7 +320,7 @@ def _fetch_tunisia_auto() -> pd.DataFrame:
             rows.append(_metric_row(country, metric + " — previous", prev, "units", "2024", cfg["confidence"], cfg["source_name"], url))
         if not rows:
             return _auto_empty(country, "Source reachable but expected registration fields were not parsed; review parser.", url, cfg["source_name"])
-        return pd.DataFrame(rows, columns=_AUTO_COLUMNS)
+        return _certify_auto_df(country, rows, url, cfg["source_name"])
     except Exception as exc:
         return _auto_empty(country, f"Refresh failed: {type(exc).__name__}: {exc}", url, cfg["source_name"])
 
@@ -276,15 +330,15 @@ def _discover_naamsa_latest_pdf() -> str:
     raw = _http_bytes(landing)
     html_text = raw.decode("utf-8", errors="ignore")
     # Prefer FLASH standard monthly file. The YYYYMM portion makes lexical max reliable.
-    candidates = re.findall(r'href=["\']([^"\']*FLASH_STD_20\d{4}\.pdf)["\']', html_text, flags=re.I)
+    candidates = re.findall(r'href=["\']([^"\']*FLASH_STD_20\d{4}(?:-\d+)?\.pdf)["\']', html_text, flags=re.I)
     if not candidates:
         # Some WordPress pages expose absolute URLs without a quoted href in cached markup.
-        candidates = re.findall(r'https?://[^\s"\']*FLASH_STD_20\d{4}\.pdf', html_text, flags=re.I)
+        candidates = re.findall(r'https?://[^\s"\']*FLASH_STD_20\d{4}(?:-\d+)?\.pdf', html_text, flags=re.I)
     if not candidates:
         raise RuntimeError("Latest naamsa monthly FLASH PDF was not discovered on newsroom page")
     abs_urls = [urljoin(landing, c) for c in candidates]
     def key(u: str):
-        m = re.search(r"FLASH_STD_(20\d{4})\.pdf", u, flags=re.I)
+        m = re.search(r"FLASH_STD_(20\d{4})(?:-\d+)?\.pdf", u, flags=re.I)
         return m.group(1) if m else "000000"
     return max(abs_urls, key=key)
 
@@ -294,37 +348,33 @@ def _fetch_south_africa_auto() -> pd.DataFrame:
     cfg = AUTO_MARKET_SOURCE_CONFIG[country]
     try:
         pdf_url = _discover_naamsa_latest_pdf()
-        ym = re.search(r"FLASH_STD_(20\d{4})\.pdf", pdf_url, flags=re.I)
+        ym = re.search(r"FLASH_STD_(20\d{4})(?:-\d+)?\.pdf", pdf_url, flags=re.I)
         period = ym.group(1) if ym else "Latest month"
         raw = _http_bytes(pdf_url)
-        text = re.sub(r"\s+", " ", _pdf_text(raw))
-        rows = []
-        # Parse current-month local volumes from the Market-at-a-Glance table.
+        text = _pdf_text(raw)
+        text = re.sub(r"[\t\r]+", " ", text)
+        text = re.sub(r" +", " ", text)
+        num = r"(\d{1,3}(?:[ ,]\d{3})+|\d+)"
         specs = [
-            ("Passenger vehicle sales", r"Passenger\s+([0-9][0-9\s]{2,})\s+[0-9][0-9\s]{2,}"),
-            ("Light CV <3501kg sales", r"Light\s+CV\s*<\s*3501kg\s+([0-9][0-9\s]{2,})\s+[0-9][0-9\s]{1,}"),
-            ("Medium CV 3501-8500kg sales", r"Medium\s+CV\s+3501\s*[-–]\s*8500kg\s+([0-9][0-9\s]{1,})\s+[0-9][0-9\s]{0,}"),
-            ("Industry total vehicle sales", r"Industry\s+Total\s+([0-9][0-9\s]{2,})\s+[0-9][0-9\s]{2,}"),
+            ("Passenger vehicle sales", rf"Passenger\s+{num}"),
+            ("Light CV <3501kg sales", rf"Light(?:\s+Commercial)?\s+(?:Vehicles?|CV)\s*<\s*3\s*501\s*kg\s+{num}"),
+            ("Medium CV 3501-8500kg sales", rf"Medium(?:\s+Commercial)?\s+(?:Vehicles?|CV)\s+3\s*501\s*[-–]\s*8\s*500\s*kg\s+{num}"),
+            ("Heavy CV 8501-16500kg sales", rf"Heavy(?:\s+Commercial)?\s+(?:Vehicles?|CV)\s+8\s*501\s*[-–]\s*16\s*500\s*kg\s+{num}"),
+            ("Extra Heavy CV >16500kg sales", rf"Extra\s+Heavy(?:\s+Commercial)?\s+(?:Vehicles?|CV)\s*>\s*16\s*500\s*kg\s+{num}"),
+            ("Bus >8500kg sales", rf"Bus(?:es)?\s*>\s*8\s*500\s*kg\s+{num}"),
+            ("Industry total vehicle sales", rf"Industry\s+Total\s+{num}"),
         ]
-        for metric, pat in specs:
-            m = re.search(pat, text, flags=re.I)
+        rows=[]
+        for metric,pat in specs:
+            m=re.search(pat,text,flags=re.I)
             if m:
-                rows.append(_metric_row(country, metric, _int_token(m.group(1)), "units", period, cfg["confidence"], cfg["source_name"], pdf_url))
-        # Heavy CV family: add three sub-segments if present.
-        for metric, pat in [
-            ("Heavy CV 8501-16500kg sales", r"Heavy\s+CV\s+8501\s*[-–]\s*16500kg\s+([0-9][0-9\s]{1,})"),
-            ("Extra Heavy CV >16500kg sales", r"Extra\s+Heavy\s+CV\s*>\s*16500kg\s+([0-9][0-9\s]{1,})"),
-            ("Bus >8500kg sales", r"Bus\s*>\s*8500kg\s+([0-9][0-9\s]{1,})"),
-        ]:
-            m = re.search(pat, text, flags=re.I)
-            if m:
-                rows.append(_metric_row(country, metric, _int_token(m.group(1)), "units", period, cfg["confidence"], cfg["source_name"], pdf_url))
-        if not rows:
-            return _auto_empty(country, "Latest naamsa report discovered, but expected sales rows were not parsed.", pdf_url, cfg["source_name"])
-        return pd.DataFrame(rows, columns=_AUTO_COLUMNS)
+                rows.append(_metric_row(country,metric,_int_token(m.group(1)),"units",period,cfg["confidence"],cfg["source_name"],pdf_url,status="Parsed — awaiting validation"))
+        segment_count=sum(1 for r in rows if r["Metric"] in {"Light CV <3501kg sales","Medium CV 3501-8500kg sales","Heavy CV 8501-16500kg sales","Extra Heavy CV >16500kg sales","Bus >8500kg sales"})
+        if segment_count<3:
+            return _auto_empty(country,"NAAMSA report reached, but fewer than 3 commercial segments parsed; chart withheld.",pdf_url,cfg["source_name"])
+        return _certify_auto_df(country,rows,pdf_url,cfg["source_name"])
     except Exception as exc:
-        return _auto_empty(country, f"Refresh failed: {type(exc).__name__}: {exc}", cfg["landing_url"], cfg["source_name"])
-
+        return _auto_empty(country,f"Refresh failed: {type(exc).__name__}: {exc}",cfg["landing_url"],cfg["source_name"])
 
 def _fetch_kenya_auto() -> pd.DataFrame:
     country = "Kenya"
@@ -352,7 +402,7 @@ def _fetch_kenya_auto() -> pd.DataFrame:
                 rows.append(_metric_row(country, metric, _int_token(nums[-1]), "units", "2025*", cfg["confidence"], cfg["source_name"], url))
         if not rows:
             return _auto_empty(country, "KNBS survey downloaded but Table 13.4 could not be parsed; review parser.", url, cfg["source_name"])
-        return pd.DataFrame(rows, columns=_AUTO_COLUMNS)
+        return _certify_auto_df(country, rows, url, cfg["source_name"])
     except Exception as exc:
         return _auto_empty(country, f"Refresh failed: {type(exc).__name__}: {exc}", url, cfg["source_name"])
 
@@ -376,7 +426,7 @@ def fetch_auto_market_data(country: str) -> pd.DataFrame:
 def _auto_market_health(df: pd.DataFrame) -> tuple[str, int, int]:
     if df.empty:
         return "Unavailable", 0, 0
-    usable = df[(df["Data Type"] == "Reported") & pd.to_numeric(df["Value"], errors="coerce").notna()]
+    usable = df[(df["Data Type"] == "Reported") & (df["Auto Status"] == "Validated") & pd.to_numeric(df["Value"], errors="coerce").notna()]
     errors = df[df["Metric"] == "Auto refresh status"]
     if not usable.empty:
         return "Live", len(usable), len(errors)
@@ -3899,7 +3949,12 @@ def _verified_auto_rows(country: str) -> pd.DataFrame:
     if df.empty:
         return df
     numeric = pd.to_numeric(df["Value"], errors="coerce")
-    mask = df["Data Type"].eq("Reported") & numeric.notna() & df["Source URL"].fillna("").ne("")
+    mask = (
+        df["Data Type"].eq("Reported")
+        & numeric.notna()
+        & df["Source URL"].fillna("").ne("")
+        & df["Auto Status"].eq("Validated")
+    )
     out = df.loc[mask].copy()
     out["Value"] = pd.to_numeric(out["Value"], errors="coerce")
     return out
@@ -5078,6 +5133,65 @@ def render_v16_executive_brief(country: str, cdata: dict):
         st.caption(tr(MODEL_NOTICE_EN, MODEL_NOTICE_ZH))
 
 
+def render_v18_portfolio_home():
+    """Market-first portfolio: no synthetic pipeline KPIs."""
+    official_like = int(V16_METRIC_AUDIT["Data Type"].isin(["Reported","Official"]).sum())
+    modelled = int(V16_METRIC_AUDIT["Data Type"].isin(["Modelled","Estimated"]).sum())
+    high_priority = sum(1 for x in V15_PORTFOLIO.values() if x["attract"] >= 75)
+    execution_gaps = sum(1 for x in V15_PORTFOLIO.values() if x["attract"] - x["execute"] >= 25)
+
+    _level_hdr(1, tr("Africa Market Portfolio", "非洲市场组合"), tr("Market opportunity, executability and evidence quality — not CRM pipeline.", "只看市场机会、可执行性和证据质量，不看CRM式虚拟项目漏斗。"))
+    cards = [
+        (tr("Core markets", "核心市场"), len(V15_PORTFOLIO)),
+        (tr("High-attractiveness", "高吸引力市场"), high_priority),
+        (tr("Auto sales sources", "自动销量数据源"), len(AUTO_MARKET_SOURCE_CONFIG)),
+        (tr("Reported metrics", "公开/报告指标"), official_like),
+        (tr("Modelled metrics", "模型指标"), modelled),
+        (tr("Execution gaps", "高执行缺口"), execution_gaps),
+        (tr("Dealer records", "经销商记录"), len(V16_DEALERS)),
+        (tr("Low-confidence metrics", "低可信指标"), int(V16_METRIC_AUDIT["Confidence"].isin(["D","E"]).sum())),
+    ]
+    for col, (label, val) in zip(st.columns(8), cards):
+        with col:
+            st.metric(label, val)
+
+    _level_hdr(2, tr("Country Priority Matrix", "国家优先级矩阵"), tr("Bubble size is a planning-model market proxy, not verified sales.", "气泡大小为规划模型市场代理值，不等于已验证销量。"))
+    rows = [{
+        tr("Country","国家"):v15_country_label(name), "Country Key":name,
+        tr("Market Attractiveness","市场吸引力"):item["attract"], tr("CBU Executability","CBU可执行性"):item["execute"],
+        tr("Planning Market Proxy","规划市场代理值"):item["size"], tr("CBU Mode","CBU模式"):v15_mode_label(item["mode"]),
+        tr("Strategic Role","战略角色"):item["role"][1 if V15_LANG=="zh" else 0],
+    } for name,item in V15_PORTFOLIO.items()]
+    df = pd.DataFrame(rows)
+    fig = px.scatter(df, x=tr("CBU Executability","CBU可执行性"), y=tr("Market Attractiveness","市场吸引力"),
+                     size=tr("Planning Market Proxy","规划市场代理值"), color=tr("CBU Mode","CBU模式"), text=tr("Country","国家"),
+                     size_max=46, hover_data=[tr("Strategic Role","战略角色")])
+    fig.add_vline(x=60,line_dash="dot",line_color="#9BA3B2")
+    fig.add_hline(y=70,line_dash="dot",line_color="#9BA3B2")
+    fig.update_traces(textposition="top center")
+    fig.update_layout(**{**CHART_BASE,"height":470,"margin":dict(l=35,r=20,t=25,b=25)})
+    st.plotly_chart(fig,use_container_width=True,config=PLOTLY_CFG,key="v18_home_matrix")
+    _chart_takeaway("矩阵只回答“哪些市场值得优先研究与投入资源”。气泡大小仍是规划模型代理值；正式销量逐国由Verified Market Data替换。",
+                    "The matrix prioritises where to research and allocate resources. Bubble size remains a planning proxy until replaced by verified market-sales data.", "model")
+
+    _level_hdr(3, tr("Market Coverage", "市场覆盖与数据成熟度"), tr("Which countries already have automatic authoritative sales sources?", "哪些国家已经接入权威销量自动源？"))
+    maturity = []
+    for name,item in V15_PORTFOLIO.items():
+        cfg = AUTO_MARKET_SOURCE_CONFIG.get(name)
+        status = tr("Not configured","未配置")
+        source = "—"
+        if cfg:
+            source = cfg["source_name"]
+            health, usable, _ = _auto_market_health(fetch_auto_market_data(name))
+            status = f"{health} · {usable}"
+        maturity.append([v15_country_label(name),item["attract"],item["execute"],source,status,v15_mode_label(item["mode"])])
+    st.dataframe(pd.DataFrame(maturity, columns=[tr("Country","国家"),tr("Attract.","吸引力"),tr("Execute","执行性"),tr("Authoritative sales source","权威销量源"),tr("Auto status","自动状态"),tr("Entry mode","进入模式")]), hide_index=True, use_container_width=True)
+
+    _level_hdr(4, tr("Market Portfolio Table", "市场组合总表"), tr("One row per country; enter Country War Room for the full market story.", "每个国家一行；进入国家作战室查看完整市场逻辑。"))
+    st.dataframe(df.drop(columns=["Country Key"]), hide_index=True, use_container_width=True)
+    st.caption(tr(MODEL_NOTICE_EN, MODEL_NOTICE_ZH))
+
+
 def render_v16_portfolio_home():
     opportunities = _prepare_opportunity_pipeline(V16_OPPORTUNITIES.copy())
     actions = V16_ACTIONS.copy()
@@ -5252,6 +5366,369 @@ def render_v16_logic_audit(country: str):
             st.warning(issue)
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# V18 MARKET INTELLIGENCE LAYER
+# OEM perspective: explain the market first. Dealer ecosystem matters; synthetic
+# customer projects and weighted sales pipelines do not drive the country story.
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _plain_text(value, limit=220):
+    text = re.sub(r"<[^>]+>", " ", str(value or ""))
+    text = re.sub(r"[*_`#]+", "", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text if len(text) <= limit else text[:limit-1].rstrip() + "…"
+
+
+def _v18_verdict(country: str) -> tuple[str, str]:
+    p = V15_PORTFOLIO[country]
+    a, e = p["attract"], p["execute"]
+    if a >= 78 and e >= 60:
+        return tr("PRIORITY", "优先推进"), "good"
+    if a >= 75 and e < 60:
+        return tr("HIGH POTENTIAL · CONTROLLED ENTRY", "高潜力 · 受控进入"), "warn"
+    if a >= 60:
+        return tr("SELECTIVE ENTRY", "选择性进入"), ""
+    return tr("WATCH / REFERENCE", "观察 / 样板"), ""
+
+
+def _v18_pure_ev_models(cdata: dict) -> list[dict]:
+    models = []
+    for item in cdata.get("farizon_alignment", {}).get("models", []):
+        name = str(item.get("model", ""))
+        lower = name.lower()
+        if any(x in lower for x in ["ice", "diesel", "rugged", "ckd readiness"]):
+            continue
+        if name and (name.upper().startswith("V") or name.upper().startswith("F")):
+            models.append(item)
+    return models
+
+
+def _v18_best_demand(cdata: dict):
+    seg = cdata.get("segment_apps", {})
+    if not seg:
+        return "—", 0.0
+    name, data = max(seg.items(), key=lambda kv: float(kv[1].get("ev_readiness", 0)))
+    return name.split("(")[0].strip(), float(data.get("ev_readiness", 0))
+
+
+def render_v18_executive_answer(country: str, cdata: dict):
+    verdict, cls = _v18_verdict(country)
+    mechanics = cdata.get("market_mechanics", {})
+    models = _v18_pure_ev_models(cdata)
+    model_names = " / ".join(x["model"] for x in models[:3]) or tr("Product fit requires validation", "车型匹配待验证")
+    demand_name, demand_score = _v18_best_demand(cdata)
+    channel = _plain_text(mechanics.get("channel_ecosystem"), 105)
+    blocker = _plain_text(mechanics.get("market_access"), 105)
+    strategy = _plain_text(mechanics.get("governance_test"), 130)
+    value_pool = _plain_text(mechanics.get("value_pool"), 115)
+
+    st.markdown(f'''
+<div class="gtm-mission-banner">
+  <div class="gtm-mission-title">🎯 {v15_country_label(country)} · {tr("Market Verdict", "市场结论")}</div>
+  <div class="gtm-mission-sub">{tr("Answer first: market → demand → channel → product → access → strategy", "先给答案：市场 → 需求 → 渠道 → 产品 → 准入 → 战略")}</div>
+</div>''', unsafe_allow_html=True)
+
+    cards = (
+        _decision_card(tr("Market verdict", "市场判断"), verdict, f"Attract. {V15_PORTFOLIO[country]['attract']} · Execute {V15_PORTFOLIO[country]['execute']}", cls)
+        + _decision_card(tr("Demand focus", "需求重点"), demand_name, f"EV readiness {demand_score:.1f}/10 · {value_pool}")
+        + _decision_card(tr("Product priority", "产品优先"), model_names, tr("Pure-EV portfolio only", "仅纯电产品组合"))
+        + _decision_card(tr("Channel logic", "渠道逻辑"), tr("Dealer-led OEM entry", "经销商主导的OEM进入"), channel)
+        + _decision_card(tr("Main constraint", "主要约束"), tr("Access + execution", "准入 + 执行"), blocker)
+        + _decision_card(tr("Decision rule", "决策规则"), tr("Evidence before scale", "先验证再放量"), strategy)
+    )
+    st.markdown(f'<div class="decision-grid">{cards}</div>', unsafe_allow_html=True)
+    _chart_takeaway(
+        f"{v15_country_label(country)}当前结论为“{verdict}”。看板后续只围绕市场事实、需求场景、竞争/渠道、产品经济性和准入展开，不再用虚拟项目台数作为市场吸引力证据。",
+        f"Current verdict: {verdict}. The market case is driven by verified market evidence, demand, competition/channel, product economics and access — not synthetic project pipelines.",
+        "internal",
+    )
+
+
+def _v18_reference_kpis(cdata: dict):
+    items = list(cdata.get("kpi", {}).items())[:4]
+    if not items:
+        return
+    cols = st.columns(len(items))
+    for col, (label, payload) in zip(cols, items):
+        value = payload[0] if isinstance(payload, (tuple, list)) else payload
+        detail = payload[1] if isinstance(payload, (tuple, list)) and len(payload) > 1 else ""
+        with col:
+            st.metric(label, value, help=detail)
+    st.caption(tr(
+        "Reference KPIs are retained from the country research layer. They are not automatically promoted to VERIFIED unless linked to an audited source record.",
+        "以上为国家研究层参考KPI；只有绑定审计来源并通过校验的数据，才会升级为“已验证”。",
+    ))
+
+
+def _v18_auto_market_chart(country: str):
+    auto_df = _verified_auto_rows(country)
+    if auto_df.empty:
+        raw = fetch_auto_market_data(country) if country in AUTO_MARKET_SOURCE_CONFIG else pd.DataFrame()
+        if country in AUTO_MARKET_SOURCE_CONFIG:
+            status = ""
+            if not raw.empty and "Auto Status" in raw.columns:
+                status = str(raw.iloc[0].get("Auto Status", ""))
+            st.warning(tr(
+                f"Automatic source is configured but no validated metric is available. Chart withheld. {status}",
+                f"已配置自动数据源，但当前没有通过校验的指标，因此不展示图表。{status}",
+            ))
+        return False
+
+    source_name = str(auto_df.iloc[0]["Source Name"])
+    source_url = str(auto_df.iloc[0]["Source URL"])
+    period = str(auto_df.iloc[0]["Period"])
+    _chdr(tr("VERIFIED MARKET DATA", "已验证市场数据"), tr("Latest reported market structure", "最新公开市场结构"),
+          tr(f"Validated automatic extraction · period {period}", f"自动抓取并通过校验 · 数据期 {period}"), source_name, source_url)
+
+    if country == "South Africa":
+        fig, df = _sa_latest_sales_chart(auto_df)
+        if fig is None or df.empty:
+            st.warning(tr("Validated rows exist but the commercial segment chart cannot be formed.", "存在已验证数据，但不足以形成商用车细分图。"))
+            return False
+        st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CFG, key=f"v18_auto_{country}")
+        lcv = float(df.loc[df["Segment"].eq("LCV <3.5t"), "Units"].sum())
+        heavy = float(df.loc[df["Segment"].isin(["HCV 8.5–16.5t", "Extra HCV >16.5t", "Bus >8.5t"]), "Units"].sum())
+        _chart_takeaway(
+            f"本期NAAMSA通过校验的公开数据中，LCV约 {lcv:,.0f} 台；HCV + Extra HCV + Bus合计约 {heavy:,.0f} 台。该图只说明细分销量，不推断HCV渠道或省份分布。",
+            f"Validated NAAMSA data show about {lcv:,.0f} LCV units and {heavy:,.0f} units across HCV + Extra HCV + Bus. No HCV channel or province split is inferred.",
+            "verified",
+        )
+        return True
+
+    chart_df = auto_df[~auto_df["Metric"].str.contains("previous", case=False, na=False)].copy()
+    if chart_df.empty:
+        return False
+    fig = px.bar(chart_df, x="Metric", y="Value", text_auto=",.0f")
+    fig.update_traces(marker_color="#295BA5")
+    fig.update_layout(**{**CHART_BASE, "height":360, "showlegend":False, "margin":dict(l=25,r=15,t=15,b=95)})
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CFG, key=f"v18_auto_{country}")
+    top = chart_df.sort_values("Value", ascending=False).iloc[0]
+    _chart_takeaway(
+        f"最新已验证公开数据中，规模最大的已抓取指标为“{top['Metric']}”，约 {float(top['Value']):,.0f} 台。图中只展示自动抓取且通过合理性校验的公开指标。",
+        f"The largest validated reported metric currently captured is {top['Metric']} at about {float(top['Value']):,.0f} units. Only validated reported metrics are plotted.",
+        "verified",
+    )
+    return True
+
+
+def render_v18_market_structure(country: str, cdata: dict):
+    _level_hdr(1, tr("Market Size & Structure", "市场规模与结构"), tr("Facts first; models are visibly separated.", "先看事实；模型与事实严格分层。"))
+    if not _v18_auto_market_chart(country):
+        _v18_reference_kpis(cdata)
+
+    _level_hdr(2, tr("Demand Signals", "需求场景信号"), tr("Which operating scenarios are structurally suitable for BEV commercial vehicles?", "哪些真实运营场景更适合纯电商用车？"))
+    seg = gen_segment_apps_df(country).copy()
+    seg["Priority"] = seg["EV_Readiness"].apply(lambda x: tr("Priority", "重点") if x >= 6 else tr("Selective", "选择性") if x >= 3 else tr("Not priority", "非重点"))
+    seg["Farizon fit"] = seg["Application"].apply(
+        lambda x: "V6E / V7E" if "Urban" in x or "FMCG" in x else ("F1E · route validation" if "Port" in x else tr("Current portfolio gap", "当前产品不优先"))
+    )
+    fig = px.bar(seg.sort_values("EV_Readiness"), x="EV_Readiness", y="Application", orientation="h", text="Priority")
+    fig.update_traces(marker_color="#295BA5", textposition="outside")
+    fig.update_layout(**{**CHART_BASE, "height":330, "showlegend":False, "xaxis":{**CHART_BASE["xaxis"], "range":[0,10], "title":"EV readiness / 10"}, "yaxis":{**CHART_BASE["yaxis"], "title":""}})
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CFG, key=f"v18_demand_{country}")
+    best = seg.sort_values("EV_Readiness", ascending=False).iloc[0]
+    _chart_takeaway(
+        f"内部场景模型显示，“{best['Application'].split('(')[0].strip()}”是当前纯电适配度最高的需求池（{best['EV_Readiness']:.1f}/10）。这里不再把模型场景量伪装成市场销量，重点用于判断产品切入方向。",
+        f"The internal use-case model ranks {best['Application']} highest at {best['EV_Readiness']:.1f}/10. Modelled scenario volumes are intentionally not presented as market sales.",
+        "model",
+    )
+    with st.expander(tr("View demand-signal assumptions", "展开查看需求场景假设"), expanded=False):
+        st.dataframe(seg[["Application","EV_Readiness","Priority","Farizon fit"]], hide_index=True, use_container_width=True)
+        st.caption(tr(MODEL_NOTICE_EN, MODEL_NOTICE_ZH))
+
+    mech = cdata.get("market_mechanics", {})
+    _level_hdr(3, tr("How the Market Works", "市场运行机制"), tr("Demand pool, channel structure and entry friction in plain language.", "用最短文字讲清需求池、渠道结构和进入摩擦。"))
+    cards = (
+        _decision_card(tr("Value pool", "价值池"), tr("Where demand concentrates", "需求集中在哪里"), _plain_text(mech.get("value_pool"), 180))
+        + _decision_card(tr("Channel ecosystem", "渠道生态"), tr("Who controls access", "谁控制市场入口"), _plain_text(mech.get("channel_ecosystem"), 180))
+        + _decision_card(tr("Market access", "市场准入"), tr("What blocks entry", "进入主要障碍"), _plain_text(mech.get("market_access"), 180))
+    )
+    st.markdown(f'<div class="decision-grid">{cards}</div>', unsafe_allow_html=True)
+
+
+def render_v18_competition_channel(country: str, cdata: dict):
+    _level_hdr(1, tr("Competition & Dealer Landscape", "竞争与经销商格局"), tr("OEM view: who sells, who services, and which partner profile can carry the brand.", "OEM视角：谁在卖、谁能服务、什么样的经销商能承接品牌。"))
+    mech = cdata.get("market_mechanics", {})
+    _chart_takeaway(_plain_text(mech.get("channel_ecosystem"), 260), _plain_text(mech.get("channel_ecosystem"), 260), "derived")
+
+    dealers = _v16_country_frame(V16_DEALERS, country)
+    if not dealers.empty:
+        show = dealers[["Dealer / Group","Relationship Stage","Partner Score","Commercial Assessment","Data Type"]].copy()
+        st.dataframe(show, hide_index=True, use_container_width=True)
+        _chart_takeaway(
+            "现有经销商记录只用于OEM渠道版图和合作伙伴质量判断，不再与虚拟客户项目、预计台数或成交概率绑定。Partner Score属于内部判断。",
+            "Dealer records are used for OEM channel-landscape assessment only; they are no longer tied to synthetic customer projects or weighted pipelines. Partner Score is an internal judgement.",
+            "internal",
+        )
+    else:
+        st.info(tr("No named dealer record is stored for this market yet. Use the partner profile below to build the longlist.", "该市场尚未录入实名经销商。可先按下方伙伴画像建立Longlist。"))
+
+    _sdiv(tr("Preferred Dealer Profile", "理想经销商画像"))
+    criteria = [
+        tr("Commercial-vehicle sales and fleet-account capability", "具备商用车销售及大客户能力"),
+        tr("National or priority-city aftersales / parts coverage", "具备全国或重点城市售后及备件覆盖"),
+        tr("Ability to invest in EV diagnostics, training and demo vehicles", "愿意投入新能源诊断、培训和样车"),
+        tr("Access to leasing, finance and body-builder ecosystems", "能够连接租赁、金融及上装生态"),
+        tr("No unmanageable conflict with directly competing Chinese EV-CV brands", "不存在不可管理的中国新能源商用车同级品牌冲突"),
+    ]
+    st.markdown("\n".join(f"- {x}" for x in criteria))
+
+    intel = INTERNAL_COMPETITOR_DATA.get(country, {})
+    comp = pd.DataFrame(intel.get("competitors", []))
+    if comp.empty:
+        return
+    _level_hdr(2, tr("Competitive Positioning", "竞品卡位"), tr("Model layer until exact local price / sales sources are attached.", "在绑定当地精确价格/销量来源前，本层统一视为研究模型。"))
+    plot = comp.copy()
+    plot["Payload_Plot"] = pd.to_numeric(plot.get("Payload_kg"), errors="coerce").fillna(1000).clip(lower=300)
+    plot["Price_USD"] = pd.to_numeric(plot.get("Price_USD"), errors="coerce")
+    plot["Length_mm"] = pd.to_numeric(plot.get("Length_mm"), errors="coerce")
+    plot = plot.dropna(subset=["Price_USD","Length_mm"])
+    if not plot.empty:
+        fig = px.scatter(plot, x="Length_mm", y="Price_USD", color="Brand_Type", size="Payload_Plot", text="Model", size_max=32,
+                         color_discrete_map=BRAND_TYPE_COLORS, category_orders={"Brand_Type": BRAND_TYPE_ORDER})
+        fig.update_traces(textposition="top center", marker=dict(line=dict(color="white", width=1.2), opacity=.86))
+        fig.update_layout(**{**CHART_BASE, "height":430, "xaxis":{**CHART_BASE["xaxis"],"title":"Length (mm)"}, "yaxis":{**CHART_BASE["yaxis"],"title":"Indicative price (USD)"}})
+        st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CFG, key=f"v18_comp_{country}")
+        ours = plot[plot["Brand_Type"].astype(str).str.contains("Ours", na=False)]
+        rivals = plot[~plot.index.isin(ours.index)]
+        if not ours.empty and not rivals.empty:
+            our_p = float(ours.iloc[0]["Price_USD"]); rival_p = float(rivals["Price_USD"].mean())
+            delta = (our_p/rival_p-1)*100 if rival_p else 0
+            _chart_takeaway(
+                f"研究模型中，我方指示价格相对竞品均值约 {delta:+.1f}%。该图用于发现需要验证的PVA问题，不作为正式成交价或市场份额证据。",
+                f"In the research model, our indicative price is about {delta:+.1f}% versus the rival average. Use this to identify PVA questions, not as official transaction-price or market-share evidence.",
+                "model",
+            )
+        else:
+            _chart_takeaway("该图为竞品研究模型，正式价格、网点数和销量必须绑定具体Source ID后才能进入管理层事实层。",
+                            "This is a competitor research model. Price, network count and sales require exact source IDs before entering the management fact layer.", "model")
+    with st.expander(tr("View competitor research table", "展开查看竞品研究表"), expanded=False):
+        keep = [c for c in ["Model","Brand_Type","Price_USD","Length_mm","Payload_kg","Battery_kWh","Channel_Strategy","Channel_Count","Source_ID"] if c in comp.columns]
+        st.dataframe(comp[keep], hide_index=True, use_container_width=True)
+        st.caption(tr(MODEL_NOTICE_EN, MODEL_NOTICE_ZH))
+
+
+def render_v18_product_tco(country: str, cdata: dict):
+    _level_hdr(1, tr("Farizon Product Fit", "远程产品匹配"), tr("Only Pure-EV products are considered in the product recommendation layer.", "产品建议层只讨论远程纯电商用车。"))
+    alignment = cdata.get("farizon_alignment", {})
+    models = _v18_pure_ev_models(cdata)
+    if models:
+        cards = ""
+        for item in models[:4]:
+            cards += _decision_card(item.get("model",""), _plain_text(item.get("role"), 80), _plain_text(item.get("logic"), 145))
+        st.markdown(f'<div class="decision-grid">{cards}</div>', unsafe_allow_html=True)
+    else:
+        st.warning(tr("No Pure-EV model recommendation has passed the current strategic filter.", "当前没有通过纯电战略筛选的推荐车型。"))
+    st.caption(tr("Portfolio rule: ", "产品组合规则：") + _plain_text(alignment.get("portfolio_rule"), 320))
+
+    _level_hdr(2, tr("60-Month TCO Benchmark", "60个月TCO基准"), tr("Country-level benchmark, not a customer quote.", "国家级基准，不等于客户报价。"))
+    p = cdata["tco_params"]
+    st.plotly_chart(chart_tco_breakeven(country), use_container_width=True, config=PLOTLY_CFG, key=f"v18_tco_{country}")
+    breakeven_month, _ = calc_tco_breakeven(country)
+    ice_per_km = p["Diesel_Price_per_L"] * p["ICE_Consumption_L_per_100km"] / 100
+    ev_per_km = p["Charging_Tariff_per_kWh"] * p["EV_Consumption_kWh_per_100km"] / 100
+    if breakeven_month is None:
+        be = tr("60 months: no parity", "60个月内未达到平衡")
+    else:
+        be = tr(f"Parity around month {breakeven_month:.1f}", f"约第 {breakeven_month:.1f} 个月达到平衡")
+    if ev_per_km < ice_per_km:
+        zh = f"国家基准下，纯电能源成本约 ${ev_per_km:.3f}/公里，低于燃油 ${ice_per_km:.3f}/公里；{be}。真正成交仍需用经销商获取的客户真实里程、载重、充电和融资条件复算。"
+    else:
+        zh = f"国家基准下，纯电能源成本尚未低于燃油（EV ${ev_per_km:.3f}/公里 vs ICE ${ice_per_km:.3f}/公里）；{be}。不建议仅凭政策或ESG推进。"
+    _chart_takeaway(zh, zh, "derived")
+    with st.expander(tr("View TCO assumptions and source", "展开查看TCO假设与来源"), expanded=False):
+        st.dataframe(pd.DataFrame([{
+            "ICE Capex":p["ICE_Capex"],"EV Capex":p["EV_Capex"],"Diesel/L":p["Diesel_Price_per_L"],
+            "Charging/kWh":p["Charging_Tariff_per_kWh"],"Monthly km":p["Monthly_km"],"Interest":p["Interest_Rate"],
+            "ICE residual":p["ICE_Residual_Pct"],"EV residual":p["EV_Residual_Pct"]
+        }]), hide_index=True, use_container_width=True)
+        st.caption(f"Source reference: {p.get('source_name','')} · {p.get('source_url','')}")
+
+
+def render_v18_access_strategy(country: str, cdata: dict):
+    _level_hdr(1, tr("Market Access", "市场准入"), tr("Tariff, homologation, FX and operating constraints.", "关税、认证、外汇及运营约束。"))
+    p = cdata.get("policy", {})
+    sources = cdata.get("sources", {})
+    for title, key, icon, src_key in [
+        (tr("Tariff & Import", "关税与进口"), "tariff", "🏷", "customs"),
+        (tr("Certification & Homologation", "认证与准入"), "certification", "📋", "market"),
+        (tr("Market / Operating Risk", "市场与运营风险"), "risk", "⚠", "trade"),
+    ]:
+        src = sources.get(src_key, ("", ""))
+        st.markdown(f'<div class="pol-card"><div class="pol-card-title">{icon} {title}</div><p>{p.get(key, "—")}</p></div>', unsafe_allow_html=True)
+        if src[0]:
+            st.caption(f"Source: [{src[0]}]({src[1]})")
+
+    _level_hdr(2, tr("Operational Risk Screen", "运营风险筛查"), tr("Internal decision support; not an official country-risk rating.", "内部决策辅助，不是官方国家风险评级。"))
+    st.plotly_chart(chart_risk_radar(gen_risk_radar_df(country), country), use_container_width=True, config=PLOTLY_CFG, key=f"v18_risk_{country}")
+    gate = calc_gate_index(country)
+    _chart_takeaway(
+        f"内部Market Access Gate Index为 {gate:.0f}/100。该指数用于比较外汇、政策、关税、港口与电网约束，不能替代正式法规或信用审查。",
+        f"Internal Market Access Gate Index is {gate:.0f}/100. It compares FX, policy, tariff, port and grid constraints; it does not replace legal or credit review.",
+        "internal",
+    )
+
+    _level_hdr(3, tr("Recommended OEM Strategy", "建议OEM进入策略"), tr("What to do — and what not to do.", "应该怎么做，以及明确不做什么。"))
+    mech = cdata.get("market_mechanics", {})
+    guard = cdata.get("strategic_guardrails", {})
+    green = _plain_text(guard.get("green_zone"), 350)
+    rule = _plain_text(mech.get("governance_test"), 350)
+    st.success("**" + tr("Green zone / Recommended route", "绿色区间 / 推荐路径") + "**\n\n" + green)
+    st.info("**" + tr("Scale gate", "放量前置条件") + "**\n\n" + rule)
+    red_lines = guard.get("red_lines", [])
+    if red_lines:
+        st.warning("**" + tr("Red lines", "战略红线") + "**\n\n" + "\n".join(f"- {x}" for x in red_lines))
+
+
+def render_v18_intelligence_evidence(country: str, cdata: dict):
+    _level_hdr(1, tr("Current Market Signals", "最新市场信号"), tr("Recent external changes only; old stories are kept out of the current feed.", "只看近期外部变化；旧信息不进入当前情报流。"))
+    render_news_panel(cdata.get("news_query", ""), country)
+    _level_hdr(2, tr("Evidence & Data Quality", "证据与数据质量"), tr("Detailed audit is intentionally secondary to the market conclusion.", "证据审计刻意放在市场结论之后。"))
+    render_v16_data_governance(country)
+    render_v16_logic_audit(country)
+    with st.expander(tr("Open due-diligence evidence", "展开查看尽调证据"), expanded=False):
+        _render_due_diligence_tab(country, cdata)
+
+
+def render_v18_dealer_landscape_global():
+    _level_hdr(1, tr("Dealer Landscape", "经销商格局"), tr("OEM channel map — no synthetic customer pipeline.", "OEM渠道版图，不展示虚拟客户项目漏斗。"))
+    if V16_DEALERS.empty:
+        st.info(tr("No dealer records.", "暂无经销商记录。"))
+        return
+    countries = sorted(V16_DEALERS["Country"].dropna().unique().tolist())
+    selected = st.multiselect(tr("Country filter", "国家筛选"), countries, default=countries)
+    df = V16_DEALERS[V16_DEALERS["Country"].isin(selected)].copy()
+    show = df[["Country","Dealer / Group","Relationship Stage","Partner Score","Commercial Assessment","Data Type","Source ID"]]
+    st.dataframe(show, hide_index=True, use_container_width=True)
+    _chart_takeaway("该页面只回答“当地有哪些潜在/现有经销商、能力如何、与OEM是否匹配”。项目台数、成交概率和客户线索不再作为市场分析主线。",
+                    "This workspace answers which dealers exist and how well they fit the OEM. Synthetic project units and win probabilities are not part of the market-analysis storyline.", "internal")
+
+
+def render_v18_global_governance():
+    _level_hdr(1, tr("Data Governance", "数据治理"), tr("Which markets are automated, verified, stale or still model-based?", "哪些市场已自动化、已验证、过期或仍是模型？"))
+    cols = st.columns(4)
+    with cols[0]:
+        st.metric(tr("Auto sales adapters", "自动销量适配器"), len(AUTO_MARKET_SOURCE_CONFIG))
+    with cols[1]:
+        st.metric(tr("Registered sources", "来源记录"), len(V16_SOURCES))
+    with cols[2]:
+        st.metric(tr("Audited metrics", "已审计指标"), len(V16_METRIC_AUDIT))
+    with cols[3]:
+        st.metric(tr("Modelled metrics", "模型指标"), int(V16_METRIC_AUDIT["Data Type"].isin(["Modelled","Estimated"]).sum()))
+    rows = []
+    for country, cfg in AUTO_MARKET_SOURCE_CONFIG.items():
+        df = fetch_auto_market_data(country)
+        health, usable, errors = _auto_market_health(df)
+        detail = ""
+        if not df.empty and health != "Live":
+            detail = str(df.iloc[0].get("Auto Status", ""))
+        rows.append([country, cfg["source_name"], cfg["frequency"], health, usable, detail])
+    st.dataframe(pd.DataFrame(rows, columns=["Country","Auto source","Cadence","Status","Validated metrics","Parser / validation note"]), hide_index=True, use_container_width=True)
+    st.caption(tr("V18 is fail-closed: parser output cannot enter a VERIFIED chart until it passes plausibility and consistency checks.", "V18采用Fail-Closed：自动解析结果只有通过合理性与一致性校验后，才能进入“已验证”图表。"))
+    with st.expander(tr("Source register", "展开来源库"), expanded=False):
+        st.dataframe(V16_SOURCES, hide_index=True, use_container_width=True)
+
+
 # 13. SESSION STATE
 # ══════════════════════════════════════════════════════════════════════════════
 if "selected_country" not in st.session_state:
@@ -5267,7 +5744,7 @@ with st.sidebar:
         Africa CV Intelligence
     </div>
     <div style="font-family:'Inter';font-size:.68rem;color:rgba(255,255,255,.4);margin-top:2px;">
-        McKinsey UX Refactor · v16.0 · 12 Markets
+        Market Intelligence Edition · v18.0 · 12 Markets
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -5275,8 +5752,9 @@ with st.sidebar:
     _view_options = [
         tr("Market Portfolio", "市场组合"),
         tr("Country War Room", "国家作战室"),
-        tr("Customer & Channel", "客户与渠道"),
+        tr("Dealer Landscape", "经销商格局"),
         tr("Competitive Intelligence", "竞品情报"),
+        tr("Data Governance", "数据治理"),
     ]
     V16_VIEW = st.radio(
         tr("Workspace", "业务工作区"),
@@ -5346,10 +5824,10 @@ with h1:
     st.markdown("""
 <div style="padding:18px 0 6px 0;">
     <div style="font-family:'Inter';font-size:1.28rem;font-weight:700;color:#2D3142;letter-spacing:-.3px;">
-        Africa Commercial Vehicle Market & Sales Intelligence
+        Africa Commercial Vehicle Market Intelligence
     </div>
     <div style="font-family:'Inter';font-size:.78rem;color:#9BA3B2;margin-top:3px;">
-        12 Tier 1 markets · Decision → Monetisation → Depth → Action narrative flow
+        12 Tier 1 markets · Market Size → Demand → Competition → Channel → Product Fit → Access → Strategy
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -5367,13 +5845,16 @@ st.markdown('<hr style="margin:0 0 18px 0;border-color:#E2E5EB;">', unsafe_allow
 # V16 top-level workspaces. Country War Room deliberately falls through to the
 # original map and country renderer below, preserving the established page skin.
 if V16_VIEW == tr("Market Portfolio", "市场组合"):
-    render_v16_portfolio_home()
+    render_v18_portfolio_home()
     st.stop()
-if V16_VIEW == tr("Customer & Channel", "客户与渠道"):
-    render_v16_global_commercial()
+if V16_VIEW == tr("Dealer Landscape", "经销商格局"):
+    render_v18_dealer_landscape_global()
     st.stop()
 if V16_VIEW == tr("Competitive Intelligence", "竞品情报"):
     render_v16_global_competitor()
+    st.stop()
+if V16_VIEW == tr("Data Governance", "数据治理"):
+    render_v18_global_governance()
     st.stop()
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -5530,116 +6011,39 @@ if not is_t1:
     with m3: st.metric("Est. CV Imports", "{:,} units/yr".format(macro.get("cv_imports",0)), help="Regional trade estimate")
     st.caption("Source: [AfDB](https://www.afdb.org) · [IMF WEO](https://www.imf.org) · Indicative estimates.")
 else:
-    render_v16_executive_brief(sel, cdata)
-    tab_market, tab_customer, tab_product, tab_policy, tab_intel = st.tabs([
-        tr("📊 Market & Segment", "📊 市场与场景"),
-        tr("🤝 Customer & Channel", "🤝 客户与渠道"),
-        tr("🎯 Product, Price & TCO", "🎯 产品、价格与TCO"),
-        tr("📋 Policy, Risk & Actions", "📋 政策、风险与行动"),
+    render_v18_executive_answer(sel, cdata)
+    tab_market, tab_comp, tab_product, tab_access, tab_intel = st.tabs([
+        tr("📊 Market Size & Demand", "📊 市场规模与需求"),
+        tr("🏢 Competition & Dealer", "🏢 竞争与经销商"),
+        tr("🎯 Product, PVA & TCO", "🎯 产品、PVA与TCO"),
+        tr("📋 Access & Strategy", "📋 准入与战略"),
         tr("🕵️ Intelligence & Evidence", "🕵️ 情报与证据"),
     ])
 
     with tab_market:
-        _render_market_risk_tab(sel, cdata)
-        _render_signals_tab(sel, cdata)
+        render_v18_market_structure(sel, cdata)
 
-    with tab_customer:
-        render_v16_commercial_workspace(sel)
+    with tab_comp:
+        render_v18_competition_channel(sel, cdata)
 
     with tab_product:
-        _render_alignment_tab(sel, cdata)
-        st.info(
-            tr(
-                "The route-based TCO engine remains in Market & Segment in this framework release. "
-                "It will be moved here when vehicle and price master data are governed.",
-                "当前框架版本中，线路TCO模型仍保留在“市场与场景”。完成车型和价格主数据治理后，将整体迁移至本模块。",
-            )
-        )
+        render_v18_product_tco(sel, cdata)
 
-    with tab_policy:
-        p     = cdata["policy"]
-        src_c = cdata["sources"].get("customs",("",""))
-        src_m = cdata["sources"].get("market",("",""))
-        src_t = cdata["sources"].get("trade",("",""))
-
-        # Single-column policy cards (Task 1: no side-by-side long text)
-        st.markdown(f'<div class="pol-card"><div class="pol-card-title">🏷 Tariff & Import Structure</div><p>{p["tariff"]}</p></div>', unsafe_allow_html=True)
-        st.caption(f"Source: [{src_c[0]}]({src_c[1]})")
-
-        st.markdown(f'<div class="pol-card ok"><div class="pol-card-title">📋 Certification & Homologation</div><p>{p["certification"]}</p></div>', unsafe_allow_html=True)
-        st.caption(f"Source: [{src_m[0]}]({src_m[1]})")
-
-        st.markdown(f'<div class="pol-card"><div class="pol-card-title">🏗 Key Buyers & Procurement Bodies</div><p>{p["key_buyers"]}</p></div>', unsafe_allow_html=True)
-        st.caption(f"Source: [{src_t[0]}]({src_t[1]})")
-
-        st.markdown(f'<div class="pol-card warn"><div class="pol-card-title">⚠ Risk Factors & Operational Considerations</div><p>{p["risk"]}</p></div>', unsafe_allow_html=True)
-
-        _sdiv("Market Entry Assessment Scorecard")
-        all_sc = {
-            "Nigeria":      {"Market Size":9,"EV Readiness":7,"Tariff Advantage":9,"Regulatory Ease":5,"Growth Momentum":7},
-            "South Africa": {"Market Size":8,"EV Readiness":5,"Tariff Advantage":4,"Regulatory Ease":8,"Growth Momentum":4},
-            "Morocco":      {"Market Size":6,"EV Readiness":6,"Tariff Advantage":8,"Regulatory Ease":8,"Growth Momentum":8},
-            "Egypt":        {"Market Size":7,"EV Readiness":3,"Tariff Advantage":5,"Regulatory Ease":5,"Growth Momentum":8},
-            "Kenya":        {"Market Size":6,"EV Readiness":6,"Tariff Advantage":6,"Regulatory Ease":7,"Growth Momentum":8},
-            "Ethiopia":     {"Market Size":5,"EV Readiness":9,"Tariff Advantage":9,"Regulatory Ease":6,"Growth Momentum":9},
-            "Algeria":      {"Market Size":6,"EV Readiness":2,"Tariff Advantage":4,"Regulatory Ease":3,"Growth Momentum":5},
-            "Tunisia":      {"Market Size":4,"EV Readiness":8,"Tariff Advantage":9,"Regulatory Ease":7,"Growth Momentum":7},
-            "Rwanda":       {"Market Size":2,"EV Readiness":9,"Tariff Advantage":10,"Regulatory Ease":9,"Growth Momentum":8},
-            "Djibouti":     {"Market Size":2,"EV Readiness":5,"Tariff Advantage":3,"Regulatory Ease":5,"Growth Momentum":6},
-            "Mauritius":    {"Market Size":2,"EV Readiness":9,"Tariff Advantage":9,"Regulatory Ease":9,"Growth Momentum":6},
-            "Madagascar":   {"Market Size":4,"EV Readiness":1,"Tariff Advantage":3,"Regulatory Ease":4,"Growth Momentum":5},
-        }
-        scores = all_sc.get(sel, {d:5 for d in ["Market Size","EV Readiness","Tariff Advantage","Regulatory Ease","Growth Momentum"]})
-        for col, (dim, score) in zip(st.columns(5), scores.items()):
-            color = "#D04A02" if score>=8 else "#295BA5" if score>=6 else "#9BA3B2"
-            with col:
-                st.markdown(f"""
-<div style="background:white;border:1px solid #E2E5EB;border-radius:8px;
-            padding:14px 12px;box-shadow:0 1px 4px rgba(0,0,0,.06);text-align:center;">
-    <div style="font-family:'Inter';font-size:.6rem;font-weight:700;text-transform:uppercase;
-                letter-spacing:.6px;color:#9BA3B2;margin-bottom:7px;">{dim}</div>
-    <div style="font-family:'Inter';font-size:1.5rem;font-weight:700;color:{color};">
-        {score}<span style="font-size:.72rem;color:#9BA3B2;">/10</span></div>
-    <div style="background:#F0F2F5;border-radius:3px;height:4px;margin-top:8px;">
-        <div style="background:{color};width:{min(score*10,100)}%;height:4px;border-radius:3px;"></div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-        st.caption(f"Source: [{src_t[0]}]({src_t[1]}) · Assessment based on simulated and publicly available market intelligence.")
-        _render_due_diligence_tab(sel, cdata)
-        _render_guardrails_tab(sel, cdata)
-        _sdiv(tr("Action Register", "行动管理"))
-        country_actions = _v16_country_frame(V16_ACTIONS, sel)
-        if country_actions.empty:
-            st.info(tr("No structured action has been recorded.", "尚未录入结构化行动。"))
-        else:
-            st.dataframe(country_actions, hide_index=True, use_container_width=True)
+    with tab_access:
+        render_v18_access_strategy(sel, cdata)
 
     with tab_intel:
-        _render_competitive_intel_tab(sel, cdata)
-        render_v16_data_governance(sel)
-        render_v16_logic_audit(sel)
+        render_v18_intelligence_evidence(sel, cdata)
 
 # ══════════════════════════════════════════════════════════════════════════════
-# 18. INTELLIGENCE FEED — collapsed expander at the very bottom of the page.
-#     No longer a tab, no longer competing for visual attention with the
-#     structured dashboard above.
+# 18. INTELLIGENCE FEED — Tier 2 fallback only.
+# Tier 1 intelligence is integrated inside Intelligence & Evidence.
 # ══════════════════════════════════════════════════════════════════════════════
-st.markdown("<br>", unsafe_allow_html=True)
-news_query = cdata.get("news_query","") if is_t1 else f"{sel} transport logistics commercial vehicle"
-
-with st.expander(f"📡 点击展开：{sel} 近期商业与政策情报流 / Click to expand recent intelligence", expanded=False):
-    st.markdown(f"""
-<div style="background:#F8F9FB;border:1px solid #E2E5EB;border-radius:8px;
-            padding:11px 16px;margin-bottom:14px;font-family:'Inter';
-            font-size:.76rem;color:#5A6070;line-height:1.7;">
-    Sources: Reuters · Bloomberg · FT · Engineering News · BusinessDay · Zawya · Africa Report
-    &nbsp;·&nbsp; Automated RSS + curated inputs · 30-day primary / 90-day fallback
-    {"&nbsp;·&nbsp; <span style='color:#D04A02;'>⚠ Tier 2 — general coverage</span>" if not is_t1 else ""}
-</div>
-""", unsafe_allow_html=True)
-    render_news_panel(news_query, sel)
-    st.caption(f"Keywords used: `{news_query}` · Cache TTL: 30 minutes")
+if not is_t1:
+    st.markdown("<br>", unsafe_allow_html=True)
+    news_query = f"{sel} transport logistics commercial vehicle"
+    with st.expander(f"📡 {sel} recent market intelligence", expanded=False):
+        render_news_panel(news_query, sel)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # 19. FOOTER
@@ -5652,7 +6056,7 @@ st.markdown(f"""
         <div>
             <strong style="color:#5A6070;">Africa CV Market Governance & Intelligence Platform v{APP_VERSION}</strong>
             &nbsp;·&nbsp; Internal strategic use only
-            &nbsp;·&nbsp; +DJ/MU/MG Strategic Expansion · Immutable TCO · Signals · Guardrails · Farizon Alignment
+            &nbsp;·&nbsp; Market-first OEM view · Verified Data Gate · Demand Signals · Dealer Landscape · Pure-EV Product Fit
         </div>
         <div style="text-align:right;">
             RDB · RURA · NAAMSA · Stats SA · National Treasury ZA · ANME TN · OCP · DPFZA · MRA · JIRAMA · Reuters · Bloomberg · AfDB
