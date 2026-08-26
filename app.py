@@ -1,6 +1,6 @@
 """
 Africa Commercial Vehicle Market Governance & Intelligence Platform
-Enterprise BI Engine v16.0
+Decision-First Intelligence Engine v17.0
 McKinsey UX Refactor — Narrative-Flow Layout · Zero Text Overlap · Collapsed Intel Feed
 """
 
@@ -18,8 +18,8 @@ from urllib.request import Request, urlopen
 from urllib.parse import urljoin
 from datetime import datetime, timedelta
 
-APP_VERSION = "16.2.0"
-DATA_VERSION = "2026-08-25"
+APP_VERSION = "17.0.0"
+DATA_VERSION = "2026-08-26"
 SCHEMA_VERSION = "1.0"
 MODEL_NOTICE_EN = "Model estimate or internal judgement; not official market statistics."
 MODEL_NOTICE_ZH = "模型估算或内部判断，不代表官方市场统计。"
@@ -613,6 +613,29 @@ button[aria-selected="true"][data-baseweb="tab"]{
 .footprint-card-title{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#8B3000;margin-bottom:7px;}
 .footprint-card-body{font-size:.83rem;line-height:1.75;color:var(--txt);}
 .footprint-card-body b{color:#D04A02;}
+/* ── V17 Decision-first layer ── */
+.takeaway-box{
+    background:#F8FAFC;border:1px solid #DCE3EC;border-left:4px solid var(--navy);
+    border-radius:7px;padding:11px 14px;margin:6px 0 18px 0;
+    font-size:.80rem;line-height:1.65;color:var(--txt);
+}
+.takeaway-box.verified{border-left-color:var(--green);background:#F5FBF8;}
+.takeaway-box.derived{border-left-color:var(--blue);background:#F5F8FD;}
+.takeaway-box.model{border-left-color:var(--amber);background:#FFF9F0;}
+.takeaway-tag{
+    display:inline-block;font-size:.57rem;font-weight:800;letter-spacing:.6px;
+    padding:2px 7px;border-radius:20px;margin-right:7px;background:#E8EDF4;color:var(--navy);
+    text-transform:uppercase;vertical-align:1px;
+}
+.decision-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:8px 0 18px 0;}
+.decision-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:14px 16px;box-shadow:var(--shadow);min-height:104px;}
+.decision-card .k{font-size:.60rem;color:var(--dim);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:7px;}
+.decision-card .v{font-size:1rem;color:var(--txt);font-weight:750;line-height:1.35;}
+.decision-card .s{font-size:.69rem;color:var(--mid);line-height:1.45;margin-top:6px;}
+.decision-card.primary{border-top:3px solid var(--orange);}
+.decision-card.action{border-top:3px solid var(--green);}
+.evidence-line{font-size:.67rem;color:var(--dim);margin-top:4px;}
+@media(max-width:900px){.decision-grid{grid-template-columns:1fr;}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -3850,6 +3873,64 @@ def _chdr(label, title, sub, src_name, src_url):
 </div>
 """, unsafe_allow_html=True)
 
+
+def _chart_takeaway(zh_text: str, en_text: str = "", evidence: str = "verified"):
+    """Compact management takeaway shown immediately under important charts."""
+    labels = {
+        "verified": tr("VERIFIED", "已验证"),
+        "derived": tr("DERIVED", "派生结论"),
+        "model": tr("MODEL", "模型判断"),
+        "internal": tr("INTERNAL", "内部判断"),
+    }
+    css = evidence if evidence in {"verified", "derived", "model"} else "derived"
+    content = zh_text if V15_LANG == "zh" else (en_text or zh_text)
+    st.markdown(
+        f'<div class="takeaway-box {css}"><span class="takeaway-tag">{labels.get(evidence, labels["derived"])}</span>{content}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def _verified_auto_rows(country: str) -> pd.DataFrame:
+    """Only return numeric, source-linked auto rows that passed the adapter parser."""
+    try:
+        df = fetch_auto_market_data(country).copy()
+    except Exception:
+        return pd.DataFrame(columns=_AUTO_COLUMNS)
+    if df.empty:
+        return df
+    numeric = pd.to_numeric(df["Value"], errors="coerce")
+    mask = df["Data Type"].eq("Reported") & numeric.notna() & df["Source URL"].fillna("").ne("")
+    out = df.loc[mask].copy()
+    out["Value"] = pd.to_numeric(out["Value"], errors="coerce")
+    return out
+
+
+def _sa_latest_sales_chart(auto_df: pd.DataFrame):
+    """Latest NAAMSA segment chart. No channel/province inference is permitted."""
+    wanted = [
+        ("Light CV <3501kg sales", "LCV <3.5t"),
+        ("Medium CV 3501-8500kg sales", "MCV 3.5–8.5t"),
+        ("Heavy CV 8501-16500kg sales", "HCV 8.5–16.5t"),
+        ("Extra Heavy CV >16500kg sales", "Extra HCV >16.5t"),
+        ("Bus >8500kg sales", "Bus >8.5t"),
+    ]
+    rows = []
+    for metric, label in wanted:
+        hit = auto_df[auto_df["Metric"].eq(metric)]
+        if not hit.empty:
+            rows.append({"Segment": label, "Units": float(hit.iloc[0]["Value"])})
+    if not rows:
+        return None, pd.DataFrame()
+    df = pd.DataFrame(rows)
+    fig = px.bar(df, x="Segment", y="Units", text_auto=",.0f")
+    fig.update_traces(marker_color="#295BA5", hovertemplate="<b>%{x}</b><br>%{y:,.0f} units<extra></extra>")
+    fig.update_layout(**{**CHART_BASE, "height":340, "showlegend":False, "margin":dict(l=30,r=15,t=16,b=45)})
+    return fig, df
+
+
+def _decision_card(label: str, value: str, sub: str = "", cls: str = "") -> str:
+    return f'<div class="decision-card {cls}"><div class="k">{label}</div><div class="v">{value}</div><div class="s">{sub}</div></div>'
+
 def _level_hdr(level_num: int, title: str, sub: str = ""):
     st.markdown(f"""
 <div class="section-hdr">
@@ -4137,67 +4218,77 @@ def _render_market_risk_tab(country: str, cdata: dict):
                 "这是受控的国家市场基准，不是客户报价，页面端不能覆盖底层假设。",
             )
         )
+        if ev_per_km < ice_per_km:
+            _chart_takeaway(
+                f"当前国家基准下，纯电能源成本约 ${ev_per_km:.3f}/公里，低于燃油车 ${ice_per_km:.3f}/公里；但是否值得成交仍需结合客户实际里程、载重、充电和融资条件。",
+                f"EV energy cost is about ${ev_per_km:.3f}/km versus ICE ${ice_per_km:.3f}/km; customer route, payload, charging and finance still determine the deal case.",
+                "derived",
+            )
+        else:
+            _chart_takeaway(
+                f"当前国家基准下，纯电能源成本尚未形成明显优势（EV ${ev_per_km:.3f}/公里 vs ICE ${ice_per_km:.3f}/公里），不建议只凭政策或品牌逻辑推进。",
+                f"Current EV energy cost does not show a clear advantage (${ev_per_km:.3f}/km vs ICE ${ice_per_km:.3f}/km); do not proceed on policy or branding alone.",
+                "derived",
+            )
 
     _level_hdr(3, "Market Depth · 市场深度", "Brand competitive set and country-specific structural story")
 
     if country == "South Africa":
-        # South Africa keeps its full 4-chart Stats SA / NAAMSA depth panel —
-        # explicitly preserved at the user's request rather than collapsed
-        # into a single exclusive chart like the other markets.
-        src = cdata["sources"]["trade"]
-        STATSSA = "https://www.statssa.gov.za/publications/P7162/P7162.html"
-        NAAMSA  = "https://naamsa.co.za"
+        # V17 rule: verified facts drive the default view. Legacy simulated charts are
+        # retained only as clearly labelled research models and never presented as NAAMSA facts.
+        auto_sa = _verified_auto_rows("South Africa")
+        if not auto_sa.empty:
+            source_url = auto_sa.iloc[0]["Source URL"]
+            source_name = auto_sa.iloc[0]["Source Name"]
+            period = str(auto_sa.iloc[0]["Period"])
+            _chdr(
+                tr("VERIFIED · NAAMSA", "已验证 · NAAMSA"),
+                tr("Latest Commercial Vehicle Segment Sales", "最新商用车细分销量"),
+                tr(f"Latest parsed monthly report · period {period}", f"来自最新月度报告 · 数据期 {period}"),
+                source_name,
+                source_url,
+            )
+            fig, sa_seg = _sa_latest_sales_chart(auto_sa)
+            if fig is not None:
+                st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CFG, key="za_verified_segments")
+                lcv = sa_seg.loc[sa_seg["Segment"].eq("LCV <3.5t"), "Units"].sum()
+                heavy = sa_seg.loc[sa_seg["Segment"].isin(["HCV 8.5–16.5t","Extra HCV >16.5t","Bus >8.5t"]), "Units"].sum()
+                if lcv > 0 and heavy > 0:
+                    summary = f"本期NAAMSA可验证数据中，LCV销量约 {lcv:,.0f} 台；重型商用车相关细分（HCV + Extra HCV + Bus）合计约 {heavy:,.0f} 台。该图只回答‘各细分当前卖了多少’，不推断渠道或省份分布。"
+                else:
+                    summary = "本图仅使用NAAMSA最新月报中可直接解析的商用车细分销量，不对渠道、省份或客户结构作未经验证的推断。"
+                _chart_takeaway(summary, "Only directly parsed NAAMSA segment sales are shown; no channel or provincial inference is made.", "verified")
+        else:
+            st.warning(tr(
+                "Latest NAAMSA data could not be parsed. V17 intentionally hides old simulated HCV channel/province charts rather than presenting them as current facts.",
+                "暂未成功解析最新NAAMSA数据。V17会隐藏旧版模拟的HCV渠道/省份图，而不是将其继续当作实时事实展示。",
+            ))
 
-        row1_l, row1_r = st.columns(2, gap="large")
-        with row1_l:
-            _chdr("Competitive Set", f"Brand Market Share — {country}",
-                  "Top 5 brands by annual CV unit sales", src[0], src[1])
-            st.plotly_chart(chart_brand(gen_brand_df(country), country),
-                            use_container_width=True, config=PLOTLY_CFG, key=f"{country}_brand")
-        with row1_r:
-            _chdr("Exclusive · Transnet / NAAMSA",
-                  "Rail Collapse → Road HCV Demand Transfer",
-                  "Rail freight down 46% from 2018 peak; HCV road sales absorb displaced demand",
-                  "Transnet Annual Report",
-                  "https://www.transnet.net/InvestorCentre/Pages/AnnualReports.aspx")
-            st.plotly_chart(chart_za_scissors(), use_container_width=True, config=PLOTLY_CFG, key="za_scissors")
-
-        st.markdown("<br>", unsafe_allow_html=True)
-        row2_l, row2_r = st.columns(2, gap="large")
-        with row2_l:
-            _chdr("Exclusive · Stats SA P7162", "Road Freight Revenue by Commodity Category",
-                  "Mining & Quarrying dominates at 35.4% of total freight revenue", "Stats SA — P7162", STATSSA)
-            st.plotly_chart(chart_za_freight_cat(gen_za_freight_category()),
-                            use_container_width=True, config=PLOTLY_CFG, key="za_freight_cat")
-        with row2_r:
-            _chdr("Exclusive · Stats SA P7162", "Payload Volume vs. Freight Income — The Cost Squeeze",
-                  "Diverging trends illustrate per-km cost inflation burden on fleet operators",
-                  "Stats SA — P7162", STATSSA)
-            st.plotly_chart(chart_za_payload_income(gen_za_payload_income()),
-                            use_container_width=True, config=PLOTLY_CFG, key="za_payload_income")
-
-        st.markdown("<br>", unsafe_allow_html=True)
-        row3_l, row3_r = st.columns(2, gap="large")
-        with row3_l:
-            _chdr("Exclusive · NAAMSA", "HCV Sales by Channel",
-                  "Dealer retail dominates; corporate fleet growing", "NAAMSA", NAAMSA)
-            st.plotly_chart(chart_za_channel(gen_za_channel()),
-                            use_container_width=True, config=PLOTLY_CFG, key="za_channel")
-        with row3_r:
-            _chdr("Exclusive · NAAMSA", "HCV Sales by Province",
-                  "Gauteng accounts for 45.1% — industrial heartland concentration", "NAAMSA", NAAMSA)
-            st.plotly_chart(chart_za_province(gen_za_province()),
-                            use_container_width=True, config=PLOTLY_CFG, key="za_province")
-        st.caption(f"Sources: [Stats SA P7162]({STATSSA}) · [NAAMSA]({NAAMSA}) · Simulated data modelled on actual report structures.")
+        # Structural narrative is kept, but modelled charts are intentionally removed from the default management view.
+        with st.expander(tr("Research models / legacy analytical views (not management facts)", "研究模型 / 旧版分析视图（不得作为管理事实）"), expanded=False):
+            st.warning(tr(MODEL_NOTICE_EN, MODEL_NOTICE_ZH))
+            st.markdown(tr(
+                "The former HCV Sales by Channel and HCV Sales by Province charts were removed from the default view because the public NAAMSA monthly release does not directly substantiate those HCV-specific splits. Brand-share and freight-transfer views below remain analytical inputs unless an exact source table is attached.",
+                "旧版“HCV Sales by Channel”和“HCV Sales by Province”已从默认页面移除，因为公开NAAMSA月报不能直接支持HCV专属渠道/省份拆分。下方品牌份额、货运转移等内容在绑定精确来源表前仅作为研究输入。",
+            ))
+            src = cdata["sources"]["trade"]
+            _chdr(tr("MODEL", "模型"), tr("Legacy Brand Competitive Set", "旧版品牌竞争集合"), tr("Internal / modelled input", "内部/模型输入"), src[0], src[1])
+            st.plotly_chart(chart_brand(gen_brand_df(country), country), use_container_width=True, config=PLOTLY_CFG, key=f"{country}_brand_model")
+            _chart_takeaway("该品牌图属于模型/内部研究输入，未绑定可验证的NAAMSA品牌级商用车销量前，不用于正式市场份额结论。", "This brand chart is modelled and should not support formal market-share claims until exact source data are attached.", "model")
 
     else:
         brand_col, excl_col = st.columns(2, gap="large")
         with brand_col:
             src = cdata["sources"]["trade"]
-            _chdr("Competitive Set", f"Brand Market Share — {country}",
-                  "Top 5 brands by annual CV unit sales", src[0], src[1])
+            _chdr(tr("MODEL · Competitive Set", "模型 · 竞争集合"), f"Brand Market Share — {country}",
+                  tr("Modelled brand structure; not official share unless exact audited source is attached.", "模型化品牌结构；未绑定精确审计来源前不代表官方份额。"), src[0], src[1])
             st.plotly_chart(chart_brand(gen_brand_df(country), country),
                             use_container_width=True, config=PLOTLY_CFG, key=f"{country}_brand")
+            _chart_takeaway(
+                "该图当前用于识别竞争集合，而不是确认正式市场份额。品牌级销量进入Source Registry并通过审计前，不应引用为外部事实。",
+                "Use this chart to frame the competitive set, not as official market share until brand-level sales are audited.",
+                "model",
+            )
         with excl_col:
             renderer = EXCLUSIVE_CHART_REGISTRY.get(country)
             if renderer:
@@ -4700,6 +4791,7 @@ def _v16_country_frame(df: pd.DataFrame, country: str) -> pd.DataFrame:
 
 
 def render_v16_commercial_workspace(country: str):
+    """V17 commercial page: three decision cards first, tables only on demand."""
     dealers = _v16_country_frame(V16_DEALERS, country)
     customers = _v16_country_frame(V16_CUSTOMERS, country)
     opportunities = _prepare_opportunity_pipeline(_v16_country_frame(V16_OPPORTUNITIES, country))
@@ -4707,87 +4799,93 @@ def render_v16_commercial_workspace(country: str):
 
     _level_hdr(
         1,
-        tr("Commercial Decision Snapshot", "销售决策快照"),
-        tr(
-            "Dealer coverage, account access, weighted pipeline and immediate actions.",
-            "渠道覆盖、客户触达、加权项目管道与近期行动。",
-        ),
+        tr("Commercial Answer", "商业推进结论"),
+        tr("Opportunity, channel and customer fit first; raw records are collapsed below.", "先看项目、渠道和客户是否值得推进；原始记录默认收起。"),
     )
-    weighted_units = opportunities["Weighted Units"].sum() if not opportunities.empty else 0
-    weighted_value = opportunities["Weighted Value USD"].sum() if not opportunities.empty else 0
-    due_dates = pd.to_datetime(actions["Deadline"], errors="coerce") if not actions.empty else pd.Series(dtype="datetime64[ns]")
-    due_actions = int(due_dates.le(pd.Timestamp.now() + pd.Timedelta(days=60)).sum())
-
-    cards = [
-        (tr("Dealer candidates", "候选渠道"), len(dealers)),
-        (tr("Mapped customers", "已识别客户"), len(customers)),
-        (tr("Pipeline units", "项目台数"), int(opportunities["Expected Units"].sum()) if not opportunities.empty else 0),
-        (tr("Weighted units", "加权台数"), round(weighted_units, 1)),
-        (tr("Weighted value", "加权金额"), f"${weighted_value/1_000_000:.2f}m"),
-        (tr("Actions due ≤60d", "60天内到期行动"), due_actions),
-    ]
-    for col, (label, value) in zip(st.columns(6), cards):
-        with col:
-            st.metric(label, value)
 
     if dealers.empty and customers.empty and opportunities.empty:
-        st.info(
-            tr(
-                "Commercial records are not yet migrated for this market. The country analytics remain available; add named dealer, customer and project records before an investment decision.",
-                "该市场的销售记录尚未迁移。国家分析仍可使用，但投资决策前必须补充实名渠道、客户和项目记录。",
-            ),
-            icon="ℹ️",
-        )
+        st.info(tr(
+            "No named commercial record is available. Do not make an investment decision from market analytics alone.",
+            "暂无实名商业记录，不应仅凭市场分析作出投资决策。",
+        ))
         return
 
-    _sdiv(tr("Opportunity Pipeline", "项目管道"))
-    if opportunities.empty:
-        st.info(tr("No opportunity has been recorded.", "尚未录入项目机会。"))
-    else:
+    # Main opportunity
+    opp_html = _decision_card(tr("Current opportunity", "当前项目"), tr("No qualified project", "暂无明确项目"), tr("Add a named customer and project.", "需补充实名客户与项目。"), "primary")
+    if not opportunities.empty:
+        top = opportunities.sort_values("Weighted Value USD", ascending=False).iloc[0]
+        opp_html = _decision_card(
+            tr("Current opportunity", "当前项目"),
+            f"{top['Project']} · {int(top['Expected Units'])} {tr('units','台')}",
+            f"{top['Stage']} · {top['Effective Probability']:.0%} · ${top['Expected Units']*top['Unit Value USD']/1_000_000:.2f}m potential",
+            "primary",
+        )
+
+    dealer_html = _decision_card(tr("Channel status", "渠道状态"), tr("No named dealer", "暂无实名渠道"), tr("Channel evidence incomplete.", "渠道证据不完整。"))
+    if not dealers.empty:
+        d = dealers.sort_values("Partner Score", ascending=False).iloc[0]
+        dealer_html = _decision_card(
+            tr("Channel status", "渠道状态"),
+            f"{d['Dealer / Group']} · {d['Relationship Stage']}",
+            f"Score {int(d['Partner Score'])} · {d['Next Action']}",
+        )
+
+    customer_html = _decision_card(tr("Customer fit", "客户匹配"), tr("No named account", "暂无实名客户"), tr("Customer evidence incomplete.", "客户证据不完整。"), "action")
+    if not customers.empty:
+        c = customers.sort_values("Fit Score", ascending=False).iloc[0]
+        customer_html = _decision_card(
+            tr("Customer fit", "客户匹配"),
+            f"{c['Customer']} · {int(c['Fit Score'])}/100",
+            f"{c['Application']} · {int(c['Daily km'])} km/day · {c['Charging Readiness']} charging readiness",
+            "action",
+        )
+
+    st.markdown(f'<div class="decision-grid">{opp_html}{dealer_html}{customer_html}</div>', unsafe_allow_html=True)
+
+    if not opportunities.empty:
+        weighted_units = opportunities["Weighted Units"].sum()
+        weighted_value = opportunities["Weighted Value USD"].sum()
+        _chart_takeaway(
+            f"当前共录入 {int(opportunities['Expected Units'].sum())} 台机会，加权后约 {weighted_units:.1f} 台、${weighted_value/1_000_000:.2f}m。优先看项目阶段是否向 Pilot / Negotiation / PO 移动，而不是只看名义台数。",
+            f"Pipeline totals {int(opportunities['Expected Units'].sum())} units; weighted pipeline is {weighted_units:.1f} units / ${weighted_value/1_000_000:.2f}m. Prioritise stage progression over headline volume.",
+            "internal",
+        )
+
         stage_order = ["Research","Contacted","Qualified","Technical Fit","Proposal","Pilot","Commercial Fit","Negotiation","Tender","PO","Won","Lost"]
-        stage_units = (
-            opportunities.groupby("Stage")["Expected Units"].sum()
-            .reindex(stage_order, fill_value=0)
-            .reset_index()
-        )
-        fig = px.bar(
-            stage_units,
-            x="Stage",
-            y="Expected Units",
-            color="Expected Units",
-            color_continuous_scale=["#D9E5F5", "#295BA5"],
-            text_auto=True,
-        )
-        fig.update_layout(
-            **{
-                **CHART_BASE,
-                "height": 300,
-                "margin": dict(l=25, r=20, t=20, b=25),
-                "showlegend": False,
-                "coloraxis_showscale": False,
-            }
-        )
-        st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CFG, key=f"v16_pipe_{country}")
-        st.dataframe(opportunities, hide_index=True, use_container_width=True)
+        stage_units = opportunities.groupby("Stage")["Expected Units"].sum().reindex(stage_order, fill_value=0).reset_index()
+        stage_units = stage_units[stage_units["Expected Units"] > 0]
+        if not stage_units.empty:
+            fig = px.bar(stage_units, x="Stage", y="Expected Units", text_auto=True)
+            fig.update_traces(marker_color="#295BA5")
+            fig.update_layout(**{**CHART_BASE, "height":280, "margin":dict(l=25,r=20,t=15,b=30), "showlegend":False})
+            st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CFG, key=f"v17_pipe_{country}")
+            leading = stage_units.sort_values("Expected Units", ascending=False).iloc[0]
+            _chart_takeaway(
+                f"项目当前主要集中在 {leading['Stage']} 阶段（{int(leading['Expected Units'])} 台）。若连续两次复核未向下一Gate推进，应下调成交概率或重新评估资源投入。",
+                f"Pipeline concentration is in {leading['Stage']} ({int(leading['Expected Units'])} units). Reassess probability if it does not advance across two review cycles.",
+                "internal",
+            )
 
-    _sdiv(tr("Dealer and Customer Coverage", "渠道与客户覆盖"))
-    st.markdown("**" + tr("Dealer candidates", "候选渠道") + "**")
-    if dealers.empty:
-        st.caption(tr("No dealer record.", "暂无渠道记录。"))
-    else:
-        st.dataframe(dealers, hide_index=True, use_container_width=True)
-    st.markdown("**" + tr("Target accounts", "目标客户") + "**")
-    if customers.empty:
-        st.caption(tr("No customer record.", "暂无客户记录。"))
-    else:
-        st.dataframe(customers, hide_index=True, use_container_width=True)
-
-    st.caption(
-        tr(
-            "Commercial records shown here are internal planning inputs. Named prospects, scores, expected units and probabilities require country-manager verification.",
-            "本页客户、渠道、评分、预计台数及成交概率均为内部业务输入，须由国家经理核验。",
-        )
-    )
+    with st.expander(tr("View detailed opportunity / dealer / customer records", "展开查看项目、渠道与客户明细"), expanded=False):
+        _sdiv(tr("Opportunity Pipeline", "项目管道"))
+        if not opportunities.empty:
+            st.dataframe(opportunities, hide_index=True, use_container_width=True)
+        else:
+            st.caption(tr("No opportunity record.", "暂无项目记录。"))
+        _sdiv(tr("Dealer Candidates", "候选渠道"))
+        if not dealers.empty:
+            st.dataframe(dealers, hide_index=True, use_container_width=True)
+        else:
+            st.caption(tr("No dealer record.", "暂无渠道记录。"))
+        _sdiv(tr("Target Accounts", "目标客户"))
+        if not customers.empty:
+            st.dataframe(customers, hide_index=True, use_container_width=True)
+        else:
+            st.caption(tr("No customer record.", "暂无客户记录。"))
+        st.caption(tr(
+            "Commercial records are internal planning inputs and require country-manager verification.",
+            "客户、渠道、预计台数及概率均为内部业务输入，须由国家经理核验。",
+        ))
 
 
 def render_v16_data_governance(country: str):
@@ -4906,6 +5004,7 @@ def render_v16_data_governance(country: str):
 
 
 def render_v16_executive_brief(country: str, cdata: dict):
+    """V17 decision-first executive brief: answer first, evidence on demand."""
     portfolio = V15_PORTFOLIO[country]
     governance = cdata["strategic_guardrails"]
     alignment = cdata["farizon_alignment"]
@@ -4913,36 +5012,70 @@ def render_v16_executive_brief(country: str, cdata: dict):
     allowed = zh["green"] if zh else governance["green_zone"]
     portfolio_rule = zh["portfolio"] if zh else alignment["portfolio_rule"]
     model_names = " / ".join(item["model"] for item in alignment["models"][:3])
-    opps = _v16_country_frame(V16_OPPORTUNITIES, country)
+    opps = _prepare_opportunity_pipeline(_v16_country_frame(V16_OPPORTUNITIES, country))
+    dealers = _v16_country_frame(V16_DEALERS, country)
     actions = _v16_country_frame(V16_ACTIONS, country)
+
     pipeline_units = int(opps["Expected Units"].sum()) if not opps.empty else 0
-    next_action = actions.iloc[0]["Action"] if not actions.empty else tr(
-        "Complete named-account and partner validation.",
-        "完成实名客户与合作伙伴验证。",
-    )
-    deadline = actions.iloc[0]["Deadline"] if not actions.empty else "—"
+    weighted_units = float(opps["Weighted Units"].sum()) if not opps.empty else 0
     decision = (
-        tr("Prioritise", "优先投入") if portfolio["attract"] >= 75 and portfolio["execute"] >= 60
-        else tr("Conditional Go", "有条件进入") if portfolio["execute"] >= 55
-        else tr("Project Only / Hold", "仅项目制 / 暂缓")
+        tr("PRIORITISE", "优先推进") if portfolio["attract"] >= 75 and portfolio["execute"] >= 60
+        else tr("CONDITIONAL GO", "有条件进入") if portfolio["execute"] >= 55
+        else tr("PROJECT ONLY / HOLD", "仅项目制 / 暂缓")
     )
+    next_action = actions.iloc[0]["Action"] if not actions.empty else tr("Complete commercial validation", "完成商业验证")
+    deadline = actions.iloc[0]["Deadline"] if not actions.empty else "—"
+    blocker = (
+        str(dealers.iloc[0]["Commercial Assessment"]) if not dealers.empty
+        else tr("Named partner and customer evidence is incomplete.", "实名渠道与客户证据仍不完整。")
+    )
+    top_project = "—"
+    if not opps.empty:
+        top = opps.sort_values("Weighted Value USD", ascending=False).iloc[0]
+        top_project = f"{top['Project']} · {int(top['Expected Units'])} {tr('units','台')}"
+
     st.markdown(f"""
 <div class="gtm-mission-banner">
-  <div class="gtm-mission-title">🎯 {country} · {tr("Executive Brief", "管理层决策摘要")}</div>
-  <div class="gtm-mission-sub">{tr("Decision first · evidence below · owner and deadline attached", "先给结论 · 下接证据 · 明确责任与期限")}</div>
+  <div class="gtm-mission-title">🎯 {v15_country_label(country)} · {tr("Executive Answer", "管理层结论")}</div>
+  <div class="gtm-mission-sub">{tr("5-second answer first; detailed evidence is available below.", "先用5秒看懂结论，再按需展开证据。")}</div>
+</div>
+<div class="decision-grid">
+  {_decision_card(tr('Market verdict','市场结论'), decision, tr('Internal decision based on current attractiveness and executability.','基于当前市场吸引力与可执行性的内部判断。'), 'primary')}
+  {_decision_card(tr('Go-to-market','进入方式'), v15_mode_label(portfolio['mode']), allowed)}
+  {_decision_card(tr('Product focus','产品重点'), model_names, portfolio_rule)}
+  {_decision_card(tr('Current opportunity','当前机会'), f'{pipeline_units} {tr("units","台")} · {weighted_units:.1f} {tr("weighted","加权台数")}', top_project)}
+  {_decision_card(tr('Main blocker','主要阻碍'), tr('Commercial validation','商业验证'), blocker[:150])}
+  {_decision_card(tr('Next decision','下一决策'), next_action, f'{tr("Deadline","截止")}: {deadline}', 'action')}
 </div>
 """, unsafe_allow_html=True)
-    brief_rows = pd.DataFrame([
-        [tr("Current decision", "当前结论"), decision],
-        [tr("CBU mode", "CBU模式"), v15_mode_label(portfolio["mode"])],
-        [tr("Recommended models", "推荐车型"), model_names],
-        [tr("Permitted zone", "允许区间"), allowed],
-        [tr("Portfolio rule", "产品组合规则"), portfolio_rule],
-        [tr("Recorded pipeline", "已录入项目"), f"{pipeline_units} {tr('units', '台')}"],
-        [tr("Immediate action", "近期行动"), next_action],
-        [tr("Deadline", "截止时间"), deadline],
-    ], columns=[tr("Decision field", "决策字段"), tr("Management view", "管理判断")])
-    st.dataframe(brief_rows, hide_index=True, use_container_width=True)
+
+    # One-sentence management interpretation; source detail stays below.
+    if country == "South Africa":
+        _chart_takeaway(
+            "南非应继续推进，但不建议以‘泛HCV市场增长’作为电动化逻辑；当前最清晰的切入点仍是高里程、固定线路、回场充电的车队项目。",
+            "Proceed selectively: use high-mileage, fixed-route, depot-return fleets rather than broad HCV growth as the EV thesis.",
+            "internal",
+        )
+    else:
+        _chart_takeaway(
+            f"当前建议为“{decision}”。管理层优先关注下一项决策与主要阻碍，市场背景和方法论放在下方展开查看。",
+            f"Current recommendation: {decision}. Focus on the next decision and blocker; detailed evidence remains below.",
+            "internal",
+        )
+
+    with st.expander(tr("View decision evidence and definitions", "展开查看决策依据与口径"), expanded=False):
+        brief_rows = pd.DataFrame([
+            [tr("Current decision", "当前结论"), decision],
+            [tr("CBU mode", "CBU模式"), v15_mode_label(portfolio["mode"])],
+            [tr("Recommended models", "推荐车型"), model_names],
+            [tr("Allowed zone", "允许区间"), allowed],
+            [tr("Product portfolio rule", "产品组合规则"), portfolio_rule],
+            [tr("Pipeline", "已录入项目"), f"{pipeline_units} {tr('units','台')}"],
+            [tr("Next action", "近期行动"), next_action],
+            [tr("Deadline", "截止时间"), deadline],
+        ], columns=[tr("Decision field", "决策字段"), tr("Management view", "管理判断")])
+        st.dataframe(brief_rows, hide_index=True, use_container_width=True)
+        st.caption(tr(MODEL_NOTICE_EN, MODEL_NOTICE_ZH))
 
 
 def render_v16_portfolio_home():
@@ -5403,7 +5536,7 @@ else:
         tr("🤝 Customer & Channel", "🤝 客户与渠道"),
         tr("🎯 Product, Price & TCO", "🎯 产品、价格与TCO"),
         tr("📋 Policy, Risk & Actions", "📋 政策、风险与行动"),
-        tr("🕵️ Competition & Sources", "🕵️ 竞品与来源"),
+        tr("🕵️ Intelligence & Evidence", "🕵️ 情报与证据"),
     ])
 
     with tab_market:
