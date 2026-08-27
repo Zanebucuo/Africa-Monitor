@@ -1,6 +1,6 @@
 """
 Africa Commercial Vehicle Market Governance & Intelligence Platform
-Evidence-Driven Market Intelligence Edition v19.0
+Evidence & Deal Intelligence Edition v20.0
 McKinsey UX Refactor — Narrative-Flow Layout · Zero Text Overlap · Collapsed Intel Feed
 """
 
@@ -21,9 +21,9 @@ from pathlib import Path
 import hashlib
 import json
 
-APP_VERSION = "19.0.0"
+APP_VERSION = "20.0.0"
 DATA_VERSION = "2026-08-26"
-SCHEMA_VERSION = "1.2"
+SCHEMA_VERSION = "2.0"
 MODEL_NOTICE_EN = "Model estimate or internal judgement; not official market statistics."
 MODEL_NOTICE_ZH = "模型估算或内部判断，不代表官方市场统计。"
 
@@ -92,38 +92,12 @@ def v15_country_label(country: str) -> str:
 # components below remain untouched. These structured tables close the loop from
 # country insight to dealer, customer, opportunity and action management.
 # ─────────────────────────────────────────────────────────────────────────────
-V16_DEALERS = pd.DataFrame([
-    ["Tunisia","Loukil Group","Target",78,"National automotive group; validate EV-CV mandate and investment appetite.","Confirm management sponsor and service investment plan","2026-09-15","Judgement","SRC-MOD-01"],
-    ["Tunisia","Aures Auto / UADH","Target",70,"Potential channel case; legal-entity relationship and portfolio conflicts require verification.","Complete entity, brand and conflict map","2026-09-30","Judgement","SRC-MOD-01"],
-    ["South Africa","National CV Partner","Qualified",76,"National fleet and aftersales capability subject to SLA validation.","Agree anchor-fleet pilot SLA","2026-10-15","Judgement","SRC-MOD-01"],
-    ["Egypt","Institutional Import Partner","Target",64,"Importer capability depends on licence, FX access and secured settlement.","Validate licence and bank route","2026-10-31","Judgement","SRC-MOD-01"],
-    ["Rwanda","EV Mobility Partner","Qualified",74,"Strong EV orientation; fleet scale and technical capacity remain gating items.","Select pilot accounts and charging scope","2026-09-30","Judgement","SRC-MOD-01"],
-], columns=["Country","Dealer / Group","Relationship Stage","Partner Score","Commercial Assessment","Next Action","Deadline","Data Type","Source ID"])
-
-V16_CUSTOMERS = pd.DataFrame([
-    ["Tunisia","Tunis Urban Logistics Prospect","3PL",120,"Last-mile delivery",150,"Medium",78,"Collect route and depot-power data","Judgement","SRC-MOD-01"],
-    ["Tunisia","Public Utility Prospect","Utility",200,"Service fleet",90,"High",72,"Confirm tender and replacement cycle","Judgement","SRC-MOD-01"],
-    ["South Africa","National Parcel Fleet Prospect","3PL",850,"Parcel delivery",180,"Medium",88,"Build 20-unit pilot TCO and SLA","Judgement","SRC-MOD-01"],
-    ["Egypt","State-linked Fleet Prospect","Institutional",500,"Service fleet",120,"Low",65,"Verify funding and import pathway","Judgement","SRC-MOD-01"],
-    ["Rwanda","Kigali Delivery Prospect","Delivery",80,"Urban delivery",100,"High",80,"Confirm depot charging design","Judgement","SRC-MOD-01"],
-], columns=["Country","Customer","Type","Fleet Size","Application","Daily km","Charging Readiness","Fit Score","Next Action","Data Type","Source ID"])
-
-V16_OPPORTUNITIES = pd.DataFrame([
-    ["Tunisia","Tunis last-mile pilot","Electric LCV","Pilot",20,38000,.55,"2027-03-31","Medium","Complete route TCO","2026-09-30"],
-    ["Tunisia","Utility fleet validation","Electric LCV","Qualified",30,39000,.25,"2027-06-30","Medium","Confirm tender calendar","2026-10-15"],
-    ["South Africa","National parcel pilot","Large electric van","Proposal",50,52000,.40,"2027-04-30","Medium","Submit pilot SLA","2026-10-15"],
-    ["Egypt","Institutional fleet project","Electric LCV","Research",100,35000,.05,"2027-12-31","High","Validate FX allocation","2026-10-31"],
-    ["Rwanda","Kigali showcase","Compact electric van","Negotiation",15,32000,.70,"2027-02-28","Low","Close charging scope","2026-09-15"],
-], columns=["Country","Project","Vehicle","Stage","Expected Units","Unit Value USD","Probability","Expected Close","Risk","Next Action","Next Action Date"])
-
-V16_ACTIONS = pd.DataFrame([
-    ["Tunisia","Regulation","Obtain written homologation checklist","P0","Homologation","2026-09-15","Open","Approved document checklist"],
-    ["Tunisia","Channel","Complete Loukil / Aures scorecard","P0","Country Manager","2026-09-30","Open","Partner recommendation"],
-    ["Tunisia","Customer","Collect duty cycle from two anchor fleets","P0","Country Manager","2026-10-15","Open","Route-based TCO"],
-    ["South Africa","Customer","Define national parcel pilot","P0","Country Manager","2026-10-15","Open","Vehicle SLA and trial plan"],
-    ["Egypt","Finance","Validate secured FX and payment route","P0","Finance","2026-10-31","Open","Written payment structure"],
-    ["Rwanda","Pilot","Close depot charging scope","P1","Country Manager","2026-09-15","Open","Charging BOQ"],
-], columns=["Country","Workstream","Action","Priority","Owner","Deadline","Status","Expected Output"])
+# V20: dynamic commercial流水不再硬编码在核心代码中。
+# 空表仅保留旧函数兼容；主页面通过外部Loader读取经销商/人工市场输入。
+V16_DEALERS = pd.DataFrame(columns=["Country","Dealer / Group","Relationship Stage","Partner Score","Commercial Assessment","Next Action","Deadline","Data Type","Source ID"])
+V16_CUSTOMERS = pd.DataFrame(columns=["Country","Customer","Type","Fleet Size","Application","Daily km","Charging Readiness","Fit Score","Next Action","Data Type","Source ID"])
+V16_OPPORTUNITIES = pd.DataFrame(columns=["Country","Project","Vehicle","Stage","Expected Units","Unit Value USD","Probability","Expected Close","Risk","Next Action","Next Action Date"])
+V16_ACTIONS = pd.DataFrame(columns=["Country","Workstream","Action","Priority","Owner","Deadline","Status","Expected Output"])
 
 V16_SOURCES = pd.DataFrame([
     ["SRC-TN-01","Tunisia","Institut National de la Statistique","https://www.ins.tn/statistiques/117","Government","2024-12-31","A","Transport statistics","Exact downloadable table preferred"],
@@ -6414,6 +6388,629 @@ def render_v19_global_governance():
     if not files.empty: st.dataframe(files,hide_index=True,use_container_width=True)
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# V20 EVIDENCE & DEAL INTELLIGENCE — CLOUD-NATIVE DATA DECOUPLING
+# - Browser uploads are TEMPORARY ONLY: parse → validate → normalize → download.
+# - Public/reproducible research may still be read from GitHub repository files.
+# - High-frequency human-maintained data is read from Google Sheets when configured.
+# - No runtime local writes are used for persistence.
+# - CRM-style customers/opportunities stay outside the core market-intelligence model.
+# - Deal Desk restores client-side TCO interaction without exposing OEM cost/margin.
+# ══════════════════════════════════════════════════════════════════════════════
+
+V20_GSHEET_WORKSHEETS = {
+    "dealer_landscape": "dealer_landscape",
+    "market_manual_inputs": "market_manual_inputs",
+    "competitor_specs": "competitor_specs",
+    "product_specs": "product_specs",
+    "demand_fit_inputs": "demand_fit_inputs",
+    "source_registry": "source_registry",
+    "field_evidence": "field_evidence",
+}
+
+V20_DEALER_COLUMNS = [
+    "Country", "Dealer / Group", "Relationship Stage", "Partner Score",
+    "Commercial Assessment", "CV Experience", "Aftersales", "Fleet Capability",
+    "EV Capability", "Chinese Brand Conflict", "Data Type", "Source ID", "Source URL"
+]
+
+# Demonstration fallback only. It is NOT treated as verified market fact and is
+# used only when a private Google Sheet has not yet been configured.
+V20_DEALER_FALLBACK = pd.DataFrame([
+    ["Tunisia","Loukil Group","Target",78,"National automotive group; validate commercial-vehicle mandate and EV investment appetite.","High","High","High","Medium","Medium","Demo / Internal","DEMO-NOT-FACT",""],
+    ["Tunisia","Aures Auto / UADH","Target",70,"Potential automotive channel; entity relationship and portfolio conflicts require verification.","Medium","Medium","Medium","Medium","Medium","Demo / Internal","DEMO-NOT-FACT",""],
+    ["South Africa","National CV Partner","Illustrative",76,"Illustrative partner profile only; replace with named dealer evidence in Google Sheets.","High","High","High","Medium","Low","Demo / Internal","DEMO-NOT-FACT",""],
+    ["Egypt","Institutional Import Partner","Illustrative",64,"Illustrative importer profile; replace with verified legal entity, licence and brand portfolio.","Medium","Medium","High","Low","Medium","Demo / Internal","DEMO-NOT-FACT",""],
+    ["Rwanda","EV Mobility Partner","Illustrative",74,"Illustrative EV-oriented partner profile; verify service scale and commercial-vehicle capability.","Medium","Medium","Medium","High","Low","Demo / Internal","DEMO-NOT-FACT",""],
+], columns=V20_DEALER_COLUMNS)
+
+
+def _v20_has_gsheets_config() -> bool:
+    try:
+        connections = st.secrets.get("connections", {})
+        return bool(connections and connections.get("gsheets"))
+    except Exception:
+        return False
+
+
+def _v20_read_sheet(worksheet: str, ttl: int = 300) -> pd.DataFrame:
+    """Read-only Google Sheets connector. Fails closed to an empty DataFrame."""
+    if not _v20_has_gsheets_config():
+        return pd.DataFrame()
+    try:
+        from streamlit_gsheets import GSheetsConnection
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        df = conn.read(worksheet=worksheet, ttl=ttl)
+        return pd.DataFrame(df).dropna(how="all")
+    except Exception:
+        return pd.DataFrame()
+
+
+def _v20_normalize(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+    out = pd.DataFrame(df).copy()
+    for c in columns:
+        if c not in out.columns:
+            out[c] = ""
+    return out[columns]
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_dealer_landscape() -> pd.DataFrame:
+    """External dealer research loader. Primary backend: private Google Sheets."""
+    live = _v20_read_sheet(V20_GSHEET_WORKSHEETS["dealer_landscape"], ttl=300)
+    if not live.empty:
+        live = _v20_normalize(live, V20_DEALER_COLUMNS)
+        live["Partner Score"] = pd.to_numeric(live["Partner Score"], errors="coerce")
+        live["Data Backend"] = "Google Sheets"
+        return live
+    demo = V20_DEALER_FALLBACK.copy()
+    demo["Data Backend"] = "Demo fallback"
+    return demo
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_manual_market_data() -> pd.DataFrame:
+    """Human-maintained market metrics from Google Sheets; only Approved rows flow into analysis."""
+    live = _v20_read_sheet(V20_GSHEET_WORKSHEETS["market_manual_inputs"], ttl=300)
+    if live.empty:
+        return pd.DataFrame(columns=V19_STANDARD_METRIC_COLUMNS)
+    out = _v20_normalize(live, V19_STANDARD_METRIC_COLUMNS)
+    out["Value"] = pd.to_numeric(out["Value"], errors="coerce")
+    out = out.dropna(subset=["Value"])
+    out = out[out["Status"].astype(str).str.lower().eq("approved")]
+    return out
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_competitor_specs() -> pd.DataFrame:
+    frames = []
+    for key in ["competitor_specs", "product_specs"]:
+        x = _v20_read_sheet(V20_GSHEET_WORKSHEETS[key], ttl=300)
+        if not x.empty:
+            x = _v20_normalize(x, V19_COMPETITOR_COLUMNS)
+            x = x[x["Status"].astype(str).str.lower().eq("approved")]
+            frames.append(x)
+    return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(columns=V19_COMPETITOR_COLUMNS)
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_demand_fit_inputs() -> pd.DataFrame:
+    live = _v20_read_sheet(V20_GSHEET_WORKSHEETS["demand_fit_inputs"], ttl=300)
+    if live.empty:
+        return pd.DataFrame(columns=V19_DEMAND_INPUT_COLUMNS)
+    out = _v20_normalize(live, V19_DEMAND_INPUT_COLUMNS)
+    out = out[out["Status"].astype(str).str.lower().eq("approved")]
+    return out
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_source_registry() -> pd.DataFrame:
+    live = _v20_read_sheet(V20_GSHEET_WORKSHEETS["source_registry"], ttl=300)
+    if live.empty:
+        return pd.DataFrame(columns=V19_SOURCE_REGISTRY.columns)
+    return _v20_normalize(live, list(V19_SOURCE_REGISTRY.columns))
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_field_evidence() -> pd.DataFrame:
+    return _v20_read_sheet(V20_GSHEET_WORKSHEETS["field_evidence"], ttl=300)
+
+
+def _v20_sheet_probe() -> tuple[str, str]:
+    if not _v20_has_gsheets_config():
+        return "Not configured", "Add [connections.gsheets] to Streamlit Secrets."
+    try:
+        from streamlit_gsheets import GSheetsConnection
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        test = conn.read(worksheet=V20_GSHEET_WORKSHEETS["dealer_landscape"], ttl=60)
+        return "Connected", f"dealer_landscape: {len(pd.DataFrame(test)):,} rows"
+    except Exception as exc:
+        return "Connection error", f"{type(exc).__name__}: {str(exc)[:180]}"
+
+
+def _v20_approved_market_metrics(country: str | None = None) -> pd.DataFrame:
+    frames = []
+    repo = _v19_repo_metrics(country)
+    if not repo.empty:
+        x = repo.copy(); x["Data Backend"] = "GitHub public data"; frames.append(x)
+    manual = load_manual_market_data()
+    if country and not manual.empty:
+        manual = manual[manual["Country"].astype(str).str.lower().eq(country.lower())]
+    if not manual.empty:
+        x = manual.copy(); x["Data Backend"] = "Google Sheets"; frames.append(x)
+    if not frames:
+        return pd.DataFrame(columns=V19_STANDARD_METRIC_COLUMNS + ["Data Backend"])
+    return pd.concat(frames, ignore_index=True, sort=False)
+
+
+# Override V19 source resolver so Google-Sheets source IDs can be clicked in all
+# existing evidence components without changing their chart code.
+def _v19_source(source_id: str) -> dict:
+    dynamic = load_source_registry()
+    if not dynamic.empty and "Source ID" in dynamic.columns:
+        hit = dynamic[dynamic["Source ID"].astype(str).eq(str(source_id))]
+        if not hit.empty:
+            return hit.iloc[0].to_dict()
+    hit = V19_SOURCE_REGISTRY[V19_SOURCE_REGISTRY["Source ID"] == source_id]
+    if not hit.empty:
+        return hit.iloc[0].to_dict()
+    legacy = V16_SOURCES[V16_SOURCES["Source ID"] == source_id]
+    if legacy.empty:
+        return {}
+    r = legacy.iloc[0]
+    return {"Source ID":source_id,"Title":r.get("Source Name",""),"Publisher":r.get("Source Name",""),"URL":r.get("Source URL",""),"Period":r.get("Publication Date","")}
+
+
+def _v19_user_competitors(country: str) -> pd.DataFrame:
+    frames = []
+    repo_frames = []
+    for dataset in ["Competitor Specs", "Product Specs"]:
+        x = _v19_repo_dataset(dataset, country)
+        if not x.empty:
+            repo_frames.append(x)
+    if repo_frames:
+        frames.append(pd.concat(repo_frames, ignore_index=True))
+    sheets = load_competitor_specs()
+    if not sheets.empty:
+        sheets = sheets[sheets["Country"].astype(str).str.lower().eq(country.lower())]
+        if not sheets.empty:
+            frames.append(sheets)
+    if not frames:
+        return pd.DataFrame(columns=V19_COMPETITOR_COLUMNS)
+    x = pd.concat(frames, ignore_index=True, sort=False)
+    return _v20_normalize(x, V19_COMPETITOR_COLUMNS)
+
+
+def _v19_demand_inputs(country: str) -> pd.DataFrame:
+    sheets = load_demand_fit_inputs()
+    if not sheets.empty:
+        x = sheets[sheets["Country"].astype(str).str.lower().eq(country.lower())]
+        if not x.empty:
+            return _v20_normalize(x, V19_DEMAND_INPUT_COLUMNS)
+    repo = _v19_repo_dataset("Demand Fit Inputs", country)
+    if not repo.empty:
+        return _v20_normalize(repo, V19_DEMAND_INPUT_COLUMNS)
+    if country == "South Africa":
+        return V19_SA_DEMAND_FIT_DEFAULT.copy()
+    return pd.DataFrame(columns=V19_DEMAND_INPUT_COLUMNS)
+
+
+def _v20_required_daily_km(country: str, days_per_month: int, diesel_price: float, charging_tariff: float, interest_rate: float) -> int | None:
+    for daily in range(20, 801, 10):
+        month, _ = calc_tco_breakeven(
+            country,
+            diesel_price_override=diesel_price,
+            charging_tariff_override=charging_tariff,
+            monthly_km_override=float(daily * days_per_month),
+            interest_rate_override=interest_rate,
+        )
+        if month is not None and month <= 60:
+            return daily
+    return None
+
+
+def _v20_deal_desk_metrics(country: str, daily_km: float, days_per_month: int, diesel_price: float, charging_tariff: float, interest_rate: float):
+    monthly_km = float(daily_km) * float(days_per_month)
+    df = gen_tco_60month_df(
+        country,
+        diesel_price_override=diesel_price,
+        charging_tariff_override=charging_tariff,
+        monthly_km_override=monthly_km,
+        interest_rate_override=interest_rate,
+    )
+    be, _ = calc_tco_breakeven(
+        country,
+        diesel_price_override=diesel_price,
+        charging_tariff_override=charging_tariff,
+        monthly_km_override=monthly_km,
+        interest_rate_override=interest_rate,
+    )
+    saving = float(df["ICE_Cumulative_Cost"].iloc[-1] - df["EV_Cumulative_Cost"].iloc[-1])
+    ice_km = float(df.attrs.get("ice_per_km", 0))
+    ev_km = float(df.attrs.get("ev_per_km", 0))
+    required = _v20_required_daily_km(country, days_per_month, diesel_price, charging_tariff, interest_rate)
+    return df, be, saving, ice_km, ev_km, required
+
+
+def render_v20_deal_desk(country: str, cdata: dict):
+    _level_hdr(
+        3,
+        tr("Deal Desk · Client TCO Simulator", "Deal Desk · 客户真实工况推演"),
+        tr("Client-side operating variables are open; OEM cost, margin and support assumptions stay locked.", "只开放客户侧运营变量；OEM成本、毛利及商务支持参数保持锁定。"),
+    )
+    p = cdata["tco_params"]
+    base_daily = max(20, int(round(float(p["Monthly_km"]) / 26)))
+    client_mode = st.toggle(
+        tr("Client presentation mode", "客户演示模式"),
+        value=True,
+        key=f"v20_client_mode_{country}",
+        help=tr("Hide locked acquisition/residual assumptions from the presentation view.", "隐藏锁定的购置/残值假设，避免客户会议中暴露内部基准。"),
+    )
+
+    i1, i2, i3, i4 = st.columns(4)
+    daily_km = i1.number_input(tr("Client daily mileage (km)", "客户日均里程（km）"), min_value=20, max_value=800, value=min(base_daily, 800), step=10, key=f"v20_daily_{country}")
+    diesel = i2.number_input(tr("Client diesel price (USD/L eq.)", "客户柴油价格（USD/L等值）"), min_value=0.05, max_value=5.00, value=float(p["Diesel_Price_per_L"]), step=0.01, format="%.2f", key=f"v20_diesel_{country}")
+    power = i3.number_input(tr("Client charging tariff (USD/kWh eq.)", "客户场站电价（USD/kWh等值）"), min_value=0.01, max_value=2.00, value=float(p["Charging_Tariff_per_kWh"]), step=0.01, format="%.3f", key=f"v20_power_{country}")
+    rate_pct = i4.number_input(tr("Financing interest rate (%)", "客户车贷年利率（%）"), min_value=0.0, max_value=60.0, value=float(p["Interest_Rate"] * 100), step=0.5, format="%.1f", key=f"v20_rate_{country}")
+
+    with st.expander(tr("Advanced operating input", "高级运营输入"), expanded=False):
+        days = st.slider(tr("Operating days / month", "每月运营天数"), min_value=15, max_value=31, value=26, step=1, key=f"v20_days_{country}")
+        st.caption(tr("Vehicle acquisition benchmark, residual value, consumption and OEM commercial support remain locked to the internal country baseline.", "车辆购置基准、残值、能耗及OEM商务支持继续使用内部国家基准，不在客户侧开放。"))
+
+    df, be, saving, ice_km, ev_km, required = _v20_deal_desk_metrics(country, daily_km, days, diesel, power, rate_pct/100)
+    if be is None:
+        headline = tr("⚠ No financial parity within 60 months under the client scenario", "⚠ 按客户实际工况，60个月内暂未实现财务回本")
+        headline_color = "#B45309"
+    else:
+        headline = tr(f"⚡ Client scenario reaches financial parity around month {be:.1f}", f"⚡ 按客户实际工况，预计第 {be:.1f} 个月实现财务回本！")
+        headline_color = "#1A8C5B"
+    st.markdown(f'<div style="font:800 1.28rem Inter;color:{headline_color};margin:12px 0 14px 0;">{headline}</div>', unsafe_allow_html=True)
+
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric(tr("Break-even", "回本时间"), tr("No parity ≤60mo", "60个月内未回本") if be is None else f"{be:.1f} mo")
+    k2.metric(tr("5-year saving / vehicle", "5年单车节省"), f"${saving:,.0f}", delta=tr("EV advantage", "EV优势") if saving >= 0 else tr("EV premium", "EV成本更高"), delta_color="normal" if saving >= 0 else "inverse")
+    saving_pct = (ice_km-ev_km)/ice_km*100 if ice_km else 0
+    k3.metric(tr("Energy cost / km", "能源成本/公里"), f"EV ${ev_km:.3f}", delta=f"{saving_pct:+.1f}% vs ICE")
+    k4.metric(tr("Mileage threshold", "日里程门槛"), tr("Not found ≤800 km/day", "≤800km/日仍不成立") if required is None else f">≈ {required} km/day")
+
+    fig = chart_tco_breakeven(
+        country,
+        diesel_price_override=diesel,
+        charging_tariff_override=power,
+        monthly_km_override=float(daily_km * days),
+        interest_rate_override=rate_pct/100,
+    )
+    st.plotly_chart(fig, use_container_width=True, config=PLOTLY_CFG, key=f"v20_deal_tco_{country}")
+    if saving >= 0:
+        parity_text = f"约第 {be:.1f} 个月回本。" if be is not None else "但60个月内仍未形成完整购置成本回收。"
+        zh = f"客户工况下，EV 5年累计TCO预计比燃油车低约 ${saving:,.0f}/台；能源成本约 ${ev_km:.3f}/km，对比燃油 ${ice_km:.3f}/km。{parity_text}"
+    else:
+        zh = f"客户工况下，EV 5年累计TCO仍高约 ${abs(saving):,.0f}/台。当前不应强推EV，应优先提高日里程、降低场站电价或改善融资条件后再复算。"
+    _chart_takeaway(zh, zh, "derived")
+
+    sens_rows = []
+    for km in [80, 120, 160, 200, 250, 300, 400]:
+        m, _ = calc_tco_breakeven(country, diesel_price_override=diesel, charging_tariff_override=power, monthly_km_override=km*days, interest_rate_override=rate_pct/100)
+        sens_rows.append([km, 65 if m is None else min(float(m), 65), tr("No parity", "不回本") if m is None else f"{m:.1f}"])
+    sens = pd.DataFrame(sens_rows, columns=["Daily km", "Break-even plot", "Break-even"])
+    with st.expander(tr("Mileage sensitivity", "展开里程敏感性"), expanded=False):
+        fig2 = px.line(sens, x="Daily km", y="Break-even plot", markers=True)
+        fig2.add_hline(y=60, line_dash="dot", line_color="#B45309")
+        fig2.update_layout(**{**CHART_BASE, "height":320, "yaxis_title":tr("Break-even month (65 = no parity)", "回本月份（65代表不回本）"), "xaxis_title":tr("Daily mileage (km)", "日均里程（km）")})
+        st.plotly_chart(fig2, use_container_width=True, config=PLOTLY_CFG, key=f"v20_tco_sens_{country}")
+        st.dataframe(sens[["Daily km","Break-even"]], hide_index=True, use_container_width=True)
+
+    if not client_mode:
+        with st.expander(tr("Locked internal benchmark assumptions", "内部锁定基准（内部模式）"), expanded=False):
+            st.dataframe(pd.DataFrame([{
+                "ICE reference acquisition": p["ICE_Capex"], "EV reference acquisition": p["EV_Capex"],
+                "ICE L/100km": p["ICE_Consumption_L_per_100km"], "EV kWh/100km": p["EV_Consumption_kWh_per_100km"],
+                "ICE residual": p["ICE_Residual_Pct"], "EV residual": p["EV_Residual_Pct"],
+            }]), hide_index=True, use_container_width=True)
+            st.caption(tr("These are benchmark modelling assumptions, not OEM factory cost or margin.", "以上为TCO建模基准，不代表OEM出厂成本或毛利底线。"))
+
+
+def render_v19_product_pva(country: str, cdata: dict):
+    _level_hdr(1,tr("Product Fit & PVA", "产品匹配与PVA"),tr("Every Farizon product must be attached to a real local benchmark set.","每个Farizon产品都必须绑定真实当地竞品集合。"))
+    models=_v18_pure_ev_models(cdata)
+    comp=_v19_all_competitors(country)
+    for item in models[:4]:
+        fm=str(item.get("model",""))
+        model_keys=[x.strip() for x in re.split(r"/|,",fm) if x.strip()]
+        rows=comp[comp["Farizon Model"].isin(model_keys)] if not comp.empty else pd.DataFrame()
+        bench=" / ".join((rows["Brand"].astype(str)+" "+rows["Model"].astype(str)).drop_duplicates().tolist()[:3]) if not rows.empty else tr("Awaiting local benchmark data", "待补当地竞品")
+        source_tag = tr("Google Sheets / GitHub / official OEM evidence", "Google Sheets / GitHub / OEM官方证据") if not rows.empty else tr("Evidence gap", "证据缺口")
+        body = f"{tr('Local benchmarks','当地对标')}: {bench}. {_plain_text(item.get('logic'),260)} · {source_tag}"
+        st.markdown(_v19_full_card(fm,_plain_text(item.get("role"),160),body),unsafe_allow_html=True)
+        if not rows.empty:
+            with st.expander(f"{fm} · {tr('competitor evidence','竞品证据')}",expanded=False):
+                st.dataframe(rows[["Brand","Model","Benchmark Type","Price Local","Currency","Battery kWh","Range km","Payload kg","Cargo m3","Warranty","Source URL"]],hide_index=True,use_container_width=True,column_config={"Source URL":st.column_config.LinkColumn(tr("Source","来源"),display_text=tr("Open","打开"))})
+    if country=="South Africa":
+        st.info(tr("Farizon specifications are intentionally not guessed. Put official V6E/V7E/F1E specs and local target price into the product_specs worksheet or approved GitHub data to unlock quantitative PVA.","远程V6E/V7E/F1E参数不会被猜测。请把官方规格及当地目标价录入 Google Sheets 的 product_specs 工作表或Approved GitHub数据，即可解锁定量PVA。"))
+
+    _level_hdr(2,tr("60-Month Market TCO Benchmark", "60个月市场TCO基准"),tr("Static country benchmark for market comparison; the client simulator follows immediately below.","用于市场比较的国家静态基准；客户真实工况沙盘紧随其后。"))
+    p=cdata["tco_params"]
+    st.plotly_chart(chart_tco_breakeven(country),use_container_width=True,config=PLOTLY_CFG,key=f"v20_tco_base_{country}")
+    breakeven_month,_=calc_tco_breakeven(country)
+    ice_per_km=p["Diesel_Price_per_L"]*p["ICE_Consumption_L_per_100km"]/100
+    ev_per_km=p["Charging_Tariff_per_kWh"]*p["EV_Consumption_kWh_per_100km"]/100
+    be=tr("not reached within 60 months","60个月内未达到平衡") if breakeven_month is None else tr(f"around month {breakeven_month:.1f}",f"约第 {breakeven_month:.1f} 个月")
+    _chart_takeaway(f"国家基准用于回答市场层面的经济性，不代表任何具体客户。当前能源成本 EV ${ev_per_km:.3f}/km、ICE ${ice_per_km:.3f}/km，基准盈亏平衡为{be}；下一步必须用客户真实工况进入Deal Desk复算。",f"The country benchmark is not a customer quote. Use the Deal Desk below for client-specific operating inputs.","derived")
+    with st.expander(tr("Market benchmark source & assumptions", "展开市场基准来源与假设"),expanded=False):
+        st.dataframe(pd.DataFrame([{
+            "Diesel/L":p["Diesel_Price_per_L"],"Charging/kWh":p["Charging_Tariff_per_kWh"],"Monthly km":p["Monthly_km"],"Interest":p["Interest_Rate"],
+            "ICE L/100km":p["ICE_Consumption_L_per_100km"],"EV kWh/100km":p["EV_Consumption_kWh_per_100km"]
+        }]),hide_index=True,use_container_width=True)
+        st.caption(f"Source reference: {p.get('source_name','')} · {p.get('source_url','')}")
+
+    render_v20_deal_desk(country, cdata)
+
+
+def render_v19_competition_channel(country: str, cdata: dict):
+    _level_hdr(1,tr("Competition & Dealer Landscape", "竞争与经销商格局"),tr("Who is already selling, what is the benchmark, and what dealer capability is required?", "谁已经在卖、对标是谁、什么渠道能力才足够？"))
+    if country=="South Africa":
+        render_v19_sa_competition()
+    else:
+        render_v18_competition_channel(country,cdata)
+
+    _level_hdr(3,tr("Dealer Landscape", "经销商生态"),tr("External market structure, not CRM pipeline management.","这是市场渠道结构，不是CRM项目管理。"))
+    dealers = load_dealer_landscape()
+    dealers = dealers[dealers["Country"].astype(str).str.lower().eq(country.lower())] if not dealers.empty else dealers
+    if dealers.empty:
+        st.warning(tr("No dealer landscape data. Add the market's dealer groups to the private Google Sheet.","暂无经销商格局数据。请在Private Google Sheet的 dealer_landscape 工作表补充当地经销商集团。"))
+    else:
+        if dealers["Data Backend"].astype(str).eq("Demo fallback").all():
+            st.warning(tr("Dealer rows below are demonstration fallback only. Do not use them as verified market facts.","以下经销商数据仅为演示占位，不能作为已验证市场事实。"))
+        show=[c for c in ["Dealer / Group","Relationship Stage","Partner Score","CV Experience","Aftersales","Fleet Capability","EV Capability","Chinese Brand Conflict","Commercial Assessment","Source URL","Data Backend"] if c in dealers.columns]
+        st.dataframe(dealers[show],hide_index=True,use_container_width=True,column_config={"Source URL":st.column_config.LinkColumn(tr("Source","来源"),display_text=tr("Open","打开"))})
+    st.info(tr("Preferred partner profile: national CV sales/aftersales coverage, fleet-account capability, spare-parts discipline, EV technical readiness and manageable conflict with directly competing Chinese EV-CV brands.","理想经销商画像：全国性商用车销售/售后覆盖、Fleet大客户能力、备件管理、EV技术能力，以及可控的同级中国新能源商用车品牌冲突。"))
+
+
+def render_v18_dealer_landscape_global():
+    _level_hdr(1,tr("Dealer Landscape", "经销商格局"),tr("External dealer ecosystem loaded from Google Sheets when available; no customer pipeline.","优先从Google Sheets读取经销商生态；不承载客户项目漏斗。"))
+    df=load_dealer_landscape()
+    if df.empty:
+        st.info(tr("No dealer records.","暂无经销商记录。")); return
+    countries=sorted(df["Country"].dropna().astype(str).unique().tolist())
+    selected=st.multiselect(tr("Country filter","国家筛选"),countries,default=countries)
+    x=df[df["Country"].isin(selected)].copy()
+    if x["Data Backend"].astype(str).eq("Demo fallback").all():
+        st.warning(tr("Google Sheets is not configured; showing demo fallback rows only.","Google Sheets尚未配置；当前仅展示演示占位数据。"))
+    show=[c for c in V20_DEALER_COLUMNS+["Data Backend"] if c in x.columns]
+    st.dataframe(x[show],hide_index=True,use_container_width=True,column_config={"Source URL":st.column_config.LinkColumn(tr("Source","来源"),display_text=tr("Open","打开"))})
+
+
+def render_v18_portfolio_home():
+    official_like=int(V16_METRIC_AUDIT["Data Type"].isin(["Reported","Official"]).sum())
+    high_priority=sum(1 for x in V15_PORTFOLIO.values() if x["attract"]>=75)
+    execution_gaps=sum(1 for x in V15_PORTFOLIO.values() if x["attract"]-x["execute"]>=25)
+    dealers=load_dealer_landscape()
+    sheet_metrics=load_manual_market_data()
+    _level_hdr(1,tr("Africa Market Portfolio","非洲市场组合"),tr("Market opportunity, executability and evidence quality — not CRM pipeline.","只看市场机会、可执行性和证据质量，不看CRM式项目漏斗。"))
+    cards=[
+        (tr("Core markets","核心市场"),len(V15_PORTFOLIO)),
+        (tr("High-attractiveness","高吸引力市场"),high_priority),
+        (tr("Auto sales sources","自动销量数据源"),len(AUTO_MARKET_SOURCE_CONFIG)),
+        (tr("Reported metrics","公开/报告指标"),official_like),
+        (tr("Manual approved metrics","人工批准指标"),len(sheet_metrics)),
+        (tr("Execution gaps","高执行缺口"),execution_gaps),
+        (tr("Dealer landscape rows","经销商生态记录"),len(dealers)),
+        (tr("Low-confidence metrics","低可信指标"),int(V16_METRIC_AUDIT["Confidence"].isin(["D","E"]).sum())),
+    ]
+    for col,(label,val) in zip(st.columns(8),cards):
+        with col: st.metric(label,val)
+    _level_hdr(2,tr("Country Priority Matrix","国家优先级矩阵"),tr("Bubble size remains a planning proxy until verified market-sales data replace it.","气泡大小在权威销量替换前仍是规划代理值。"))
+    rows=[{tr("Country","国家"):v15_country_label(name),"Country Key":name,tr("Market Attractiveness","市场吸引力"):item["attract"],tr("CBU Executability","CBU可执行性"):item["execute"],tr("Planning Market Proxy","规划市场代理值"):item["size"],tr("CBU Mode","CBU模式"):v15_mode_label(item["mode"]),tr("Strategic Role","战略角色"):item["role"][1 if V15_LANG=="zh" else 0]} for name,item in V15_PORTFOLIO.items()]
+    df=pd.DataFrame(rows)
+    fig=px.scatter(df,x=tr("CBU Executability","CBU可执行性"),y=tr("Market Attractiveness","市场吸引力"),size=tr("Planning Market Proxy","规划市场代理值"),color=tr("CBU Mode","CBU模式"),text=tr("Country","国家"),size_max=46,hover_data=[tr("Strategic Role","战略角色")])
+    fig.add_vline(x=60,line_dash="dot",line_color="#9BA3B2")
+    fig.add_hline(y=70,line_dash="dot",line_color="#9BA3B2")
+    fig.update_traces(textposition="top center")
+    fig.update_layout(**{**CHART_BASE,"height":470,"margin":dict(l=35,r=20,t=25,b=25)})
+    st.plotly_chart(fig,use_container_width=True,config=PLOTLY_CFG,key="v20_home_matrix")
+    _chart_takeaway("矩阵用于决定研究和资源优先级，而不是宣称各国真实销量。下一阶段应持续用Verified销量替换气泡的规划代理值。","The matrix prioritises research and resource allocation; it does not claim verified sales volume.","model")
+    _level_hdr(3,tr("Market Coverage & Data Backends","市场覆盖与数据后端"),tr("Authoritative automation + human-maintained evidence.","权威自动数据 + 人工维护证据。"))
+    maturity=[]
+    for name,item in V15_PORTFOLIO.items():
+        cfg=AUTO_MARKET_SOURCE_CONFIG.get(name); source="—"; status=tr("Not configured","未配置")
+        if cfg:
+            source=cfg["source_name"]
+            health,usable,_=_auto_market_health(fetch_auto_market_data(name))
+            status=f"{health} · {usable}"
+        manual_count=int((sheet_metrics["Country"].astype(str).str.lower()==name.lower()).sum()) if not sheet_metrics.empty else 0
+        dealer_count=int((dealers["Country"].astype(str).str.lower()==name.lower()).sum()) if not dealers.empty else 0
+        maturity.append([v15_country_label(name),item["attract"],item["execute"],source,status,manual_count,dealer_count,v15_mode_label(item["mode"])])
+    st.dataframe(pd.DataFrame(maturity,columns=[tr("Country","国家"),tr("Attract.","吸引力"),tr("Execute","执行性"),tr("Authoritative sales source","权威销量源"),tr("Auto status","自动状态"),tr("Manual metrics","人工指标"),tr("Dealer rows","经销商记录"),tr("Entry mode","进入模式")]),hide_index=True,use_container_width=True)
+
+
+def render_v19_market_structure(country: str, cdata: dict):
+    _level_hdr(1,tr("Market Size & Structure", "市场规模与结构"),tr("Verified public data first; approved human inputs supplement evidence without changing code.","先讲公开可验证数据；人工批准输入用于补充证据，无需修改代码。"))
+    if country=="South Africa":
+        render_v19_sa_market_facts()
+        render_v19_sa_freight_demand()
+    manual=_v20_approved_market_metrics(country)
+    if not manual.empty:
+        _v19_evidence_header("user",tr("Approved manual / repository market data", "已批准人工 / GitHub市场数据"),tr("External data layer; no app.py edit required.","来自外部数据层，无需修改app.py。"),[],"")
+        st.dataframe(manual,hide_index=True,use_container_width=True,column_config={"Source URL":st.column_config.LinkColumn(tr("Source","来源"),display_text=tr("Open","打开"))})
+        _v19_render_approved_metric_chart(country,manual)
+        _chart_takeaway("这部分数据来自Google Sheets或GitHub Approved数据文件，可直接补充当地销量、价格、注册和其他市场指标；所有关键数字应同时维护Source ID、时间与来源链接。","Approved external data can supplement sales, registration, pricing and market metrics without editing code.","user")
+    auto=_verified_auto_rows(country)
+    if not auto.empty:
+        _v19_evidence_header("verified",tr("Latest automatic market data","最新自动市场数据"),tr("Only parser output that passes fail-closed validation is shown.","只有通过Fail-Closed校验的自动解析数据才展示。"),[],str(auto.iloc[0]["Period"]),"Fail-closed")
+        st.dataframe(auto[["Metric","Value","Unit","Period","Source Name","Source URL"]],hide_index=True,use_container_width=True,column_config={"Source URL":st.column_config.LinkColumn(tr("Source","来源"),display_text=tr("Open","打开"))})
+    render_v19_demand_fit(country,cdata)
+    with st.expander(tr("Additional market depth / legacy analytical charts","展开更多市场深度 / 旧版分析图"),expanded=False):
+        st.warning(tr("Legacy charts remain research inputs unless exact source certification is available.","旧版图表只有在精确来源通过认证后才能升级为事实，否则仅作研究输入。"))
+        src=cdata.get("sources",{}).get("trade",("",""))
+        st.plotly_chart(chart_brand(gen_brand_df(country),country),use_container_width=True,config=PLOTLY_CFG,key=f"v20_legacy_brand_{country}")
+        if src[0]: st.caption(f"Legacy source label: {src[0]} · {src[1]}")
+        renderer=EXCLUSIVE_CHART_REGISTRY.get(country)
+        if renderer: renderer()
+
+
+def render_v19_data_intake():
+    _level_hdr(1,tr("Data Hub", "数据中台"),tr("Temporary parsing, Google Sheets live data, and read-only GitHub public evidence — no runtime local persistence.","临时解析、Google Sheets实时人工数据与GitHub公开证据读取；运行时不做本地持久化。"))
+    st.warning(tr("Cloud rule: browser uploads are temporary. V20 never writes uploaded files or manifest changes to the Streamlit container. Persistent data must live in Google Sheets, GitHub repository files, Drive, or a future database.","云端规则：浏览器拖入文件仅用于临时分析。V20不会把上传文件或Manifest改动写入Streamlit容器。长期数据必须存放在Google Sheets、GitHub仓库、Drive或后续数据库中。"))
+    tab_upload,tab_sheet,tab_repo,tab_templates=st.tabs([tr("Temporary Parser","临时解析"),tr("Google Sheets","Google Sheets"),tr("GitHub Public Data","GitHub公开数据"),tr("Schemas","数据模板")])
+
+    with tab_upload:
+        dataset=st.selectbox(tr("Dataset type","数据类型"),["Market Metrics","Competitor Specs","Product Specs","Demand Fit Inputs","Evidence PDF"],key="v20_intake_type")
+        uploaded=st.file_uploader(tr("Drop CSV / XLSX / PDF here","拖入 CSV / XLSX / PDF"),type=["csv","xlsx","pdf"],key="v20_uploader")
+        if uploaded is not None:
+            ext=Path(uploaded.name).suffix.lower()
+            c1,c2,c3=st.columns(3)
+            country=c1.selectbox(tr("Country","国家"),list(TIER1.keys()),index=list(TIER1.keys()).index(st.session_state.selected_country) if st.session_state.selected_country in TIER1 else 0,key="v20_upload_country")
+            period=c2.text_input(tr("Period","数据期"),value="2026-08",key="v20_upload_period")
+            source=c3.text_input(tr("Source","来源"),value="Field / Official source",key="v20_upload_source")
+            source_url=st.text_input(tr("Source URL / evidence link","来源链接 / 证据链接"),value="",key="v20_upload_url")
+            source_type=st.selectbox(tr("Evidence type","证据类型"),["Official","Industry","OEM","Field Research","Internal Estimate"],key="v20_upload_evidence")
+            confidence=st.selectbox(tr("Confidence","可信度"),["A","B","C","D"],index=1,key="v20_upload_conf")
+            if ext==".pdf":
+                st.info(tr("PDF is preview-only in this workspace. Store the original evidence in Google Drive or the public GitHub research folder, then register its URL/Source ID in the source_registry sheet.","PDF在本页面只做临时证据预览。请把原始文件保存到Google Drive或GitHub公开研究目录，并在source_registry工作表登记URL/Source ID。"))
+                st.metric(tr("Temporary file size","临时文件大小"),f"{uploaded.size/1024:.1f} KB")
+            else:
+                try:
+                    raw=_v19_read_table(uploaded,uploaded.name)
+                    st.caption(tr(f"Detected {len(raw):,} rows × {len(raw.columns)} columns.",f"识别到 {len(raw):,} 行 × {len(raw.columns)} 列。"))
+                    st.dataframe(raw.head(30),hide_index=True,use_container_width=True)
+                    template=_v19_template_df(dataset)
+                    expected=list(template.columns)
+                    missing=[x for x in expected if x not in raw.columns]
+                    normalized=pd.DataFrame()
+                    if not missing:
+                        normalized=raw[expected].copy()
+                        st.success(tr("Schema matched.","字段与标准模板匹配。"))
+                    elif dataset=="Market Metrics" and len(raw.columns)>=2:
+                        st.warning(tr("Map the essential columns; V20 will generate a normalized CSV only. Nothing is saved server-side.","请映射核心列；V20只生成标准化CSV，不会在服务器保存。"))
+                        opts=["—"]+list(raw.columns)
+                        m1,m2,m3,m4=st.columns(4)
+                        metric_col=m1.selectbox("Metric",opts,key="v20_map_metric")
+                        value_col=m2.selectbox("Value",opts,key="v20_map_value")
+                        segment_col=m3.selectbox("Segment",opts,key="v20_map_segment")
+                        unit_col=m4.selectbox("Unit",opts,key="v20_map_unit")
+                        if metric_col!="—" and value_col!="—":
+                            normalized=pd.DataFrame({
+                                "Country":country,
+                                "Period":period,
+                                "Segment":raw[segment_col].astype(str) if segment_col!="—" else "",
+                                "Metric":raw[metric_col].astype(str),
+                                "Value":pd.to_numeric(raw[value_col],errors="coerce"),
+                                "Unit":raw[unit_col].astype(str) if unit_col!="—" else "",
+                                "Source ID":f"USER-{country[:2].upper()}-{_v19_hash_name(uploaded.name)}",
+                                "Source Name":source,
+                                "Source URL":source_url,
+                                "Evidence Type":source_type,
+                                "Confidence":confidence,
+                                "Status":"Pending",
+                                "Updated At":datetime.now().strftime("%Y-%m-%d")
+                            }).dropna(subset=["Value"])
+                    else:
+                        st.error(tr("File does not match the selected schema. Use the template first.","文件与所选模板不匹配，请先按模板整理。"))
+                    if not normalized.empty:
+                        _level_hdr(3,tr("Normalized Preview","标准化预览"),tr("Download it, then paste/import into the corresponding private Google Sheet or commit public research to GitHub.","下载后，可粘贴/导入对应Private Google Sheet；公开研究数据也可提交GitHub。"))
+                        st.dataframe(normalized.head(100),hide_index=True,use_container_width=True)
+                        safe=f"{country.replace(' ','_')}_{dataset.replace(' ','_')}_{period}.csv"
+                        st.download_button(tr("Download normalized CSV","下载标准化CSV"),normalized.to_csv(index=False).encode("utf-8-sig"),file_name=safe,mime="text/csv")
+                except Exception as exc:
+                    st.error(f"{type(exc).__name__}: {exc}")
+
+    with tab_sheet:
+        status, detail=_v20_sheet_probe()
+        c1,c2,c3=st.columns(3)
+        c1.metric(tr("Connection","连接状态"),status)
+        c2.metric(tr("Dealer rows","经销商记录"),len(load_dealer_landscape()))
+        c3.metric(tr("Approved manual metrics","人工批准指标"),len(load_manual_market_data()))
+        st.caption(detail)
+        if status!="Connected":
+            st.info(tr("Configure a private Google Sheet in Streamlit Secrets. V20 will then read it automatically; business users maintain the Sheet, not app.py.","请在Streamlit Secrets中配置Private Google Sheet。配置后V20会自动读取；业务人员只维护Sheet，不再修改app.py。"))
+        schema_rows=[]
+        for key,ws in V20_GSHEET_WORKSHEETS.items():
+            if key=="dealer_landscape": cols=", ".join(V20_DEALER_COLUMNS)
+            elif key=="market_manual_inputs": cols=", ".join(V19_STANDARD_METRIC_COLUMNS)
+            elif key in {"competitor_specs","product_specs"}: cols=", ".join(V19_COMPETITOR_COLUMNS)
+            elif key=="demand_fit_inputs": cols=", ".join(V19_DEMAND_INPUT_COLUMNS)
+            elif key=="source_registry": cols=", ".join(V19_SOURCE_REGISTRY.columns)
+            else: cols=tr("Flexible evidence log","灵活证据记录")
+            schema_rows.append([ws,cols])
+        st.dataframe(pd.DataFrame(schema_rows,columns=[tr("Worksheet","工作表"),tr("Expected columns","建议字段")]),hide_index=True,use_container_width=True)
+        if st.button(tr("Refresh Google Sheets cache","刷新Google Sheets缓存"),key="v20_refresh_sheets"):
+            st.cache_data.clear()
+            st.rerun()
+
+    with tab_repo:
+        files=_v19_scan_repo_files()
+        manifest=_v19_manifest()
+        approved=_v19_repo_metrics()
+        k1,k2,k3=st.columns(3)
+        k1.metric(tr("Repository data files","仓库数据文件"),len(files))
+        k2.metric(tr("Manifest rows","Manifest记录"),len(manifest))
+        k3.metric(tr("Approved metric rows","已批准指标"),len(approved))
+        st.caption(tr("GitHub is read-only at runtime. It is appropriate for public/reproducible research files committed to the repository, not confidential dealer/customer information.","GitHub在运行时只读。适合提交公开、可复现的研究数据，不适合存放敏感经销商/客户信息。"))
+        if not files.empty: st.dataframe(files,hide_index=True,use_container_width=True)
+        if not approved.empty: st.dataframe(approved.head(100),hide_index=True,use_container_width=True)
+
+    with tab_templates:
+        for name in ["Market Metrics","Competitor Specs","Demand Fit Inputs"]:
+            df=_v19_template_df(name)
+            st.markdown(f"**{name}**")
+            st.dataframe(df,hide_index=True,use_container_width=True)
+            st.download_button(tr("Download template","下载模板"),df.to_csv(index=False).encode("utf-8-sig"),file_name=f"template_{name.lower().replace(' ','_')}.csv",mime="text/csv",key=f"v20_tmpl_{name}")
+        st.markdown("**Google Sheets connection**")
+        secrets_example = '''# Streamlit Cloud → App settings → Secrets
+[connections.gsheets]
+spreadsheet = "https://docs.google.com/spreadsheets/d/xxxx/edit"
+type = "service_account"
+project_id = "..."
+private_key_id = "..."
+private_key = "-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n"
+client_email = "..."
+client_id = "..."
+auth_uri = "https://accounts.google.com/o/oauth2/auth"
+token_uri = "https://oauth2.googleapis.com/token"
+auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
+client_x509_cert_url = "..."'''
+        st.code(secrets_example, language="toml")
+        st.caption(tr("Never commit the service-account key or secrets.toml to a public GitHub repository.","绝不要把Service Account密钥或secrets.toml提交到公开GitHub仓库。"))
+
+
+def render_v19_intelligence_evidence(country: str, cdata: dict):
+    render_v18_intelligence_evidence(country,cdata)
+    approved=_v20_approved_market_metrics(country)
+    if not approved.empty:
+        _level_hdr(3,tr("Approved External Market Evidence","已批准外部市场数据"),tr("Google Sheets + public GitHub evidence.","Google Sheets + GitHub公开证据。"))
+        st.dataframe(approved,hide_index=True,use_container_width=True)
+    field=load_field_evidence()
+    if not field.empty and "Country" in field.columns:
+        x=field[field["Country"].astype(str).str.lower().eq(country.lower())]
+        if not x.empty:
+            with st.expander(tr("Field evidence log","展开一线证据记录"),expanded=False):
+                st.dataframe(x,hide_index=True,use_container_width=True)
+    with st.expander(tr("Source registry","来源库"),expanded=False):
+        dynamic=load_source_registry()
+        frames=[V19_SOURCE_REGISTRY]
+        if not dynamic.empty: frames.append(dynamic)
+        legacy=V16_SOURCES.rename(columns={"Source Name":"Title","Source URL":"URL","Publication Date":"Period"})[["Source ID","Country","Title","URL","Source Type","Period","Confidence"]].assign(Publisher="",Scope="Legacy register")
+        frames.append(legacy)
+        combined=pd.concat(frames,ignore_index=True,sort=False).drop_duplicates("Source ID",keep="first")
+        st.dataframe(combined,hide_index=True,use_container_width=True,column_config={"URL":st.column_config.LinkColumn(tr("Source URL","来源链接"),display_text=tr("Open","打开"))})
+
+
+def render_v19_global_governance():
+    render_v18_global_governance()
+    _level_hdr(3,tr("Cloud Data Architecture","云端数据架构"),tr("Automation, Google Sheets and GitHub each have a distinct role.","自动数据、Google Sheets与GitHub各司其职。"))
+    status,detail=_v20_sheet_probe()
+    repo_metrics=_v19_repo_metrics()
+    manual=load_manual_market_data()
+    dealers=load_dealer_landscape()
+    c1,c2,c3,c4=st.columns(4)
+    c1.metric("Google Sheets",status)
+    c2.metric(tr("Manual approved metrics","人工批准指标"),len(manual))
+    c3.metric(tr("Public repo metrics","GitHub公开指标"),len(repo_metrics))
+    c4.metric(tr("Dealer rows","经销商记录"),len(dealers))
+    st.caption(detail)
+    st.info(tr("Persistence rule: Streamlit runtime storage is not a database. V20 performs no runtime local persistence. Google Sheets holds high-frequency human inputs; GitHub holds public reproducible evidence; future scale can migrate the same loaders to PostgreSQL/Supabase.","持久化规则：Streamlit运行容器不是数据库。V20不做运行时本地持久化。Google Sheets承载高频人工输入；GitHub承载公开可复现证据；未来规模扩大时可保持Loader接口不变迁移到PostgreSQL/Supabase。"))
+
+
 # 13. SESSION STATE
 # ══════════════════════════════════════════════════════════════════════════════
 if "selected_country" not in st.session_state:
@@ -6429,7 +7026,7 @@ with st.sidebar:
         Africa CV Intelligence
     </div>
     <div style="font-family:'Inter';font-size:.68rem;color:rgba(255,255,255,.4);margin-top:2px;">
-        Evidence-Driven Edition · v19.0 · 12 Markets
+        Evidence & Deal Intelligence · v20.0 · 12 Markets
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -6440,7 +7037,7 @@ with st.sidebar:
         tr("Dealer Landscape", "经销商格局"),
         tr("Competitive Intelligence", "竞品情报"),
         tr("Data Governance", "数据治理"),
-        tr("Data Intake", "数据录入中心"),
+        tr("Data Hub", "数据中台"),
     ]
     V16_VIEW = st.radio(
         tr("Workspace", "业务工作区"),
@@ -6542,7 +7139,7 @@ if V16_VIEW == tr("Competitive Intelligence", "竞品情报"):
 if V16_VIEW == tr("Data Governance", "数据治理"):
     render_v19_global_governance()
     st.stop()
-if V16_VIEW == tr("Data Intake", "数据录入中心"):
+if V16_VIEW == tr("Data Hub", "数据中台"):
     render_v19_data_intake()
     st.stop()
 
@@ -6745,7 +7342,7 @@ st.markdown(f"""
         <div>
             <strong style="color:#5A6070;">Africa CV Market Governance & Intelligence Platform v{APP_VERSION}</strong>
             &nbsp;·&nbsp; Internal strategic use only
-            &nbsp;·&nbsp; Evidence-driven OEM view · Verified Data Gate · User Data Intake · Demand Evidence · PVA/TCO · Dealer Landscape
+            &nbsp;·&nbsp; Evidence-first OEM view · Fail-Closed Data Gate · Google Sheets-ready · Interactive Deal Desk · Dealer Landscape
         </div>
         <div style="text-align:right;">
             RDB · RURA · NAAMSA · Stats SA · National Treasury ZA · ANME TN · OCP · DPFZA · MRA · JIRAMA · Reuters · Bloomberg · AfDB
