@@ -1,0 +1,4 @@
+Collector,Status,Last Run,Rows,Source URL,Error
+naamsa,SEED,2026-08-27 00:00 UTC,8,https://naamsa.net/press-releases/,Run GitHub Action once after deployment
+statssa_p7162,SEED,2026-08-27 00:00 UTC,7,https://www.statssa.gov.za/?PPN=P7162&page_id=1854,Run GitHub Action once after deployment
+za_competitors,SEED,2026-08-27 00:00 UTC,6,Foton SA + Maxus SA,Run GitHub Action once after deployment

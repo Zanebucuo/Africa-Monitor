@@ -1,0 +1,7 @@
+Country,Period,Commodity,Previous Rm,Weight %,Current Rm,YoY %,Source ID,Source Name,Source URL,Evidence Type,Confidence,Status,Retrieved At,Parser
+South Africa,2026-03,Agriculture and forestry primary products,3855,6.6,5569,44.5,ZA-STATS-P7162-MAR26,Statistics South Africa,https://www.statssa.gov.za/publications/P7162/P7162March2026.pdf,Government,A,VERIFIED,2026-08-27 00:00 UTC,seed_official
+South Africa,2026-03,Primary mining and quarrying products,21932,37.5,21740,-0.9,ZA-STATS-P7162-MAR26,Statistics South Africa,https://www.statssa.gov.za/publications/P7162/P7162March2026.pdf,Government,A,VERIFIED,2026-08-27 00:00 UTC,seed_official
+South Africa,2026-03,"Manufactured food, beverages and tobacco products",6391,10.9,6232,-2.5,ZA-STATS-P7162-MAR26,Statistics South Africa,https://www.statssa.gov.za/publications/P7162/P7162March2026.pdf,Government,A,VERIFIED,2026-08-27 00:00 UTC,seed_official
+South Africa,2026-03,Containers,1705,2.9,1927,13.0,ZA-STATS-P7162-MAR26,Statistics South Africa,https://www.statssa.gov.za/publications/P7162/P7162March2026.pdf,Government,A,VERIFIED,2026-08-27 00:00 UTC,seed_official
+South Africa,2026-03,Parcels,1511,2.6,1914,26.7,ZA-STATS-P7162-MAR26,Statistics South Africa,https://www.statssa.gov.za/publications/P7162/P7162March2026.pdf,Government,A,VERIFIED,2026-08-27 00:00 UTC,seed_official
+South Africa,2026-03,Other freight,13363,22.8,13608,1.8,ZA-STATS-P7162-MAR26,Statistics South Africa,https://www.statssa.gov.za/publications/P7162/P7162March2026.pdf,Government,A,VERIFIED,2026-08-27 00:00 UTC,seed_official

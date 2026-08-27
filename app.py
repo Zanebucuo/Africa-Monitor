@@ -1,6 +1,6 @@
 """
 Africa Commercial Vehicle Market Governance & Intelligence Platform
-Evidence & Deal Intelligence Edition v20.0
+Evidence & Automated Market Intelligence Edition v21.0
 McKinsey UX Refactor — Narrative-Flow Layout · Zero Text Overlap · Collapsed Intel Feed
 """
 
@@ -20,9 +20,10 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import hashlib
 import json
+import os
 
-APP_VERSION = "20.0.0"
-DATA_VERSION = "2026-08-26"
+APP_VERSION = "21.0.0"
+DATA_VERSION = "Crawler-backed · 2026-08-27"
 SCHEMA_VERSION = "2.0"
 MODEL_NOTICE_EN = "Model estimate or internal judgement; not official market statistics."
 MODEL_NOTICE_ZH = "模型估算或内部判断，不代表官方市场统计。"
@@ -7011,6 +7012,257 @@ def render_v19_global_governance():
     st.info(tr("Persistence rule: Streamlit runtime storage is not a database. V20 performs no runtime local persistence. Google Sheets holds high-frequency human inputs; GitHub holds public reproducible evidence; future scale can migrate the same loaders to PostgreSQL/Supabase.","持久化规则：Streamlit运行容器不是数据库。V20不做运行时本地持久化。Google Sheets承载高频人工输入；GitHub承载公开可复现证据；未来规模扩大时可保持Loader接口不变迁移到PostgreSQL/Supabase。"))
 
 
+
+# ══════════════════════════════════════════════════════════════════════════════
+# V21 SCHEDULED CRAWLER DATA LAYER
+# Public web collection runs in GitHub Actions, NOT inside the Streamlit request
+# cycle.  Streamlit consumes only processed, versioned evidence committed back
+# to the repository.  This keeps the UI fast and creates an auditable history.
+# ══════════════════════════════════════════════════════════════════════════════
+V21_PROCESSED_DIR = V19_DATA_ROOT / "processed"
+V21_CHANGE_PATH = V21_PROCESSED_DIR / "market_changes.csv"
+V21_STATUS_PATH = V21_PROCESSED_DIR / "crawler_status.csv"
+V21_NAAMSA_PATH = V21_PROCESSED_DIR / "za_naamsa_sales.csv"
+V21_FREIGHT_PATH = V21_PROCESSED_DIR / "za_freight_demand.csv"
+V21_FREIGHT_MONTHLY_PATH = V21_PROCESSED_DIR / "za_freight_monthly.csv"
+V21_COMPETITOR_PATH = V21_PROCESSED_DIR / "za_competitor_specs.csv"
+
+
+def _v21_read_csv(path: Path) -> pd.DataFrame:
+    if not path.exists():
+        return pd.DataFrame()
+    try:
+        return pd.read_csv(path).dropna(how="all")
+    except Exception:
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_v21_crawler_status() -> pd.DataFrame:
+    return _v21_read_csv(V21_STATUS_PATH)
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_v21_changes(country: str | None = None) -> pd.DataFrame:
+    df = _v21_read_csv(V21_CHANGE_PATH)
+    if country and not df.empty and "Country" in df.columns:
+        df = df[df["Country"].astype(str).str.lower().eq(country.lower())]
+    return df
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_v21_naamsa_history() -> pd.DataFrame:
+    df = _v21_read_csv(V21_NAAMSA_PATH)
+    if df.empty: return df
+    if "Value" in df.columns: df["Value"] = pd.to_numeric(df["Value"], errors="coerce")
+    return df
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_v21_freight_demand() -> pd.DataFrame:
+    df = _v21_read_csv(V21_FREIGHT_PATH)
+    for c in ["Previous Rm","Current Rm","Weight %","YoY %"]:
+        if c in df.columns: df[c] = pd.to_numeric(df[c], errors="coerce")
+    return df
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_v21_freight_monthly() -> pd.DataFrame:
+    df = _v21_read_csv(V21_FREIGHT_MONTHLY_PATH)
+    for c in ["Payload YoY %","Freight Income YoY %"]:
+        if c in df.columns: df[c] = pd.to_numeric(df[c], errors="coerce")
+    return df
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_v21_competitors() -> pd.DataFrame:
+    df = _v21_read_csv(V21_COMPETITOR_PATH)
+    if df.empty: return pd.DataFrame(columns=V19_COMPETITOR_COLUMNS)
+    for c in V19_COMPETITOR_COLUMNS:
+        if c not in df.columns: df[c] = None
+    for c in ["Price Local","Battery kWh","Range km","Payload kg","Cargo m3","Length mm"]:
+        df[c] = pd.to_numeric(df[c], errors="coerce")
+    return df[V19_COMPETITOR_COLUMNS]
+
+
+# Preserve the V20 request-time adapter as an opt-in emergency fallback only.
+_v20_runtime_fetch_auto_market_data = fetch_auto_market_data
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def fetch_auto_market_data(country: str) -> pd.DataFrame:
+    """Scheduled-evidence first. Runtime scraping is disabled by default.
+
+    Set AFRICA_MONITOR_RUNTIME_SCRAPING=1 only for troubleshooting. Production
+    should let GitHub Actions write data/processed/*.csv and let Streamlit read it.
+    """
+    if country == "South Africa":
+        df = load_v21_naamsa_history()
+        if not df.empty:
+            sales = df[df.get("Status", "").astype(str).str.upper().eq("VERIFIED")].copy() if "Status" in df.columns else df.copy()
+            if not sales.empty:
+                # Latest period among vehicle-sales rows; lagged NEV rows remain in history but
+                # do not contaminate the latest commercial-segment chart.
+                base = sales[sales["Metric"].astype(str).isin([
+                    "Industry total vehicle sales","Passenger vehicle sales","Light CV <3501kg sales",
+                    "Medium CV 3501-8500kg sales","Heavy trucks and buses sales",
+                    "Heavy CV 8501-16500kg sales","Extra Heavy CV >16500kg sales","Bus >8500kg sales"
+                ])].copy()
+                if not base.empty:
+                    latest = sorted(base["Period"].astype(str).unique())[-1]
+                    base = base[base["Period"].astype(str).eq(latest)]
+                    rows=[]
+                    for _,r in base.iterrows():
+                        rows.append({
+                            "Country":"South Africa","Metric":r.get("Metric",""),"Value":r.get("Value"),
+                            "Unit":r.get("Unit","units"),"Period":r.get("Period",""),"Data Type":"Reported",
+                            "Confidence":r.get("Confidence","A"),"Source Name":r.get("Source Name","naamsa"),
+                            "Source URL":r.get("Source URL",""),"Retrieved At":r.get("Retrieved At",""),
+                            "Auto Status":"Validated",
+                        })
+                    return pd.DataFrame(rows, columns=_AUTO_COLUMNS)
+        return _auto_empty("South Africa", "Scheduled crawler data not yet available. Run GitHub Action: Market Data Daily.",
+                           "https://naamsa.net/press-releases/", "naamsa | The Automotive Business Council")
+    if os.getenv("AFRICA_MONITOR_RUNTIME_SCRAPING", "0") == "1":
+        return _v20_runtime_fetch_auto_market_data(country)
+    return _auto_empty(country, "Runtime web scraping is disabled in V21. Add a scheduled collector or approved manual data.")
+
+
+# V21 commercial chart supports the exact aggregation disclosed in the public
+# naamsa media release.  It will use HCV/XHCV/Bus separately only when a future
+# Flash-report parser can prove those rows and cross-check their sum.
+def _sa_latest_sales_chart(auto_df: pd.DataFrame):
+    granular = [
+        ("Light CV <3501kg sales", "LCV <3.5t"),
+        ("Medium CV 3501-8500kg sales", "MCV 3.5–8.5t"),
+        ("Heavy CV 8501-16500kg sales", "HCV 8.5–16.5t"),
+        ("Extra Heavy CV >16500kg sales", "Extra HCV >16.5t"),
+        ("Bus >8500kg sales", "Bus >8.5t"),
+    ]
+    has_granular = all(not auto_df[auto_df["Metric"].eq(m)].empty for m,_ in granular[2:])
+    wanted = granular if has_granular else [
+        ("Light CV <3501kg sales", "LCV <3.5t"),
+        ("Medium CV 3501-8500kg sales", "MCV 3.5–8.5t"),
+        ("Heavy trucks and buses sales", "Heavy trucks + buses"),
+    ]
+    rows=[]
+    for metric,label in wanted:
+        hit=auto_df[auto_df["Metric"].eq(metric)]
+        if not hit.empty:
+            rows.append({"Segment":label,"Units":float(hit.iloc[0]["Value"])})
+    seg=pd.DataFrame(rows)
+    if seg.empty: return None, seg
+    fig=px.bar(seg,x="Segment",y="Units",text="Units")
+    fig.update_traces(texttemplate="%{text:,.0f}",textposition="outside")
+    fig.update_layout(**{**CHART_BASE,"height":370,"margin":dict(l=35,r=25,t=20,b=35),"xaxis_title":"","yaxis_title":tr("Units","销量（台）")})
+    return fig,seg
+
+
+# Override freight evidence with the latest crawler-backed P7162 table when it
+# exists. Static Q1 evidence remains a safe fallback before the first Action run.
+_v20_render_v19_sa_freight_demand = render_v19_sa_freight_demand
+
+def render_v19_sa_freight_demand():
+    df=load_v21_freight_demand()
+    if df.empty:
+        return _v20_render_v19_sa_freight_demand()
+    if "Status" in df.columns:
+        df=df[df["Status"].astype(str).str.upper().eq("VERIFIED")]
+    if df.empty:
+        return _v20_render_v19_sa_freight_demand()
+    latest=sorted(df["Period"].astype(str).unique())[-1]
+    cur=df[df["Period"].astype(str).eq(latest)].dropna(subset=["YoY %"]).sort_values("YoY %")
+    _level_hdr(3,tr("Freight Demand Evidence", "货运需求证据"),tr("Latest Statistics South Africa evidence collected outside the UI.", "由GitHub定时任务采集的最新Stats SA货运需求证据。"))
+    _v19_evidence_header("verified",tr("Freight income momentum by commodity", "分货类货运收入增速"),tr("Latest available three-month commodity comparison from P7162.", "P7162最新可得三个月分货类同比。"),[],latest,"Scheduled crawler · Fail-closed")
+    fig=px.bar(cur,x="YoY %",y="Commodity",orientation="h",text="YoY %",hover_data=[c for c in ["Weight %","Current Rm"] if c in cur.columns])
+    fig.update_traces(texttemplate="%{text:.1f}%",textposition="outside")
+    fig.update_layout(**{**CHART_BASE,"height":420,"margin":dict(l=30,r=60,t=15,b=30),"xaxis_title":"YoY growth (%)","yaxis_title":""})
+    st.plotly_chart(fig,use_container_width=True,config=PLOTLY_CFG,key="v21_za_freight")
+    up=cur.sort_values("YoY %",ascending=False).iloc[0]
+    large=cur.sort_values("Weight %",ascending=False).iloc[0] if "Weight %" in cur.columns else up
+    _chart_takeaway(f"最新Stats SA数据中，增速最快的是 {up['Commodity']}（{up['YoY %']:+.1f}%）；权重最大的已跟踪货类是 {large['Commodity']}。因此需求规模与电动化适配仍需分开判断：先用公开货运数据确认需求，再用运营模型判断Farizon是否适合。",f"{up['Commodity']} has the fastest latest growth; demand size and EV operating fit are evaluated separately.","verified")
+    src_url=str(cur.iloc[0].get("Source URL","")); src_name=str(cur.iloc[0].get("Source Name","Statistics South Africa"))
+    if src_url: st.caption(f"Source: {src_name} · {latest} · {src_url}")
+    monthly=load_v21_freight_monthly()
+    if not monthly.empty and len(monthly)>=2:
+        m=monthly.sort_values("Period").tail(12)
+        fig2=px.line(m,x="Period",y=[c for c in ["Payload YoY %","Freight Income YoY %"] if c in m.columns],markers=True)
+        fig2.update_layout(**{**CHART_BASE,"height":320,"xaxis_title":"","yaxis_title":"YoY %","legend_title":""})
+        st.plotly_chart(fig2,use_container_width=True,config=PLOTLY_CFG,key="v21_za_freight_trend")
+        _chart_takeaway("这张图用于判断货运景气是否持续，而不是用单季数据外推全年。连续多月同向改善，才更能支撑商用车需求判断。","The monthly series tests whether freight momentum is persistent rather than extrapolating one quarter.","derived")
+
+
+# Feed latest crawler demand momentum into the transparent Demand × EV Fit chart.
+def _v21_apply_latest_demand_map():
+    df=load_v21_freight_demand()
+    if df.empty or "Commodity" not in df.columns: return
+    if "Status" in df.columns: df=df[df["Status"].astype(str).str.upper().eq("VERIFIED")]
+    if df.empty: return
+    latest=sorted(df["Period"].astype(str).unique())[-1]
+    x=df[df["Period"].astype(str).eq(latest)]
+    commodity_to_app={
+        "Parcels":"Parcel / courier",
+        "Manufactured food, beverages and tobacco products":"FMCG distribution",
+        "Containers":"Port / container",
+        "Agriculture and forestry primary products":"Agriculture distribution",
+        "Primary mining and quarrying products":"Mining support",
+    }
+    for commodity,app in commodity_to_app.items():
+        hit=x[x["Commodity"].astype(str).str.lower().eq(commodity.lower())]
+        if not hit.empty:
+            r=hit.iloc[0]
+            V19_DEMAND_MOMENTUM_MAP[app]=(float(r.get("YoY %",0)),float(r.get("Weight %",0)),commodity)
+
+_v21_apply_latest_demand_map()
+
+
+# Merge crawler-backed OEM specs with user-maintained/legacy competitor evidence.
+_v20_v19_all_competitors = _v19_all_competitors
+
+def _v19_all_competitors(country: str) -> pd.DataFrame:
+    base=_v20_v19_all_competitors(country)
+    auto=load_v21_competitors()
+    if not auto.empty:
+        auto=auto[auto["Country"].astype(str).str.lower().eq(country.lower())]
+    frames=[x for x in [base,auto] if x is not None and not x.empty]
+    if not frames: return pd.DataFrame(columns=V19_COMPETITOR_COLUMNS)
+    out=pd.concat(frames,ignore_index=True,sort=False)
+    for c in V19_COMPETITOR_COLUMNS:
+        if c not in out.columns: out[c]=None
+    # Automated OEM evidence is fresher than the static seed; Google-Sheets/user
+    # evidence can still override by using the same key later in the pipeline.
+    out["_rank"]=out["Evidence Type"].astype(str).str.contains("Automated OEM",case=False,na=False).astype(int)
+    out=out.sort_values("_rank").drop_duplicates(["Country","Farizon Model","Brand","Model"],keep="last").drop(columns="_rank")
+    return out[V19_COMPETITOR_COLUMNS]
+
+
+# Add current change detections ahead of the existing news/evidence page.
+_v20_render_v19_intelligence_evidence = render_v19_intelligence_evidence
+
+def render_v19_intelligence_evidence(country: str, cdata: dict):
+    changes=load_v21_changes(country)
+    if not changes.empty:
+        _level_hdr(1,tr("Automated Market Changes", "自动市场变化"),tr("What changed in the structured evidence since the previous crawler snapshot?", "与上一次爬虫快照相比，结构化市场证据发生了什么变化？"))
+        x=changes.sort_values("Detected At",ascending=False).head(20) if "Detected At" in changes.columns else changes.head(20)
+        show=[c for c in ["Detected At","Entity Type","Entity","Field","Old Value","New Value","Impact","Source URL"] if c in x.columns]
+        st.dataframe(x[show],hide_index=True,use_container_width=True,column_config={"Source URL":st.column_config.LinkColumn(tr("Source","来源"),display_text=tr("Open","打开"))})
+        _chart_takeaway("这里展示的不是普通新闻，而是“可比结构化字段发生了变化”：例如新月度销量、竞品价格、续航或产品组合变化。它直接告诉你哪些PVA或市场结论需要复核。","This is structured change detection rather than a news list; it flags evidence that may require a PVA or market-view refresh.","derived")
+    _v20_render_v19_intelligence_evidence(country,cdata)
+
+
+_v20_render_v19_global_governance = render_v19_global_governance
+
+def render_v19_global_governance():
+    _v20_render_v19_global_governance()
+    _level_hdr(3,tr("Scheduled Crawler Health", "定时爬虫健康状态"),tr("Collectors run in GitHub Actions; Streamlit only reads their versioned outputs.", "爬虫运行在GitHub Actions；Streamlit只读取其版本化输出。"))
+    status=load_v21_crawler_status()
+    if status.empty:
+        st.warning(tr("No crawler status file yet. After deployment, manually run the GitHub Actions workflows once.","尚无爬虫状态文件。部署后请先在GitHub Actions中手动运行一次工作流。"))
+    else:
+        st.dataframe(status,hide_index=True,use_container_width=True,column_config={"Source URL":st.column_config.LinkColumn(tr("Source","来源"),display_text=tr("Open","打开"))})
+    st.info(tr("Architecture rule: crawler failure never deletes the last verified dataset. A failed run updates crawler_status.csv, while the dashboard keeps the previous verified evidence.","架构规则：爬虫失败绝不会删除上一版已验证数据。失败只更新crawler_status.csv，看板继续读取上一版可信证据。"))
+
+
 # 13. SESSION STATE
 # ══════════════════════════════════════════════════════════════════════════════
 if "selected_country" not in st.session_state:
@@ -7026,7 +7278,7 @@ with st.sidebar:
         Africa CV Intelligence
     </div>
     <div style="font-family:'Inter';font-size:.68rem;color:rgba(255,255,255,.4);margin-top:2px;">
-        Evidence & Deal Intelligence · v20.0 · 12 Markets
+        Evidence & Automated Intelligence · v21.0 · 12 Markets
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -7342,7 +7594,7 @@ st.markdown(f"""
         <div>
             <strong style="color:#5A6070;">Africa CV Market Governance & Intelligence Platform v{APP_VERSION}</strong>
             &nbsp;·&nbsp; Internal strategic use only
-            &nbsp;·&nbsp; Evidence-first OEM view · Fail-Closed Data Gate · Google Sheets-ready · Interactive Deal Desk · Dealer Landscape
+            &nbsp;·&nbsp; Evidence-first OEM view · Scheduled Crawlers · Fail-Closed Data Gate · Google Sheets · Interactive Deal Desk
         </div>
         <div style="text-align:right;">
             RDB · RURA · NAAMSA · Stats SA · National Treasury ZA · ANME TN · OCP · DPFZA · MRA · JIRAMA · Reuters · Bloomberg · AfDB
